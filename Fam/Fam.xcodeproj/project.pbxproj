@@ -20,6 +20,8 @@
 		B6E308AA2BD003360032B923 /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = B6E308A92BD003360032B923 /* SwiftMath */; };
 		B6E308AF2BD004230032B923 /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308AE2BD004230032B923 /* Environment.swift */; };
 		B6E308B92BD0059E0032B923 /* NumericComparisons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308B82BD0059E0032B923 /* NumericComparisons.swift */; };
+		B6E308BD2BD009C60032B923 /* FamilyMemberStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308BC2BD009C60032B923 /* FamilyMemberStore.swift */; };
+		B6E308BF2BD009D50032B923 /* FamilyMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308BE2BD009D50032B923 /* FamilyMember.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +57,8 @@
 		B6E308982BD002B80032B923 /* FamUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		B6E308AE2BD004230032B923 /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		B6E308B82BD0059E0032B923 /* NumericComparisons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumericComparisons.swift; sourceTree = "<group>"; };
+		B6E308BC2BD009C60032B923 /* FamilyMemberStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyMemberStore.swift; sourceTree = "<group>"; };
+		B6E308BE2BD009D50032B923 /* FamilyMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyMember.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +168,8 @@
 		B6E308B02BD004550032B923 /* Model Layer */ = {
 			isa = PBXGroup;
 			children = (
+				B6E308BC2BD009C60032B923 /* FamilyMemberStore.swift */,
+				B6E308BE2BD009D50032B923 /* FamilyMember.swift */,
 			);
 			path = "Model Layer";
 			sourceTree = "<group>";
@@ -349,8 +355,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B6E3087A2BD002B70032B923 /* ViewController.swift in Sources */,
+				B6E308BF2BD009D50032B923 /* FamilyMember.swift in Sources */,
 				B6E308AF2BD004230032B923 /* Environment.swift in Sources */,
 				B6E308762BD002B70032B923 /* AppDelegate.swift in Sources */,
+				B6E308BD2BD009C60032B923 /* FamilyMemberStore.swift in Sources */,
 				B6E308B92BD0059E0032B923 /* NumericComparisons.swift in Sources */,
 				B6E308782BD002B70032B923 /* SceneDelegate.swift in Sources */,
 			);
