@@ -1,0 +1,32 @@
+{
+  "pins" : [
+    {
+      "identity" : "swiftmath",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Andre-Pham/SwiftMath",
+      "state" : {
+        "branch" : "main",
+        "revision" : "c39b101da0b3320f254a2cca78b647a0d24aa305"
+      }
+    },
+    {
+      "identity" : "swiftserialization",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Andre-Pham/SwiftSerialization.git",
+      "state" : {
+        "revision" : "8642876acf667390685661f14dd79e6a438f55bf",
+        "version" : "2.0.1"
+      }
+    },
+    {
+      "identity" : "swiftyjson",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftyJSON/SwiftyJSON",
+      "state" : {
+        "revision" : "af76cf3ef710b6ca5f8c05f3a31307d44a3c5828",
+        "version" : "5.0.2"
+      }
+    }
+  ],
+  "version" : 2
+}

@@ -16,6 +16,8 @@
 		B6E3088D2BD002B80032B923 /* FamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E3088C2BD002B80032B923 /* FamTests.swift */; };
 		B6E308972BD002B80032B923 /* FamUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308962BD002B80032B923 /* FamUITests.swift */; };
 		B6E308992BD002B80032B923 /* FamUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308982BD002B80032B923 /* FamUITestsLaunchTests.swift */; };
+		B6E308A72BD003290032B923 /* SwiftSerialization in Frameworks */ = {isa = PBXBuildFile; productRef = B6E308A62BD003290032B923 /* SwiftSerialization */; };
+		B6E308AA2BD003360032B923 /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = B6E308A92BD003360032B923 /* SwiftMath */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B6E308AA2BD003360032B923 /* SwiftMath in Frameworks */,
+				B6E308A72BD003290032B923 /* SwiftSerialization in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +147,10 @@
 			dependencies = (
 			);
 			name = Fam;
+			packageProductDependencies = (
+				B6E308A62BD003290032B923 /* SwiftSerialization */,
+				B6E308A92BD003360032B923 /* SwiftMath */,
+			);
 			productName = Fam;
 			productReference = B6E308722BD002B70032B923 /* Fam.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +223,10 @@
 				Base,
 			);
 			mainGroup = B6E308692BD002B70032B923;
+			packageReferences = (
+				B6E308A52BD003290032B923 /* XCRemoteSwiftPackageReference "SwiftSerialization" */,
+				B6E308A82BD003360032B923 /* XCRemoteSwiftPackageReference "SwiftMath" */,
+			);
 			productRefGroup = B6E308732BD002B70032B923 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -607,6 +619,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B6E308A52BD003290032B923 /* XCRemoteSwiftPackageReference "SwiftSerialization" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Andre-Pham/SwiftSerialization.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.1;
+			};
+		};
+		B6E308A82BD003360032B923 /* XCRemoteSwiftPackageReference "SwiftMath" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Andre-Pham/SwiftMath";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B6E308A62BD003290032B923 /* SwiftSerialization */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B6E308A52BD003290032B923 /* XCRemoteSwiftPackageReference "SwiftSerialization" */;
+			productName = SwiftSerialization;
+		};
+		B6E308A92BD003360032B923 /* SwiftMath */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B6E308A82BD003360032B923 /* XCRemoteSwiftPackageReference "SwiftMath" */;
+			productName = SwiftMath;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B6E3086A2BD002B70032B923 /* Project object */;
 }
