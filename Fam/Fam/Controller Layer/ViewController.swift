@@ -44,6 +44,10 @@ class ViewController: UIViewController {
             .setFrame(to: box.cgRect)
             .setBackgroundColor(to: .blue)
         backgroundLayer.addSubview(boxView)
+        
+        let family = self.createFamily()
+        let root = family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
+        (FamilyMemberStoreRenderProxy(family, root: root).orderedFamilyMembers.forEach({ print($0.familyMember.firstName) }))
     }
     
     func createFamily() -> FamilyMemberStore {
@@ -69,13 +73,17 @@ class ViewController: UIViewController {
         
         tristan.assignSpouse(heather)
         tristan.assignChildren(andre, stephanie)
+        heather.assignChildren(andre, stephanie)
         jo.assignSpouse(carolyn)
         jo.assignChildren(heather, ralph, ken)
+        carolyn.assignChildren(heather, ralph, ken)
         ken.assignSpouse(debra)
         ralph.assignSpouse(carol)
         ralph.assignChildren(hugh, conner, anna)
+        carol.assignChildren(hugh, conner, anna)
         will.assignSpouse(johanna)
         will.assignChildren(cees, wim, tiela, jo)
+        johanna.assignChildren(cees, wim, tiela, jo)
         
         return family
     }

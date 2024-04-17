@@ -14,12 +14,17 @@ class FamilyMemberStore {
     
     init() { }
     
+    func contains(familyMember: FamilyMember) -> Bool {
+        return self.familyMembers[familyMember.id] != nil
+    }
+    
     func getFamilyMember(id: UUID) -> FamilyMember? {
         return self.familyMembers[id]
     }
     
     func getAllFamilyMembers() -> [FamilyMember] {
-        return Array(self.familyMembers.values)
+        // Sort for consistent ordering
+        return Array(self.familyMembers.values).sorted(by: { $0.firstName < $1.firstName })
     }
     
     func addFamilyMember(_ familyMember: FamilyMember) {

@@ -16,10 +16,10 @@ class FamilyMember {
     
     public let id: UUID
     private weak var family: FamilyMemberStore?
-    private var motherID: UUID?
-    private var fatherID: UUID?
-    private var spouseID: UUID?
-    private var exSpousesIDs: [UUID]
+    private(set) var motherID: UUID?
+    private(set) var fatherID: UUID?
+    private(set) var spouseID: UUID?
+    private(set) var exSpousesIDs: [UUID]
     private(set) var firstName: String
     private(set) var sex: Sex
     public var mother: FamilyMember? {
@@ -49,7 +49,7 @@ class FamilyMember {
         var siblings = [FamilyMember]()
         let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
         for familyMember in allFamilyMembers {
-            if (familyMember.fatherID == self.fatherID || familyMember.motherID == self.motherID) && familyMember.id != self.id {
+            if self.isSibling(to: familyMember) {
                 siblings.append(familyMember)
             }
         }
@@ -64,6 +64,22 @@ class FamilyMember {
             }
         }
         return children
+    }
+    public var directFamily: [FamilyMember] {
+        var directFamily = [FamilyMember]()
+        if let spouse = self.spouse {
+            directFamily.append(spouse)
+        }
+        directFamily.append(contentsOf: self.exSpouses)
+        if let mother = self.mother {
+            directFamily.append(mother)
+        }
+        if let father = self.father {
+            directFamily.append(father)
+        }
+        directFamily.append(contentsOf: self.children)
+        directFamily.append(contentsOf: self.siblings)
+        return directFamily
     }
     public var hasNoParents: Bool {
         return self.fatherID == nil && self.motherID == nil
@@ -81,6 +97,19 @@ class FamilyMember {
         self.exSpousesIDs = [UUID]()
         self.firstName = firstName
         self.sex = sex
+        
+        family.addFamilyMember(self)
+    }
+    
+    func isSibling(to familyMember: FamilyMember) -> Bool {
+        guard self.id != familyMember.id else {
+            // Both family members are the same person
+            return false
+        }
+        assert(self.hasAFamily, "Member doesn't belong to a family")
+        let sharedFather = self.fatherID != nil && familyMember.fatherID == self.fatherID
+        let sharedMother = self.motherID != nil && familyMember.motherID == self.motherID
+        return sharedFather || sharedMother
     }
     
     func assignSpouse(_ spouse: FamilyMember) {
@@ -131,6 +160,11 @@ class FamilyMember {
         case .female:
             self.motherID = parent.id
         }
+    }
+    
+    func assignParents(_ parent1: FamilyMember, _ parent2: FamilyMember) {
+        self.assignParent(parent1)
+        self.assignParent(parent2)
     }
     
     func belongsToSameFamily(as familyMember: FamilyMember) -> Bool {
