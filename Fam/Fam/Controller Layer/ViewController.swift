@@ -45,6 +45,40 @@ class ViewController: UIViewController {
             .setBackgroundColor(to: .blue)
         backgroundLayer.addSubview(boxView)
     }
+    
+    func createFamily() -> FamilyMemberStore {
+        let family = FamilyMemberStore()
+        let andre = FamilyMember(firstName: "Andre", sex: .male, family: family)
+        let stephanie = FamilyMember(firstName: "Stephanie", sex: .female, family: family)
+        let tristan = FamilyMember(firstName: "Tristan", sex: .male, family: family)
+        let heather = FamilyMember(firstName: "Heather", sex: .female, family: family)
+        let jo = FamilyMember(firstName: "Jo", sex: .male, family: family)
+        let carolyn = FamilyMember(firstName: "Carolyn", sex: .female, family: family)
+        let ralph = FamilyMember(firstName: "Ralph", sex: .male, family: family)
+        let carol = FamilyMember(firstName: "Carol", sex: .female, family: family)
+        let hugh = FamilyMember(firstName: "Hugh", sex: .male, family: family)
+        let conner = FamilyMember(firstName: "Conner", sex: .male, family: family)
+        let anna = FamilyMember(firstName: "Anna", sex: .female, family: family)
+        let ken = FamilyMember(firstName: "Ken", sex: .male, family: family)
+        let debra = FamilyMember(firstName: "Debra", sex: .female, family: family)
+        let will = FamilyMember(firstName: "Will", sex: .male, family: family)
+        let johanna = FamilyMember(firstName: "Johanna", sex: .female, family: family)
+        let cees = FamilyMember(firstName: "Cees", sex: .female, family: family)
+        let wim = FamilyMember(firstName: "Wim", sex: .male, family: family)
+        let tiela = FamilyMember(firstName: "Tiela", sex: .female, family: family)
+        
+        tristan.assignSpouse(heather)
+        tristan.assignChildren(andre, stephanie)
+        jo.assignSpouse(carolyn)
+        jo.assignChildren(heather, ralph, ken)
+        ken.assignSpouse(debra)
+        ralph.assignSpouse(carol)
+        ralph.assignChildren(hugh, conner, anna)
+        will.assignSpouse(johanna)
+        will.assignChildren(cees, wim, tiela, jo)
+        
+        return family
+    }
 
 }
 

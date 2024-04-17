@@ -114,6 +114,12 @@ class FamilyMember {
         }
     }
     
+    func assignChildren(_ children: FamilyMember...) {
+        for child in children {
+            self.assignChild(child)
+        }
+    }
+    
     func assignParent(_ parent: FamilyMember) {
         guard self.hasAFamily && self.belongsToSameFamily(as: parent) else {
             assertionFailure("Members don't have the same family")
