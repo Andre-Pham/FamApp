@@ -12,6 +12,9 @@ class FamilyMemberRenderProxy {
     
     public let familyMember: FamilyMember
     private(set) var position: SMPoint? = nil
+    public var id: UUID {
+        return self.familyMember.id
+    }
     public var nextFamilyMembers: [FamilyMember] {
         var next = [FamilyMember]()
         if let spouse = self.familyMember.spouse {

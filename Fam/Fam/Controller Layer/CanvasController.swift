@@ -72,10 +72,10 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Public Properties
     
-    public var canvasBox: SMRect {
+    public var canvasRect: SMRect {
         return SMRect(minX: 0.0, maxX: self.canvasSize.width, minY: 0.0, maxY: self.canvasSize.height)
     }
-    public var canvasOrigin: SMPoint {
+    public var canvasCenter: SMPoint {
         return SMPoint(x: self.canvasSize.width/2.0, y: self.canvasSize.height/2.0)
     }
     public var canvasTopLeft: SMPoint {

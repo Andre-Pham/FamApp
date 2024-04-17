@@ -101,6 +101,26 @@ class FamilyMember {
         family.addFamilyMember(self)
     }
     
+    func isSpouse(to familyMember: FamilyMember) -> Bool {
+        return self.spouseID != nil && self.spouseID == familyMember.id
+    }
+    
+    func isExSpouse(to familyMember: FamilyMember) -> Bool {
+        return self.exSpousesIDs.contains(familyMember.id)
+    }
+    
+    func isMother(of familyMember: FamilyMember) -> Bool {
+        return familyMember.motherID == self.id
+    }
+    
+    func isFather(of familyMember: FamilyMember) -> Bool {
+        return familyMember.fatherID == self.id
+    }
+    
+    func isParent(of familyMember: FamilyMember) -> Bool {
+        return self.isMother(of: familyMember) || self.isFather(of: familyMember)
+    }
+    
     func isSibling(to familyMember: FamilyMember) -> Bool {
         guard self.id != familyMember.id else {
             // Both family members are the same person
@@ -110,6 +130,10 @@ class FamilyMember {
         let sharedFather = self.fatherID != nil && familyMember.fatherID == self.fatherID
         let sharedMother = self.motherID != nil && familyMember.motherID == self.motherID
         return sharedFather || sharedMother
+    }
+    
+    func isChild(of familyMember: FamilyMember) -> Bool {
+        return self.motherID == familyMember.id || self.fatherID == familyMember.id
     }
     
     func assignSpouse(_ spouse: FamilyMember) {
