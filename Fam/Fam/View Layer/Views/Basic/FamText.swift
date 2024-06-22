@@ -26,7 +26,7 @@ class FamText: FamUIView {
     
     override init() {
         super.init()
-        self.view.translatesAutoresizingMaskIntoConstraints = false
+        self.view.translatesAutoresizingMaskIntoConstraints = true
         self.toggleWordWrapping(to: true)
         self.setText(to: text)
         self.setFont(to: UIFont.boldSystemFont(ofSize: 13.0))

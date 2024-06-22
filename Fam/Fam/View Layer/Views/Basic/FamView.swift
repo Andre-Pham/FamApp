@@ -15,7 +15,7 @@ class FamView: FamUIView {
     override init() {
         self.view = UIView()
         super.init()
-        self.view.translatesAutoresizingMaskIntoConstraints = false
+        self.view.translatesAutoresizingMaskIntoConstraints = true
     }
     
     init(_ view: UIView) {

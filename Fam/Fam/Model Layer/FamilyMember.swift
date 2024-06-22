@@ -22,6 +22,16 @@ class FamilyMember {
     private(set) var exSpousesIDs: [UUID]
     private(set) var firstName: String
     private(set) var sex: Sex
+    public var childrenIDs: [UUID] {
+        var ids = [UUID]()
+        let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
+        for familyMember in allFamilyMembers {
+            if familyMember.motherID == self.id || familyMember.fatherID == self.id {
+                ids.append(familyMember.id)
+            }
+        }
+        return ids
+    }
     public var mother: FamilyMember? {
         if let motherID {
             return self.family?.getFamilyMember(id: motherID)
@@ -81,11 +91,38 @@ class FamilyMember {
         directFamily.append(contentsOf: self.siblings)
         return directFamily
     }
+    public var daughters: [FamilyMember] {
+        return self.children.filter({ $0.sex == .female })
+    }
+    public var daughtersWithChildren: [FamilyMember] {
+        return self.daughters.filter({ $0.hasChildren })
+    }
+    public var sons: [FamilyMember] {
+        return self.children.filter({ $0.sex == .male })
+    }
+    public var sonsWithChildren: [FamilyMember] {
+        return self.sons.filter({ $0.hasChildren })
+    }
     public var hasNoParents: Bool {
         return self.fatherID == nil && self.motherID == nil
     }
     public var hasAFamily: Bool {
         return self.family != nil
+    }
+    public var childrenCount: Int {
+        return self.childrenIDs.count
+    }
+    public var hasChildren: Bool {
+        return self.childrenCount > 0
+    }
+    public var isParent: Bool {
+        return self.hasChildren
+    }
+    public var isFather: Bool {
+        return self.sex == .male && self.hasChildren
+    }
+    public var isMother: Bool {
+        return self.sex == .female && self.hasChildren
     }
     
     init(firstName: String, sex: Sex, family: FamilyMemberStore) {

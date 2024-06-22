@@ -28,11 +28,11 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Layer Properties
     
-    private(set) var layers = [UIView]()
+//    private(set) var layers = [UIView]()
     
     // MARK: - Rendering Properties
     
-    private var canvasSize = CGSize()
+    private(set) var canvasSize = CGSize()
     private var viewSize: CGSize {
         return self.view.bounds.size
     }
@@ -70,10 +70,16 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         return self.zoomScale.isLess(than: self.minZoomScale)
     }
     
-    // MARK: - Public Properties
+    // MARK: - Alignment Guides
     
     public var canvasRect: SMRect {
         return SMRect(minX: 0.0, maxX: self.canvasSize.width, minY: 0.0, maxY: self.canvasSize.height)
+    }
+    public var canvasWidth: Double {
+        return self.canvasSize.width
+    }
+    public var canvasHeight: Double {
+        return self.canvasSize.height
     }
     public var canvasCenter: SMPoint {
         return SMPoint(x: self.canvasSize.width/2.0, y: self.canvasSize.height/2.0)
@@ -205,7 +211,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     // MARK: - Layer Functions
     
     func addLayer(_ view: FamUIView) {
-        self.layers.append(view.view)
+//        self.layers.append(view.view)
         self.canvasContainer.addSubview(view.view)
     }
     
