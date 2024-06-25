@@ -22,6 +22,9 @@ class FamilyMember {
     private(set) var exSpousesIDs: [UUID]
     private(set) var firstName: String
     private(set) var sex: Sex
+    public var parentIDs: [UUID] {
+        return [self.motherID, self.fatherID].compactMap({ $0 })
+    }
     public var childrenIDs: [UUID] {
         var ids = [UUID]()
         let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
@@ -49,6 +52,9 @@ class FamilyMember {
             return self.family?.getFamilyMember(id: spouseID)
         }
         return nil
+    }
+    public var parents: [FamilyMember] {
+        return self.parentIDs.compactMap({ self.family?.getFamilyMember(id: $0) })
     }
     public var exSpouses: [FamilyMember] {
         return self.exSpousesIDs.compactMap({

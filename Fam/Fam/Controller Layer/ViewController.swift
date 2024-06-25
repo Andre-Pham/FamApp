@@ -106,7 +106,7 @@ class ViewController: UIViewController {
         for proxy in render.orderedFamilyMemberProxies {
             if let position = proxy.position {
                 let view = FamView().setBackgroundColor(to: .blue)
-                let text = FamText().setText(to: proxy.familyMember.firstName).setTextColor(to: .white)
+                let text = FamText().setText(to: proxy.familyMember.firstName + " " + (proxy.position?.toString()  ?? "-")).setTextColor(to: .white)
                 drawLayer.addSubview(view)
                 view.addSubview(text)
                 view.setFrame(to: SMRect(

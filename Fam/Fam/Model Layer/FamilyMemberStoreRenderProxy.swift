@@ -115,24 +115,10 @@ class FamilyMemberStoreRenderProxy {
                     proxy.setPosition(to: position)
                     self.resolveRenderConflictsAnyDirection(for: proxy, offsetIncrement: Self.POSITION_PADDING)
                 }
-                // Make room for spouse (if applicable)
-//                if let spouseID = proxy.familyMember.spouseID, let spouseProxy = self.familyMemberProxiesStore[spouseID], proxy.position != nil, spouseProxy.position == nil {
-//                    switch proxy.familyMember.sex {
-//                    case .male:
-//                        while self.positionConflictExists(for: proxy.position! + SMPoint(x: Self.POSITION_PADDING, y: 0)) {
-//                            proxy.setPosition(to: proxy.position! - SMPoint(x: Self.POSITION_PADDING, y: 0))
-//                            self.resolveRenderConflictsMovingLeft(for: proxy, offsetIncrement: Self.POSITION_PADDING)
-//                        }
-//                    case .female:
-//                        while self.positionConflictExists(for: proxy.position! - SMPoint(x: Self.POSITION_PADDING, y: 0)) {
-//                            proxy.setPosition(to: proxy.position! + SMPoint(x: Self.POSITION_PADDING, y: 0))
-//                            self.resolveRenderConflictsMovingRight(for: proxy, offsetIncrement: Self.POSITION_PADDING)
-//                        }
-//                    }
-//                }
                 guard let setPosition = proxy.position else {
                     continue
                 }
+                
                 // Enforce rule:
                 // If you're a mother, both your parents HAVE to be past your right side
                 // (AKA if you have a daughter, and your daughter has kids, you must be to the right side of your daughter)
@@ -142,12 +128,7 @@ class FamilyMemberStoreRenderProxy {
                 let daughtersWithChildren = proxy.familyMember.daughtersWithChildren
                 if !daughtersWithChildren.isEmpty {
                     let daughterProxies = daughtersWithChildren.map({ self.familyMemberProxiesStore[$0.id] })
-                    var positions = [SMPoint]()
-                    for daughterProxy in daughterProxies {
-                        if let position = daughterProxy?.position {
-                            positions.append(position)
-                        }
-                    }
+                    let positions = daughterProxies.compactMap({ $0?.position })
                     if let farthestRight = SMPointCollection(points: positions).maxX,
                        farthestRight.isGreater(than: setPosition.x) {
                         self.anchorCouple(
@@ -162,12 +143,7 @@ class FamilyMemberStoreRenderProxy {
                 let sonsWithChildren = proxy.familyMember.sonsWithChildren
                 if !sonsWithChildren.isEmpty {
                     let sonProxies = sonsWithChildren.map({ self.familyMemberProxiesStore[$0.id] })
-                    var positions = [SMPoint]()
-                    for sonProxy in sonProxies {
-                        if let position = sonProxy?.position {
-                            positions.append(position)
-                        }
-                    }
+                    let positions = sonProxies.compactMap({ $0?.position })
                     if let farthestLeft = SMPointCollection(points: positions).minX,
                        farthestLeft.isLess(than: setPosition.x) {
                         self.anchorCouple(
@@ -222,6 +198,99 @@ class FamilyMemberStoreRenderProxy {
                         }
                     }
                 }
+                
+                // Enforce rule:
+                // If you have placed siblings, you must be placed adjacent to them or their spouses
+                let siblings = proxy.familyMember.siblings
+                if !siblings.isEmpty {
+                    let siblingProxies = siblings.compactMap({ self.familyMemberProxiesStore[$0.id] })
+                    let siblingSpouseProxies = siblings.compactMap({
+                        if let spouseID = $0.spouseID {
+                            return self.familyMemberProxiesStore[spouseID]
+                        }
+                        return nil
+                    })
+                    let siblingPositions = siblingProxies.compactMap({ $0.position })
+                    let siblingSpousePositions = siblingSpouseProxies.compactMap({ $0.position })
+                    if !siblingPositions.isEmpty {
+                        let anySiblingPosition = siblingPositions.first!
+                        let siblingAppearsToTheRight = proxy.position!.x.isLess(than: anySiblingPosition.x)
+                        let direction: HorizontalDirection = siblingAppearsToTheRight ? .right : .left
+                        self.resolveRenderConflicts(
+                            conflictCondition: { proxy in
+                                // Returns true if the proxy is not adjacent to a sibling or a sibling's spouse
+                                let pointCollection = SMPointCollection(points: siblingPositions + siblingSpousePositions)
+                                if let closestPoint = pointCollection.closestPoint(to: proxy.position!) {
+                                    assert(closestPoint.y.isEqual(to: proxy.position!.y), "Siblings should be rendered at the same y position")
+                                    let distance = closestPoint.length(to: proxy.position!)
+                                    return distance.isGreater(than: Self.POSITION_PADDING)
+                                } else {
+                                    assertionFailure("Closest point was not defined - logic error")
+                                    return false
+                                }
+                            },
+                            direction: direction,
+                            for: proxy,
+                            offsetIncrement: Self.POSITION_PADDING
+                        )
+                        // After moving the sibling adjacent to their siblings, ensure render conflicts are resolved
+                        self.resolveRenderConflicts(direction: direction, for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                    }
+                }
+                
+                // Resolve any connection conflicts that occurred
+                // (When connections cross over one another)
+                for proxy in self.familyMemberProxiesStore.values where proxy.position != nil {
+                    let anyParentPosition = proxy.familyMember.parentIDs
+                        .compactMap({ self.familyMemberProxiesStore[$0] })
+                        .compactMap({ $0.position }).first
+                    if let anyParentPosition {
+                        // Get all the people who are parents at the same y
+                        let otherParentsXPositionsSameY = self.familyMemberProxiesStore.values
+                            .filter({ $0.position?.y == anyParentPosition.y && $0.familyMember.isParent && !$0.familyMember.isParent(of: proxy.familyMember) })
+                            .map({ $0.position!.x })
+                        let parentsX = anyParentPosition.x
+                        // These "closest" values represent the boundary the proxy should remain in
+                        // If the proxy goes past it, a connection conflict occurs, because the
+                        // parents' connection crosses over the other parents' connections to reach the proxy
+                        let closestOtherParentsToLeft: Double? = otherParentsXPositionsSameY
+                            .filter({ $0.isLess(than: parentsX) })
+                            .max()
+                        let closestOtherParentsToRight: Double? = otherParentsXPositionsSameY
+                            .filter({ $0.isGreater(than: parentsX) })
+                            .min()
+                        // If true, proxy further right than the parents closest to the right of proxy's parents
+                        let connectionConflictExistsRight = closestOtherParentsToRight != nil && proxy.position!.x.isGreater(than: closestOtherParentsToRight!)
+                        if connectionConflictExistsRight {
+                            print("\(proxy.familyMember.firstName) has a conflict to the right")
+                            self.resolveRenderConflicts(
+                                conflictCondition: { proxy in
+                                    return self.positionConflictExists(for: proxy) || proxy.position!.x.isGreater(than: closestOtherParentsToRight!)
+                                },
+                                direction: .left,
+                                for: proxy,
+                                offsetIncrement: Self.POSITION_PADDING
+                            )
+                        }
+                        // If true, proxy further right than the parents closest to the right of proxy's parents
+                        let connectionConflictExistsLeft = closestOtherParentsToLeft != nil && proxy.position!.x.isLess(than: closestOtherParentsToLeft!)
+                        if connectionConflictExistsLeft {
+                            print("\(proxy.familyMember.firstName) has a conflict to the left")
+                            print("closest other parents to the left: \(closestOtherParentsToLeft!)")
+                            print("proxy position: \(proxy.position!.x)")
+                            print(self.familyMemberProxiesStore.values.filter({ $0.position?.y == anyParentPosition.y && $0.familyMember.isParent }).map({ $0.familyMember.firstName }))
+                            self.resolveRenderConflicts(
+                                conflictCondition: { proxy in
+                                    return self.positionConflictExists(for: proxy) || proxy.position!.x.isLess(than: closestOtherParentsToLeft!)
+                                },
+                                direction: .right,
+                                for: proxy,
+                                offsetIncrement: Self.POSITION_PADDING
+                            )
+                        }
+                    }
+                }
+                
                 assert(proxy.position != nil)
                 break
             }
@@ -256,6 +325,87 @@ class FamilyMemberStoreRenderProxy {
             }
         } else {
             memberProxy.setPosition(to: position)
+        }
+    }
+    
+    private func resolveRenderConflicts(
+        conflictCondition: (_ proxy: FamilyMemberRenderProxy) -> Bool,
+        direction: HorizontalDirection,
+        for proxy: FamilyMemberRenderProxy,
+        offsetIncrement: Double,
+        groupSpouse: Bool = true
+    ) {
+        var proxiesToMove = [proxy]
+        if let spouseID = proxy.familyMember.spouseID,
+           let spouseProxy = self.familyMemberProxiesStore[spouseID],
+           groupSpouse {
+            proxiesToMove.append(spouseProxy)
+            assert(proxy.position != spouseProxy.position || proxy.position == nil, "Duplicate positions are illegal")
+        }
+        self.resolveGroupRenderConflicts(conflictCondition: conflictCondition, direction: direction, for: proxiesToMove, offsetIncrement: offsetIncrement)
+    }
+    
+    private func resolveGroupRenderConflicts(
+        conflictCondition: (_ proxy: FamilyMemberRenderProxy) -> Bool,
+        direction: HorizontalDirection,
+        for proxies: [FamilyMemberRenderProxy],
+        offsetIncrement: Double
+    ) {
+        let xTranslation = switch direction {
+        case .right:
+            abs(offsetIncrement)
+        case .left:
+            -1.0 * abs(offsetIncrement)
+        }
+        let movableProxies = proxies.filter({ $0.position != nil })
+        guard !movableProxies.isEmpty else {
+            return
+        }
+        while movableProxies.contains(where: { conflictCondition($0) }) {
+            for proxy in movableProxies {
+                proxy.position!.translate(by: SMPoint(x: xTranslation, y: 0))
+            }
+        }
+    }
+    
+    private func resolveRenderConflictsAnyDirection(
+        conflictCondition: (_ proxy: FamilyMemberRenderProxy) -> Bool,
+        for proxy: FamilyMemberRenderProxy,
+        offsetIncrement: Double,
+        groupSpouse: Bool = true
+    ) {
+        var proxiesToMove = [proxy]
+        if let spouseID = proxy.familyMember.spouseID,
+           let spouseProxy = self.familyMemberProxiesStore[spouseID],
+           groupSpouse {
+            proxiesToMove.append(spouseProxy)
+            assert(proxy.position != spouseProxy.position || proxy.position == nil, "Duplicate positions are illegal")
+        }
+        self.resolveGroupRenderConflictsAnyDirection(conflictCondition: conflictCondition, for: proxiesToMove, offsetIncrement: offsetIncrement)
+    }
+    
+    private func resolveGroupRenderConflictsAnyDirection(
+        conflictCondition: (_ proxy: FamilyMemberRenderProxy) -> Bool,
+        for proxies: [FamilyMemberRenderProxy],
+        offsetIncrement: Double
+    ) {
+        let movableProxies = proxies.filter({ $0.position != nil })
+        guard !movableProxies.isEmpty else {
+            return
+        }
+        let startingPositions = movableProxies.map { $0.position! }
+        var sign = 1
+        var xTranslation = abs(offsetIncrement)
+        while movableProxies.contains(where: { conflictCondition($0) }) {
+            for proxyIndex in movableProxies.indices {
+                let proxy = movableProxies[proxyIndex]
+                let startingPosition = startingPositions[proxyIndex]
+                proxy.setPosition(to: SMPoint(x: startingPosition.x + Double(sign)*xTranslation, y: startingPosition.y))
+            }
+            sign *= -1
+            if sign == 1 {
+                xTranslation += abs(offsetIncrement)
+            }
         }
     }
     
