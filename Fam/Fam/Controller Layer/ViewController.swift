@@ -155,6 +155,10 @@ class ViewController: UIViewController {
         let thi = FamilyMember(firstName: "Thi", sex: .male, family: family)
         let gisele = FamilyMember(firstName: "Gisele", sex: .female, family: family)
         let lanVi = FamilyMember(firstName: "Lan Vi", sex: .female, family: family)
+        let giseleMother = FamilyMember(firstName: "Gisele Mother", sex: .female, family: family)
+        let giseleFather = FamilyMember(firstName: "Gisele Father", sex: .male, family: family)
+        let clashMother = FamilyMember(firstName: "Clash Mother", sex: .female, family: family)
+        let clashFather = FamilyMember(firstName: "Clash Father", sex: .male, family: family)
         
         tristan.assignSpouse(heather)
         tristan.assignChildren(andre, stephanie)
@@ -181,6 +185,12 @@ class ViewController: UIViewController {
         thi.assignSpouse(gisele)
         thi.assignChildren(lanVi)
         gisele.assignChild(lanVi)
+        giseleMother.assignSpouse(giseleFather)
+        giseleMother.assignChildren(gisele)
+        giseleFather.assignChildren(gisele)
+        clashMother.assignSpouse(clashFather)
+        clashMother.assignChildren(jadeHusband)
+        clashFather.assignChildren(jadeHusband)
         
         return family
     }

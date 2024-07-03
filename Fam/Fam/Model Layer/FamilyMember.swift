@@ -21,7 +21,20 @@ class FamilyMember {
     private(set) var spouseID: UUID?
     private(set) var exSpousesIDs: [UUID]
     private(set) var firstName: String
+    private(set) var lastName: String?
     private(set) var sex: Sex
+    public var fullName: String {
+        if let lastName {
+            return "\(self.firstName) \(lastName)"
+        }
+        return self.firstName
+    }
+    /// An id that is used for sorting that attempts to return a consistent ordering of family members despite being random
+    public var consistentSortingID: String {
+        // Use name first for consistency between non-persistent renders and deleting then re-adding family members
+        // Append id so if their names are the same, there's consistency between persistent renders
+        return self.fullName + self.id.uuidString
+    }
     public var parentIDs: [UUID] {
         return [self.motherID, self.fatherID].compactMap({ $0 })
     }
@@ -30,6 +43,16 @@ class FamilyMember {
         let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
         for familyMember in allFamilyMembers {
             if familyMember.motherID == self.id || familyMember.fatherID == self.id {
+                ids.append(familyMember.id)
+            }
+        }
+        return ids
+    }
+    public var siblingIDs: [UUID] {
+        var ids = [UUID]()
+        let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
+        for familyMember in allFamilyMembers {
+            if self.isSibling(to: familyMember) {
                 ids.append(familyMember.id)
             }
         }
@@ -131,7 +154,7 @@ class FamilyMember {
         return self.sex == .female && self.hasChildren
     }
     
-    init(firstName: String, sex: Sex, family: FamilyMemberStore) {
+    init(firstName: String, lastName: String? = nil, sex: Sex, family: FamilyMemberStore) {
         self.id = UUID()
         self.family = family
         self.motherID = nil
@@ -139,9 +162,14 @@ class FamilyMember {
         self.spouseID = nil
         self.exSpousesIDs = [UUID]()
         self.firstName = firstName
+        self.lastName = lastName
         self.sex = sex
         
         family.addFamilyMember(self)
+    }
+    
+    func isPerson(_ familyMember: FamilyMember) -> Bool {
+        return self.id == familyMember.id
     }
     
     func isSpouse(to familyMember: FamilyMember) -> Bool {

@@ -53,6 +53,7 @@
 		B6E308FD2BD011A30032B923 /* FamDimensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308FA2BD011A30032B923 /* FamDimensions.swift */; };
 		B6E309012BD05CBD0032B923 /* CoupleConnectionRender.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E309002BD05CBD0032B923 /* CoupleConnectionRender.swift */; };
 		B6E309032BD05D250032B923 /* ChildConnectionRender.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E309022BD05D250032B923 /* ChildConnectionRender.swift */; };
+		B6E936D92C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E936D82C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -121,6 +122,7 @@
 		B6E308FA2BD011A30032B923 /* FamDimensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FamDimensions.swift; sourceTree = "<group>"; };
 		B6E309002BD05CBD0032B923 /* CoupleConnectionRender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoupleConnectionRender.swift; sourceTree = "<group>"; };
 		B6E309022BD05D250032B923 /* ChildConnectionRender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildConnectionRender.swift; sourceTree = "<group>"; };
+		B6E936D82C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyMemberStoreUtil.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -236,6 +238,7 @@
 				B6E308C02BD00E1D0032B923 /* FamilyMemberRenderProxy.swift */,
 				B6E309002BD05CBD0032B923 /* CoupleConnectionRender.swift */,
 				B6E309022BD05D250032B923 /* ChildConnectionRender.swift */,
+				B6E936D82C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift */,
 			);
 			path = "Model Layer";
 			sourceTree = "<group>";
@@ -538,6 +541,7 @@
 				B6E308C32BD00EBB0032B923 /* FamilyMemberStoreRenderProxy.swift in Sources */,
 				B6E308BD2BD009C60032B923 /* FamilyMemberStore.swift in Sources */,
 				B6E309012BD05CBD0032B923 /* CoupleConnectionRender.swift in Sources */,
+				B6E936D92C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift in Sources */,
 				B6E308F02BD0114B0032B923 /* FamLabelledMultilineTextInput.swift in Sources */,
 				B649B7482C0971CC004364C2 /* Double.swift in Sources */,
 				B6E308E62BD0114B0032B923 /* FamText.swift in Sources */,
