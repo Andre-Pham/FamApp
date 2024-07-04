@@ -56,12 +56,12 @@ class ViewController: UIViewController {
             .setBackgroundColor(to: .white)
         self.canvasController.addLayer(connectionLayer)
         for coupleConnection in render.coupleConnections {
-            guard var position1 = coupleConnection.malePartner.position?.clone(), var position2 = coupleConnection.femalePartner.position?.clone() else {
+            guard var position1 = coupleConnection.leftPartner.position?.clone(), var position2 = coupleConnection.rightPartner.position?.clone() else {
                 assertionFailure("Missing positions for parents")
                 continue
             }
-            print(coupleConnection.malePartner.familyMember.firstName)
-            print(coupleConnection.femalePartner.familyMember.firstName)
+            print(coupleConnection.leftPartner.familyMember.firstName)
+            print(coupleConnection.rightPartner.familyMember.firstName)
             position1 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             position2 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             print("\(position1.toString()) -> \(position2.toString())")
@@ -71,8 +71,8 @@ class ViewController: UIViewController {
         }
         
         for childConnection in render.childConnections {
-            guard var parentPosition1 = childConnection.parentsConnection.malePartner.position?.clone(),
-                  var parentPosition2 = childConnection.parentsConnection.femalePartner.position?.clone(),
+            guard var parentPosition1 = childConnection.parentsConnection.leftPartner.position?.clone(),
+                  var parentPosition2 = childConnection.parentsConnection.rightPartner.position?.clone(),
                   var childPosition = childConnection.child.position?.clone() else {
                 assertionFailure("Missing positions for parents")
                 continue

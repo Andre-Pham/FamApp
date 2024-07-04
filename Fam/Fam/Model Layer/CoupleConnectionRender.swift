@@ -9,17 +9,18 @@ import Foundation
 
 class CoupleConnectionRender {
     
-    public let malePartner: FamilyMemberRenderProxy
-    public let femalePartner: FamilyMemberRenderProxy
+    public let leftPartner: FamilyMemberRenderProxy
+    public let rightPartner: FamilyMemberRenderProxy
     
     init(partner1: FamilyMemberRenderProxy, partner2: FamilyMemberRenderProxy) {
-        assert(partner1.familyMember.sex != partner2.familyMember.sex, "Same sex partners leads to failed logic")
-        if partner1.familyMember.sex == .male {
-            self.malePartner = partner1
-            self.femalePartner = partner2
-        } else {
-            self.femalePartner = partner1
-            self.malePartner = partner2
+        assert(partner1.preferredDirection != partner2.preferredDirection, "Same direction partners leads to failed logic")
+        switch partner1.preferredDirection {
+        case .right:
+            self.leftPartner = partner2
+            self.rightPartner = partner1
+        case .left:
+            self.leftPartner = partner1
+            self.rightPartner = partner2
         }
     }
     

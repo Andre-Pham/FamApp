@@ -16,6 +16,7 @@ class FamilyMemberStoreRenderProxy {
     }
     
     public static let POSITION_PADDING = 150.0
+    public static let COUPLES_PADDING = 100.0
     
     private(set) var familyMemberProxiesStore = [UUID: FamilyMemberRenderProxy]()
     private(set) var orderedFamilyMemberProxies = [FamilyMemberRenderProxy]()
@@ -29,7 +30,7 @@ class FamilyMemberStoreRenderProxy {
         self.generatePositions()
         self.generateCoupleConnections()
         self.generateChildConnections()
-//        self.bringCouplesCloser(by: 50)
+        self.bringCouplesCloser(by: Self.POSITION_PADDING - Self.COUPLES_PADDING)
     }
     
     /// Uses breadth-first search to generate an order in which the family members should be rendered. Saves family members in this order.
@@ -98,20 +99,29 @@ class FamilyMemberStoreRenderProxy {
                     continue
                 }
                 
+                // TODO: Next:
+                // Clean up this file
+                // - Remove commented out code
+                // - Combine resolve render conflict functions (there's a lottt of overlap)
+                // - Make offsetIncrement's default value Self.POSITION_PADDING
+                // - Extract rules into functions
+                // - If applicable, extract logic into FamilyMemberStoreUtil (like swapPositions(for proxy1, and proxy2))
+                // - Add comments for clarity
+                // - Clean up in general, like the fact that I keep having to refer to proxy with proxy.position! (extracting stages into functions will help with this)
+                // - Rename variables (extracting stages into functions will help with this)
+                // - After all this, add function headers to all functions (this will help readability, as these will need to be modified when I add ex spouses and stuff)
+                // TODO: After that:
+                // - Add basic buttons to create custom family trees and push edge cases
+                //   (like "add parents", "add son", "add daughter", "add spouse")
+                // TODO: After that:
+                // - Start creating the UI! woo hoo
+                
                 // Enforce rule:
                 // If you prefer right, both your parents HAVE to be past your right side
                 // (AKA if you have a child who prefers right, and your child has kids, you must be to the right of your child)
                 // If you prefer left, both your parents HAVE to be past your left side
                 // (AKA if you have a child who prefers left, and your child has kids, you must be to the left of your child)
                 // Case 1: Proxy is the parent (that needs to move)
-                // TODO: I'm in the middle of changing all sex-based rendering to direction preference based
-                // TODO: I'm up to here. Next, changing daughtersWithChildren to rightPreferenceChildrenWithChildren
-                // TODO: Then after all this, I have to implement the rule at the bottom where
-                // TODO: if a conflict occurs because you're on the left and your parents are on the right,
-                // TODO: and your spouse is on the right and their parents are on the left, you both swap positions AND direction preference
-                // TODO: also maybe move to the parents to the opposite side, since right now they're rendering suspiciously to the right for gisele
-                // TODO: ALSO
-                // TODO: Remember to test the "impossible" case, give jade husband some parents
                 let directChildrenWithRightPreferencePositions = self.getDirectChildrenProxies(
                     for: proxy,
                     directionPreference: .right
@@ -492,10 +502,10 @@ class FamilyMemberStoreRenderProxy {
     
     private func bringCouplesCloser(by distance: Double) {
         for coupleConnection in self.coupleConnections {
-            if let malePosition = coupleConnection.malePartner.position,
-               let femalePosition = coupleConnection.femalePartner.position {
-                coupleConnection.malePartner.setPosition(to: malePosition + SMPoint(x: distance/2.0, y: 0))
-                coupleConnection.femalePartner.setPosition(to: femalePosition - SMPoint(x: distance/2.0, y: 0))
+            if let leftPosition = coupleConnection.leftPartner.position,
+               let rightPosition = coupleConnection.rightPartner.position {
+                coupleConnection.leftPartner.setPosition(to: leftPosition + SMPoint(x: distance/2.0, y: 0))
+                coupleConnection.rightPartner.setPosition(to: rightPosition - SMPoint(x: distance/2.0, y: 0))
             }
         }
     }
@@ -699,7 +709,7 @@ class FamilyMemberStoreRenderProxy {
     
     private func generateChildConnections() {
         for coupleConnection in self.coupleConnections {
-            let childrenIDs = coupleConnection.malePartner.familyMember.childrenIDs
+            let childrenIDs = coupleConnection.leftPartner.familyMember.childrenIDs
             guard childrenIDs.count > 0 else {
                 continue
             }
