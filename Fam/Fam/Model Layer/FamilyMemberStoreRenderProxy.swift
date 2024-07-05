@@ -27,11 +27,6 @@ import SwiftMath
 
 class FamilyMemberStoreRenderProxy {
     
-    enum HorizontalDirection {
-        case right
-        case left
-    }
-    
     public static let POSITION_PADDING = 150.0
     public static let COUPLES_PADDING = 100.0
     

@@ -12,7 +12,7 @@ class FamilyMemberRenderProxy {
     
     public let familyMember: FamilyMember
     private(set) var position: SMPoint? = nil
-    private(set) var preferredDirection: FamilyMemberStoreRenderProxy.HorizontalDirection
+    private(set) var preferredDirection: HorizontalDirection
     public var id: UUID {
         return self.familyMember.id
     }
@@ -65,7 +65,7 @@ class FamilyMemberRenderProxy {
         self.position = position
     }
     
-    func setPreferredDirection(to direction: FamilyMemberStoreRenderProxy.HorizontalDirection) {
+    func setPreferredDirection(to direction: HorizontalDirection) {
         self.preferredDirection = direction
     }
     

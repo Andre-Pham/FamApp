@@ -54,6 +54,7 @@
 		B6E309012BD05CBD0032B923 /* CoupleConnectionRender.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E309002BD05CBD0032B923 /* CoupleConnectionRender.swift */; };
 		B6E309032BD05D250032B923 /* ChildConnectionRender.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E309022BD05D250032B923 /* ChildConnectionRender.swift */; };
 		B6E936D92C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E936D82C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift */; };
+		B6E936DB2C3847440044AAB9 /* HorizontalDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E936DA2C3847440044AAB9 /* HorizontalDirection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -123,6 +124,7 @@
 		B6E309002BD05CBD0032B923 /* CoupleConnectionRender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoupleConnectionRender.swift; sourceTree = "<group>"; };
 		B6E309022BD05D250032B923 /* ChildConnectionRender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildConnectionRender.swift; sourceTree = "<group>"; };
 		B6E936D82C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyMemberStoreUtil.swift; sourceTree = "<group>"; };
+		B6E936DA2C3847440044AAB9 /* HorizontalDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalDirection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -239,6 +241,7 @@
 				B6E309002BD05CBD0032B923 /* CoupleConnectionRender.swift */,
 				B6E309022BD05D250032B923 /* ChildConnectionRender.swift */,
 				B6E936D82C32D7A90044AAB9 /* FamilyMemberStoreUtil.swift */,
+				B6E936DA2C3847440044AAB9 /* HorizontalDirection.swift */,
 			);
 			path = "Model Layer";
 			sourceTree = "<group>";
@@ -545,6 +548,7 @@
 				B6E308F02BD0114B0032B923 /* FamLabelledMultilineTextInput.swift in Sources */,
 				B649B7482C0971CC004364C2 /* Double.swift in Sources */,
 				B6E308E62BD0114B0032B923 /* FamText.swift in Sources */,
+				B6E936DB2C3847440044AAB9 /* HorizontalDirection.swift in Sources */,
 				B6E308B92BD0059E0032B923 /* NumericComparisons.swift in Sources */,
 				B6E308F22BD0114B0032B923 /* FamLabelledTextInput.swift in Sources */,
 				B6E308F12BD0114B0032B923 /* FamImage.swift in Sources */,
