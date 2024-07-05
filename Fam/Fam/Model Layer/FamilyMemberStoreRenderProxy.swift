@@ -131,7 +131,7 @@ class FamilyMemberStoreRenderProxy {
                        farthestRight.isGreater(than: setPosition.x) {
                         self.anchorCouple(
                             to: SMPoint(x: farthestRight + Self.POSITION_PADDING, y: setPosition.y),
-                            memberProxy: proxy,
+                            proxy: proxy,
                             anchor: .left,
                             gap: Self.POSITION_PADDING
                         )
@@ -147,7 +147,7 @@ class FamilyMemberStoreRenderProxy {
                        farthestLeft.isLess(than: setPosition.x) {
                         self.anchorCouple(
                             to: SMPoint(x: farthestLeft - Self.POSITION_PADDING, y: setPosition.y),
-                            memberProxy: proxy,
+                            proxy: proxy,
                             anchor: .right,
                             gap: Self.POSITION_PADDING
                         )
@@ -167,7 +167,7 @@ class FamilyMemberStoreRenderProxy {
                             if farthestLeft.isLess(than: setPosition.x) {
                                 self.anchorCouple(
                                     to: SMPoint(x: farthestLeft - Self.POSITION_PADDING, y: setPosition.y),
-                                    memberProxy: proxy,
+                                    proxy: proxy,
                                     anchor: .right,
                                     gap: Self.POSITION_PADDING
                                 )
@@ -179,7 +179,7 @@ class FamilyMemberStoreRenderProxy {
                             if farthestRight.isGreater(than: setPosition.x) {
                                 self.anchorCouple(
                                     to: SMPoint(x: farthestRight + Self.POSITION_PADDING, y: setPosition.y),
-                                    memberProxy: proxy,
+                                    proxy: proxy,
                                     anchor: .left,
                                     gap: Self.POSITION_PADDING
                                 )
@@ -312,24 +312,34 @@ class FamilyMemberStoreRenderProxy {
         }
     }
     
-    private func anchorCouple(to position: SMPoint, memberProxy: FamilyMemberRenderProxy, anchor: HorizontalDirection, gap: Double) {
-        if let spouseID = memberProxy.familyMember.spouseID,
-           let spouseProxy = self.familyMemberProxiesStore[spouseID],
-           spouseProxy.position != nil {
+    /// Position a proxy (and their spouse, if available) at the position provided.
+    /// If anchored right, the proxy and their spouse are positioned on the position and left of the position.
+    /// If anchored left, the proxy and their spouse are positioned on the position and right of the position.
+    /// The ordering of the proxy and their spouse (who goes on the position and who goes left/right) is determined by their direction preference.
+    /// - Parameters:
+    ///   - position: The position to anchor to (the position the proxy/spouse is set to)
+    ///   - proxy: The proxy who's position and their spouse's position to set
+    ///   - anchor: The direction of the partner who's position is set to the `position` parameter
+    ///   - gap: The gap to set between the couple
+    private func anchorCouple(
+        to position: SMPoint,
+        proxy: FamilyMemberRenderProxy,
+        anchor: HorizontalDirection,
+        gap: Double = FamilyMemberStoreRenderProxy.POSITION_PADDING
+    ) {
+        if let spouseProxy = self.getSpouseProxy(for: proxy) {
+            let rightPreference = proxy.preferredDirection == .right ? proxy : spouseProxy
+            let leftPreference = proxy.preferredDirection == .right ? spouseProxy : proxy
             switch anchor {
             case .right:
-                let wife = memberProxy.familyMember.sex == .female ? memberProxy : spouseProxy
-                let other = memberProxy.familyMember.sex == .female ? spouseProxy : memberProxy
-                wife.setPosition(to: position)
-                other.setPosition(to: position - SMPoint(x: gap, y: 0))
+                rightPreference.setPosition(to: position)
+                leftPreference.setPosition(to: position - SMPoint(x: gap, y: 0))
             case .left:
-                let husband = memberProxy.familyMember.sex == .male ? memberProxy : spouseProxy
-                let other = memberProxy.familyMember.sex == .male ? spouseProxy : memberProxy
-                husband.setPosition(to: position)
-                other.setPosition(to: position + SMPoint(x: gap, y: 0))
+                leftPreference.setPosition(to: position)
+                rightPreference.setPosition(to: position + SMPoint(x: gap, y: 0))
             }
         } else {
-            memberProxy.setPosition(to: position)
+            proxy.setPosition(to: position)
         }
     }
     
@@ -410,18 +420,17 @@ class FamilyMemberStoreRenderProxy {
         }
     }
     
+    /// Checks if a proxy shares its position with any other proxies.
+    /// - Parameters:
+    ///   - proxy: The proxy to check if it has any position conflicts
+    /// - Returns: True if the provided proxy shares its position with another proxy
     private func positionConflictExists(for proxy: FamilyMemberRenderProxy) -> Bool {
+        guard proxy.hasPosition else {
+            assertionFailure("Checking if proxy with no position shares its (non-existent) position with any other proxies")
+            return false
+        }
         for otherProxy in self.orderedFamilyMemberProxies {
             if proxy.position == otherProxy.position && proxy.id != otherProxy.id {
-                return true
-            }
-        }
-        return false
-    }
-    
-    private func positionConflictExists(for position: SMPoint) -> Bool {
-        for proxy in self.orderedFamilyMemberProxies {
-            if proxy.position == position {
                 return true
             }
         }
