@@ -94,4 +94,16 @@ extension FamilyMemberStoreRenderProxy {
         return SMPointCollection(points: parentProxyPositions).averagePoint
     }
     
+    func swapProxyPositionsAndPreferredDirections(
+        _ proxy1: FamilyMemberRenderProxy,
+        _ proxy2: FamilyMemberRenderProxy
+    ) {
+        let tempPosition = proxy1.position
+        let tempDirection = proxy1.preferredDirection
+        proxy1.setPosition(to: proxy2.position)
+        proxy1.setPreferredDirection(to: proxy2.preferredDirection)
+        proxy2.setPosition(to: tempPosition)
+        proxy2.setPreferredDirection(to: tempDirection)
+    }
+    
 }
