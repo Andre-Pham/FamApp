@@ -82,18 +82,18 @@ class FamilyMemberStoreRenderProxy {
                 }
                 if proxy.familyMember.isSpouse(to: previous.familyMember) {
                     proxy.setPosition(to: position + SMPoint(x: Self.POSITION_PADDING * (proxy.preferredDirection == .left ? -1 : 1), y: 0.0))
-                    self.resolveRenderConflicts(direction: proxy.preferredDirection, for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                    self.resolveRenderConflicts(direction: proxy.preferredDirection, for: proxy)
                 } else if proxy.familyMember.isExSpouse(to: previous.familyMember) {
                     proxy.setPosition(to: position + SMPoint(x: Self.POSITION_PADDING * (proxy.preferredDirection == .left ? -1 : 1), y: 0.0))
-                    self.resolveRenderConflicts(direction: proxy.preferredDirection, for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                    self.resolveRenderConflicts(direction: proxy.preferredDirection, for: proxy)
                 } else if proxy.familyMember.isParent(of: previous.familyMember) {
                     position -= SMPoint(x: 0.0, y: Self.POSITION_PADDING)
                     proxy.setPosition(to: position)
-                    self.resolveRenderConflictsAnyDirection(for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                    self.resolveRenderConflicts(direction: nil, for: proxy)
                 } else if proxy.familyMember.isChild(of: previous.familyMember) {
                     position += SMPoint(x: 0.0, y: Self.POSITION_PADDING)
                     proxy.setPosition(to: position)
-                    self.resolveRenderConflictsAnyDirection(for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                    self.resolveRenderConflicts(direction: nil, for: proxy)
                 }
                 guard let setPosition = proxy.position else {
                     continue
@@ -135,7 +135,7 @@ class FamilyMemberStoreRenderProxy {
                             anchor: .left,
                             gap: Self.POSITION_PADDING
                         )
-                        self.resolveRenderConflicts(direction: .right, for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                        self.resolveRenderConflicts(direction: .right, for: proxy)
                     }
                 }
                 let directChildrenWithLeftPreferencePositions = self.getDirectChildrenProxies(
@@ -151,7 +151,7 @@ class FamilyMemberStoreRenderProxy {
                             anchor: .right,
                             gap: Self.POSITION_PADDING
                         )
-                        self.resolveRenderConflicts(direction: .left, for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                        self.resolveRenderConflicts(direction: .left, for: proxy)
                     }
                 }
                 
@@ -171,7 +171,7 @@ class FamilyMemberStoreRenderProxy {
                                     anchor: .right,
                                     gap: Self.POSITION_PADDING
                                 )
-                                self.resolveRenderConflicts(direction: .left, for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                                self.resolveRenderConflicts(direction: .left, for: proxy)
                             }
                         case .left:
                             // Parent prefers left - proxy must be right
@@ -183,7 +183,7 @@ class FamilyMemberStoreRenderProxy {
                                     anchor: .left,
                                     gap: Self.POSITION_PADDING
                                 )
-                                self.resolveRenderConflicts(direction: .right, for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                                self.resolveRenderConflicts(direction: .right, for: proxy)
                             }
                         }
                     }
@@ -214,11 +214,10 @@ class FamilyMemberStoreRenderProxy {
                             }
                         },
                         direction: direction,
-                        for: proxy,
-                        offsetIncrement: Self.POSITION_PADDING
+                        for: proxy
                     )
                     // After moving the sibling adjacent to their siblings, ensure render conflicts are resolved
-                    self.resolveRenderConflicts(direction: direction, for: proxy, offsetIncrement: Self.POSITION_PADDING)
+                    self.resolveRenderConflicts(direction: direction, for: proxy)
                 }
                 
                 // Resolve any connection conflicts that occurred
@@ -253,8 +252,7 @@ class FamilyMemberStoreRenderProxy {
                                     return self.positionConflictExists(for: proxy) || proxy.position!.x.isGreater(than: closestOtherParentsToRight!)
                                 },
                                 direction: .left,
-                                for: proxyWithPotentialConnectionConflict,
-                                offsetIncrement: Self.POSITION_PADDING
+                                for: proxyWithPotentialConnectionConflict
                             )
                         }
                         // If true, proxy further right than the parents closest to the right of proxy's parents
@@ -265,8 +263,7 @@ class FamilyMemberStoreRenderProxy {
                                     return self.positionConflictExists(for: proxy) || proxy.position!.x.isLess(than: closestOtherParentsToLeft!)
                                 },
                                 direction: .right,
-                                for: proxyWithPotentialConnectionConflict,
-                                offsetIncrement: Self.POSITION_PADDING
+                                for: proxyWithPotentialConnectionConflict
                             )
                         }
                     }
@@ -336,144 +333,79 @@ class FamilyMemberStoreRenderProxy {
         }
     }
     
+    /// Resolves render conflicts for a family member render proxies.
+    /// The condition for what is a "render conflict" is provided as an argument.
+    /// Works by checking if any of the proxies meet the condition for the render conflict, then moving all the proxies in one direction, then repeating until non meet the condition.
+    /// Note, this means if only one has a conflict, this still all move.
+    /// - Parameters:
+    ///   - conflictCondition: A callback iteratively triggered on every proxy provided to see if they (as a group) need to continue being moved; by default, a position conflict
+    ///   - direction: The direction to move all the proxies (to solve the render conflicts); nil for any direction
+    ///   - proxies: The proxies to move to resolve conflicts for
+    ///   - offsetIncrement: The distance the proxies are moved each iteration (after checking at least one has a render conflict)
+    ///   - groupSpouse: If true, the spouses of all the provided proxies are grouped in and also moved
     private func resolveRenderConflicts(
-        conflictCondition: (_ proxy: FamilyMemberRenderProxy) -> Bool,
-        direction: HorizontalDirection,
-        for proxy: FamilyMemberRenderProxy,
-        offsetIncrement: Double,
+        conflictCondition: ((_ proxy: FamilyMemberRenderProxy) -> Bool)? = nil,
+        direction: HorizontalDirection?,
+        for proxies: FamilyMemberRenderProxy...,
+        offsetIncrement: Double = FamilyMemberStoreRenderProxy.POSITION_PADDING,
         groupSpouse: Bool = true
     ) {
-        var proxiesToMove = [proxy]
-        if let spouseID = proxy.familyMember.spouseID,
-           let spouseProxy = self.familyMemberProxiesStore[spouseID],
-           groupSpouse {
-            proxiesToMove.append(spouseProxy)
-            assert(proxy.position != spouseProxy.position || proxy.position == nil, "Duplicate positions are illegal")
+        let resolvedConflictCondition = conflictCondition ?? self.positionConflictExists(for:)
+        var proxiesToMove = [UUID: FamilyMemberRenderProxy]()
+        for startingProxy in proxies {
+            if startingProxy.hasPosition {
+                proxiesToMove[startingProxy.id] = startingProxy
+                if let spouseProxy = self.getSpouseProxy(for: startingProxy), groupSpouse {
+                    proxiesToMove[spouseProxy.id] = spouseProxy
+                }
+            } else {
+                assertionFailure("Attempting to resolve render conflicts for a proxy with no position")
+            }
         }
-        self.resolveGroupRenderConflicts(conflictCondition: conflictCondition, direction: direction, for: proxiesToMove, offsetIncrement: offsetIncrement)
-    }
-    
-    private func resolveGroupRenderConflicts(
-        conflictCondition: (_ proxy: FamilyMemberRenderProxy) -> Bool,
-        direction: HorizontalDirection,
-        for proxies: [FamilyMemberRenderProxy],
-        offsetIncrement: Double
-    ) {
-        let xTranslation = switch direction {
-        case .right:
-            abs(offsetIncrement)
-        case .left:
-            -1.0 * abs(offsetIncrement)
-        }
-        let movableProxies = proxies.filter({ $0.position != nil })
-        guard !movableProxies.isEmpty else {
+        guard !proxiesToMove.isEmpty else {
             return
         }
-        while movableProxies.contains(where: { conflictCondition($0) }) {
-            for proxy in movableProxies {
-                proxy.position!.translate(by: SMPoint(x: xTranslation, y: 0))
+        for proxy in proxiesToMove.values {
+            guard let proxyPosition = proxy.position else {
+                assertionFailure("Logic error - all proxies must have a position")
+                return
+            }
+            if proxiesToMove.values.contains(where: { proxy.id != $0.id && proxyPosition == $0.position }) {
+                assertionFailure("Illegal - two proxies resolving conflicts together may not share the same position")
+                return
             }
         }
-    }
-    
-    private func resolveRenderConflictsAnyDirection(
-        conflictCondition: (_ proxy: FamilyMemberRenderProxy) -> Bool,
-        for proxy: FamilyMemberRenderProxy,
-        offsetIncrement: Double,
-        groupSpouse: Bool = true
-    ) {
-        var proxiesToMove = [proxy]
-        if let spouseID = proxy.familyMember.spouseID,
-           let spouseProxy = self.familyMemberProxiesStore[spouseID],
-           groupSpouse {
-            proxiesToMove.append(spouseProxy)
-            assert(proxy.position != spouseProxy.position || proxy.position == nil, "Duplicate positions are illegal")
-        }
-        self.resolveGroupRenderConflictsAnyDirection(conflictCondition: conflictCondition, for: proxiesToMove, offsetIncrement: offsetIncrement)
-    }
-    
-    private func resolveGroupRenderConflictsAnyDirection(
-        conflictCondition: (_ proxy: FamilyMemberRenderProxy) -> Bool,
-        for proxies: [FamilyMemberRenderProxy],
-        offsetIncrement: Double
-    ) {
-        let movableProxies = proxies.filter({ $0.position != nil })
-        guard !movableProxies.isEmpty else {
-            return
-        }
-        let startingPositions = movableProxies.map { $0.position! }
-        var sign = 1
-        var xTranslation = abs(offsetIncrement)
-        while movableProxies.contains(where: { conflictCondition($0) }) {
-            for proxyIndex in movableProxies.indices {
-                let proxy = movableProxies[proxyIndex]
-                let startingPosition = startingPositions[proxyIndex]
-                proxy.setPosition(to: SMPoint(x: startingPosition.x + Double(sign)*xTranslation, y: startingPosition.y))
+        if let direction {
+            let xTranslation = switch direction {
+            case .right:
+                abs(offsetIncrement)
+            case .left:
+                -1.0 * abs(offsetIncrement)
             }
-            sign *= -1
-            if sign == 1 {
-                xTranslation += abs(offsetIncrement)
+            while proxiesToMove.values.contains(where: { resolvedConflictCondition($0) }) {
+                for proxy in proxiesToMove.values {
+                    proxy.position?.translate(by: SMPoint(x: xTranslation, y: 0))
+                }
             }
-        }
-    }
-    
-    private func resolveRenderConflictsAnyDirection(for proxy: FamilyMemberRenderProxy, offsetIncrement: Double, groupSpouse: Bool = true) {
-        var proxiesToMove = [proxy]
-        if let spouseID = proxy.familyMember.spouseID,
-           let spouseProxy = self.familyMemberProxiesStore[spouseID],
-           groupSpouse {
-            proxiesToMove.append(spouseProxy)
-            assert(proxy.position != spouseProxy.position || proxy.position == nil, "Duplicate positions are illegal")
-        }
-        self.resolveGroupRenderConflictsAnyDirection(for: proxiesToMove, offsetIncrement: offsetIncrement)
-    }
-    
-    private func resolveGroupRenderConflictsAnyDirection(for proxies: [FamilyMemberRenderProxy], offsetIncrement: Double) {
-        let movableProxies = proxies.filter({ $0.position != nil })
-        guard !movableProxies.isEmpty else {
-            return
-        }
-        let startingPositions = movableProxies.map { $0.position! }
-        var sign = 1
-        var xTranslation = abs(offsetIncrement)
-        while movableProxies.contains(where: { self.positionConflictExists(for: $0) }) {
-            for proxyIndex in movableProxies.indices {
-                let proxy = movableProxies[proxyIndex]
-                let startingPosition = startingPositions[proxyIndex]
-                proxy.setPosition(to: SMPoint(x: startingPosition.x + Double(sign)*xTranslation, y: startingPosition.y))
+        } else {
+            let orderedProxies = Array(proxiesToMove.values)
+            let startingPositions = orderedProxies.compactMap({ $0.position })
+            guard orderedProxies.count == startingPositions.count else {
+                assertionFailure("Logic error - all proxies must have a position")
+                return
             }
-            sign *= -1
-            if sign == 1 {
-                xTranslation += abs(offsetIncrement)
-            }
-        }
-    }
-    
-    private func resolveRenderConflicts(direction: HorizontalDirection, for proxy: FamilyMemberRenderProxy, offsetIncrement: Double, groupSpouse: Bool = true) {
-        var proxiesToMove = [proxy]
-        if let spouseID = proxy.familyMember.spouseID,
-           let spouseProxy = self.familyMemberProxiesStore[spouseID],
-           groupSpouse {
-            proxiesToMove.append(spouseProxy)
-            assert(proxy.position != spouseProxy.position || proxy.position == nil, "Duplicate positions are illegal")
-        }
-        self.resolveGroupRenderConflicts(direction: direction, for: proxiesToMove, offsetIncrement: offsetIncrement)
-    }
-    
-    private func resolveGroupRenderConflicts(direction: HorizontalDirection, for proxies: [FamilyMemberRenderProxy], offsetIncrement: Double) {
-        let xTranslation = switch direction {
-        case .right:
-            abs(offsetIncrement)
-        case .left:
-            -1.0 * abs(offsetIncrement)
-        }
-        let movableProxies = proxies.filter({ $0.position != nil })
-        guard !movableProxies.isEmpty else {
-            return
-        }
-        while movableProxies.contains(where: { self.positionConflictExists(for: $0) }) {
-            for proxy in movableProxies {
-                proxy.position!.translate(by: SMPoint(x: xTranslation, y: 0))
+            var sign = 1
+            var xTranslation = abs(offsetIncrement)
+            while orderedProxies.contains(where: { resolvedConflictCondition($0) }) {
+                for proxyIndex in orderedProxies.indices {
+                    let proxy = orderedProxies[proxyIndex]
+                    let startingPosition = startingPositions[proxyIndex]
+                    proxy.setPosition(to: SMPoint(x: startingPosition.x + Double(sign)*xTranslation, y: startingPosition.y))
+                }
+                sign *= -1
+                if sign == 1 {
+                    xTranslation += abs(offsetIncrement)
+                }
             }
         }
     }

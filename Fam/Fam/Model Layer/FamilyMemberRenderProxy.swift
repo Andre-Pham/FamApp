@@ -16,6 +16,9 @@ class FamilyMemberRenderProxy {
     public var id: UUID {
         return self.familyMember.id
     }
+    public var hasPosition: Bool {
+        return self.position != nil
+    }
     public var nextFamilyMembers: [FamilyMember] {
         var next = [FamilyMember]()
         if let spouse = self.familyMember.spouse {
