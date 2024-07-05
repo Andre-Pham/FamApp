@@ -18,6 +18,7 @@ class FamilyMemberStoreRenderProxy {
     public static let POSITION_PADDING = 150.0
     public static let COUPLES_PADDING = 100.0
     
+    /// A store of all the family members
     private(set) var familyMemberProxiesStore = [UUID: FamilyMemberRenderProxy]()
     private(set) var orderedFamilyMemberProxies = [FamilyMemberRenderProxy]()
     private(set) var coupleConnections = [CoupleConnectionRender]()
@@ -54,7 +55,6 @@ class FamilyMemberStoreRenderProxy {
                 }
             }
         }
-        print(self.orderedFamilyMemberProxies.map({ $0.familyMember.firstName }))
     }
     
     /// Populates the "id to family member" dictionary based on the ordered family members.
@@ -304,19 +304,6 @@ class FamilyMemberStoreRenderProxy {
         }
     }
     
-    /// Bring couples closer together so that the distance between them is reduced by a provided amount.
-    /// - Parameters:
-    ///   - distance: The distance to bring the couple closer by
-    private func bringCouplesCloser(by distance: Double) {
-        for coupleConnection in self.coupleConnections {
-            if let leftPosition = coupleConnection.leftPartner.position,
-               let rightPosition = coupleConnection.rightPartner.position {
-                coupleConnection.leftPartner.setPosition(to: leftPosition + SMPoint(x: distance/2.0, y: 0))
-                coupleConnection.rightPartner.setPosition(to: rightPosition - SMPoint(x: distance/2.0, y: 0))
-            }
-        }
-    }
-    
     /// Position a proxy (and their spouse, if available) at the position provided.
     /// If anchored right, the proxy and their spouse are positioned on the position and left of the position.
     /// If anchored left, the proxy and their spouse are positioned on the position and right of the position.
@@ -440,6 +427,19 @@ class FamilyMemberStoreRenderProxy {
             }
         }
         return false
+    }
+    
+    /// Bring couples closer together so that the distance between them is reduced by a provided amount.
+    /// - Parameters:
+    ///   - distance: The distance to bring the couple closer by
+    private func bringCouplesCloser(by distance: Double) {
+        for coupleConnection in self.coupleConnections {
+            if let leftPosition = coupleConnection.leftPartner.position,
+               let rightPosition = coupleConnection.rightPartner.position {
+                coupleConnection.leftPartner.setPosition(to: leftPosition + SMPoint(x: distance/2.0, y: 0))
+                coupleConnection.rightPartner.setPosition(to: rightPosition - SMPoint(x: distance/2.0, y: 0))
+            }
+        }
     }
     
     private func generateCoupleConnections() {
