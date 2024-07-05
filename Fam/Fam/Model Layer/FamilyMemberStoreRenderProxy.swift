@@ -64,6 +64,8 @@ class FamilyMemberStoreRenderProxy {
         }
     }
     
+    /// Generate all the positions of all the proxies.
+    /// Assumes all proxies have no position.
     private func generatePositions() {
         guard !self.orderedFamilyMemberProxies.isEmpty else {
             return
@@ -302,6 +304,9 @@ class FamilyMemberStoreRenderProxy {
         }
     }
     
+    /// Bring couples closer together so that the distance between them is reduced by a provided amount.
+    /// - Parameters:
+    ///   - distance: The distance to bring the couple closer by
     private func bringCouplesCloser(by distance: Double) {
         for coupleConnection in self.coupleConnections {
             if let leftPosition = coupleConnection.leftPartner.position,
