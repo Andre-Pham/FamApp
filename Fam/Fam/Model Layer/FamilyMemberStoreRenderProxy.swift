@@ -10,15 +10,15 @@ import SwiftMath
 
 // TODO: Next:
 // Clean up this file
-// - Remove commented out code
-// - Combine resolve render conflict functions (there's a lottt of overlap)
-// - Make offsetIncrement's default value Self.POSITION_PADDING
-// - Extract rules into functions
-// - If applicable, extract logic into FamilyMemberStoreUtil (like swapPositions(for proxy1, and proxy2))
-// - Add comments for clarity
-// - Clean up in general, like the fact that I keep having to refer to proxy with proxy.position! (extracting stages into functions will help with this)
-// - Rename variables (extracting stages into functions will help with this)
-// - After all this, add function headers to all functions (this will help readability, as these will need to be modified when I add ex spouses and stuff)
+// - [DONE] Remove commented out code
+// - [DONE] Combine resolve render conflict functions (there's a lottt of overlap)
+// - [DONE] Make offsetIncrement's default value Self.POSITION_PADDING
+// - [DONE] Extract rules into functions
+// - [DONE] If applicable, extract logic into FamilyMemberStoreUtil (like swapPositions(for proxy1, and proxy2))
+// - [DONE] Add comments for clarity
+// - [DONE] Clean up in general, like the fact that I keep having to refer to proxy with proxy.position! (extracting stages into functions will help with this)
+// - [DONE] Rename variables (extracting stages into functions will help with this)
+// - [DONE] After all this, add function headers to all functions (this will help readability, as these will need to be modified when I add ex spouses and stuff)
 // TODO: After that:
 // - Add basic buttons to create custom family trees and push edge cases
 //   (like "add parents", "add son", "add daughter", "add spouse")
