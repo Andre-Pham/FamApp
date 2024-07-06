@@ -20,8 +20,13 @@ import SwiftMath
 // - [DONE] Rename variables (extracting stages into functions will help with this)
 // - [DONE] After all this, add function headers to all functions (this will help readability, as these will need to be modified when I add ex spouses and stuff)
 // TODO: After that:
-// - Add basic buttons to create custom family trees and push edge cases
+// - [DONE] Add basic buttons to create custom family trees and push edge cases
 //   (like "add parents", "add son", "add daughter", "add spouse")
+// - Fix bugs:
+// - Give Carolyn parents. There's no reason Carolyn and Joe shouldn't switch positions, but they don't.
+// - Give Cees a spouse and a child. They should be moved to the end of their siblings. The rule is, in a row of siblings, those with parents should be on the ends.
+// - Give Thahn-Lien parents. Her parents' positions should be swapped with Will and Johanna.
+// - Give Jade Husband 3 children.
 // TODO: After that:
 // - Start creating the UI! woo hoo
 
@@ -180,7 +185,7 @@ class FamilyMemberStoreRenderProxy {
             let farthestRight = SMPointCollection(points: directChildrenWithRightPreferencePositions).maxX
             if let farthestRight, farthestRight.isGreater(than: proxyPosition.x) {
                 self.anchorCouple(
-                    to: SMPoint(x: farthestRight + Self.POSITION_PADDING, y: proxyPosition.y),
+                    to: SMPoint(x: farthestRight, y: proxyPosition.y),
                     proxy: proxy,
                     anchor: .left
                 )
@@ -195,7 +200,7 @@ class FamilyMemberStoreRenderProxy {
             let farthestLeft = SMPointCollection(points: directChildrenWithLeftPreferencePositions).minX
             if let farthestLeft, farthestLeft.isLess(than: proxyPosition.x) {
                 self.anchorCouple(
-                    to: SMPoint(x: farthestLeft - Self.POSITION_PADDING, y: proxyPosition.y),
+                    to: SMPoint(x: farthestLeft, y: proxyPosition.y),
                     proxy: proxy,
                     anchor: .right
                 )
