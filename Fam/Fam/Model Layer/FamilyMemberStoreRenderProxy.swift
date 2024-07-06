@@ -23,10 +23,10 @@ import SwiftMath
 // - [DONE] Add basic buttons to create custom family trees and push edge cases
 //   (like "add parents", "add son", "add daughter", "add spouse")
 // - Fix bugs:
-// - Give Carolyn parents. There's no reason Carolyn and Joe shouldn't switch positions, but they don't.
+// - [DONE] Give Carolyn parents. There's no reason Carolyn and Joe shouldn't switch positions, but they don't.
 // - Give Cees a spouse and a child. They should be moved to the end of their siblings. The rule is, in a row of siblings, those with parents should be on the ends.
 // - Give Thahn-Lien parents. Her parents' positions should be swapped with Will and Johanna.
-// - Give Jade Husband 3 children.
+// - [DONE] Give Jade Husband 3 children.
 // TODO: After that:
 // - Start creating the UI! woo hoo
 
@@ -138,11 +138,11 @@ class FamilyMemberStoreRenderProxy {
             return false
         }
         if proxy.familyMember.isSpouse(to: otherProxy.familyMember) {
-            proxy.setPosition(to: relativePosition + SMPoint(x: Self.POSITION_PADDING * (proxy.preferredDirection == .left ? -1 : 1), y: 0.0))
+            proxy.setPosition(to: relativePosition + SMPoint(x: Self.POSITION_PADDING*proxy.preferredDirection.directionMultiplier, y: 0.0))
             self.resolveRenderConflicts(direction: proxy.preferredDirection, for: proxy)
             return true
         } else if proxy.familyMember.isExSpouse(to: otherProxy.familyMember) {
-            proxy.setPosition(to: relativePosition + SMPoint(x: Self.POSITION_PADDING * (proxy.preferredDirection == .left ? -1 : 1), y: 0.0))
+            proxy.setPosition(to: relativePosition + SMPoint(x: Self.POSITION_PADDING*proxy.preferredDirection.directionMultiplier, y: 0.0))
             self.resolveRenderConflicts(direction: proxy.preferredDirection, for: proxy)
             return true
         } else if proxy.familyMember.isParent(of: otherProxy.familyMember) {
@@ -324,7 +324,7 @@ class FamilyMemberStoreRenderProxy {
         }
         let proxiesWithPotentialConflicts = [proxy, self.getSpouseProxy(for: proxy)].compactMap({ $0 })
         for proxyBeingResolved in proxiesWithPotentialConflicts {
-            guard let proxyBeingResolvedPosition = proxyBeingResolved.position else {
+            guard proxyBeingResolved.hasPosition else {
                 continue
             }
             guard let anyParent = self.getParentProxies(for: proxyBeingResolved).first,
@@ -345,6 +345,7 @@ class FamilyMemberStoreRenderProxy {
                 .filter({ $0.isGreater(than: anyParentPosition.x) })
                 .min()
             if let closestOtherParentsToRight,
+               let proxyBeingResolvedPosition = proxyBeingResolved.position,
                proxyBeingResolvedPosition.x.isGreater(than: closestOtherParentsToRight) {
                 // A connection conflict exists because the proxy is too far right
                 self.resolveRenderConflicts(
@@ -359,6 +360,7 @@ class FamilyMemberStoreRenderProxy {
                 )
             }
             if let closestOtherParentsToLeft,
+               let proxyBeingResolvedPosition = proxyBeingResolved.position,
                proxyBeingResolvedPosition.x.isLess(than: closestOtherParentsToLeft) {
                 // A connection conflict exists because the proxy is too far left
                 self.resolveRenderConflicts(
@@ -371,6 +373,91 @@ class FamilyMemberStoreRenderProxy {
                     direction: .right,
                     for: proxyBeingResolved
                 )
+            }
+            if let closestOtherParentsToLeft,
+               let closestOtherParentsToRight,
+               let proxyBeingResolvedPosition = proxyBeingResolved.position,
+               (proxyBeingResolvedPosition.x.isGreater(than: closestOtherParentsToRight)
+                || proxyBeingResolvedPosition.x.isLess(than: closestOtherParentsToLeft)) {
+                // If we reach here, it's really bad
+                // It means there's no room for the child under the parents
+                // BUT ALSO, moving the child left/right results in a connection conflict
+                // There's only one thing left to do!
+                // Make room.
+                // 1. Place the proxy under any of the parents (move their spouse with them)
+                self.anchorCouple(
+                    to: anyParentPosition + SMPoint(x: 0, y: Self.POSITION_PADDING),
+                    proxy: proxyBeingResolved,
+                    anchor: proxyBeingResolved.preferredDirection
+                )
+                // 2. Position it to the first spot that isn't a sibling or a sibling's spouse
+                let siblingProxies = self.getSiblingProxies(for: proxyBeingResolved)
+                let siblingSpouseProxies = self.getSpouseProxies(for: siblingProxies)
+                let siblingAndSiblingSpouseProxies = siblingProxies + siblingSpouseProxies
+                self.resolveRenderConflicts(
+                    conflictCondition: { proxy in
+                        return self.positionConflictExistsBetween(proxy, and: siblingAndSiblingSpouseProxies)
+                    },
+                    direction: nil,
+                    for: proxyBeingResolved
+                )
+                guard self.positionConflictExists(for: proxyBeingResolved) else {
+                    // If at this stage there are no conflicts, then there's no problem
+                    return
+                }
+                // 3. Resolve position render conflicts for everyone that isn't them or their spouse or their parents
+                //    that is equal or further than their x position.
+                //    But further... right or left?
+                var directionOfEveryoneToMove: HorizontalDirection? = nil
+                // Get the average parent position. Whatever direction they're in, move everyone else in the opposite direction.
+                if let averageParentsPosition = self.getParentsPositionsAverage(for: proxyBeingResolved),
+                   let proxyBeingResolvedPosition = proxyBeingResolved.position,
+                   let directionParentsAreIn = self.getTheDirection(from: proxyBeingResolvedPosition, to: averageParentsPosition) {
+                    directionOfEveryoneToMove = directionParentsAreIn.oppositeDirection
+                } 
+                // If the proxy has a single parent right above them, this doesn't work.
+                // Next, we try another condition that must work given the first condition failed.
+                // We get the proxy that matches its position, get the first "next" family member proxy from that conflicting proxy
+                // that has a different y, and move everyone in that direction.
+                else if let conflictingProxy = self.getFirstProxyConflictingWith(proxyBeingResolved),
+                        let proxyBeingResolvedPosition = proxyBeingResolved.position {
+                    let directFamilyMemberIDs = conflictingProxy.nextFamilyMembers.map({ $0.id })
+                    for directID in directFamilyMemberIDs {
+                        if let directFamilyMemberProxy = self.familyMemberProxiesStore[directID],
+                           let directFamilyMemberProxyPosition = directFamilyMemberProxy.position,
+                           let directionDirectFamilyMemberIsIn = self.getTheDirection(from: proxyBeingResolvedPosition, to: directFamilyMemberProxyPosition) {
+                            directionOfEveryoneToMove = directionDirectFamilyMemberIsIn
+                            break
+                        }
+                    }
+                }
+                guard let directionOfEveryoneToMove,
+                      let proxyBeingResolvedPosition = proxyBeingResolved.position else {
+                    assertionFailure("Should be impossible")
+                    return
+                }
+                // Now we can finally collect everyone that isn't the proxy or their spouse or their parents
+                // that is equal or further than their x position
+                var proxiesToMove = [UUID: FamilyMemberRenderProxy]()
+                for potentialProxy in self.familyMemberProxiesStore.values {
+                    guard let potentialPosition = potentialProxy.position else {
+                        continue
+                    }
+                    let direction = self.getTheDirection(from: proxyBeingResolvedPosition, to: potentialPosition)
+                    if (direction == nil || direction == directionOfEveryoneToMove)
+                        && !potentialProxy.familyMember.isPerson(proxyBeingResolved.familyMember)
+                        && !potentialProxy.familyMember.isSpouse(to: proxyBeingResolved.familyMember)
+                        && !potentialProxy.familyMember.isParent(of: proxyBeingResolved.familyMember) {
+                        proxiesToMove[potentialProxy.id] = potentialProxy
+                    }
+                }
+                // (Don't forget the proxies to move spouses)
+                for spouseProxy in self.getSpouseProxies(for: Array(proxiesToMove.values)) {
+                    proxiesToMove[spouseProxy.id] = spouseProxy
+                }
+                for proxyToMove in proxiesToMove.values {
+                    proxyToMove.position?.translate(by: SMPoint(x: Self.POSITION_PADDING*directionOfEveryoneToMove.directionMultiplier, y: 0))
+                }
             }
         }
     }
@@ -482,12 +569,7 @@ class FamilyMemberStoreRenderProxy {
             }
         }
         if let direction {
-            let xTranslation = switch direction {
-            case .right:
-                abs(offsetIncrement)
-            case .left:
-                -1.0 * abs(offsetIncrement)
-            }
+            let xTranslation = abs(offsetIncrement)*direction.directionMultiplier
             while proxiesToMove.values.contains(where: { resolvedConflictCondition($0) }) {
                 for proxy in proxiesToMove.values {
                     proxy.position?.translate(by: SMPoint(x: xTranslation, y: 0))
@@ -531,6 +613,37 @@ class FamilyMemberStoreRenderProxy {
             }
         }
         return false
+    }
+    
+    /// Checks if a proxy shares its position with any of the other provided proxies.
+    /// - Parameters:
+    ///   - proxy: The proxy to check if it has any position conflicts
+    ///   - otherProxies: The proxies to check against
+    /// - Returns: True if the provided proxy shares its position with any of the other provided proxies
+    private func positionConflictExistsBetween(_ proxy: FamilyMemberRenderProxy, and otherProxies: [FamilyMemberRenderProxy]) -> Bool {
+        guard proxy.hasPosition else {
+            assertionFailure("Checking if proxy with no position shares its (non-existent) position with any other proxies")
+            return false
+        }
+        for otherProxy in otherProxies {
+            if proxy.position == otherProxy.position && proxy.id != otherProxy.id {
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func getFirstProxyConflictingWith(_ proxy: FamilyMemberRenderProxy) -> FamilyMemberRenderProxy? {
+        guard proxy.hasPosition else {
+            assertionFailure("Checking if proxy with no position shares its (non-existent) position with any other proxies")
+            return nil
+        }
+        for otherProxy in self.orderedFamilyMemberProxies {
+            if proxy.position == otherProxy.position && proxy.id != otherProxy.id {
+                return otherProxy
+            }
+        }
+        return nil
     }
     
     /// Bring couples closer together so that the distance between them is reduced by a provided amount.

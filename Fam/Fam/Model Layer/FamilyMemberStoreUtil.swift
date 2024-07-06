@@ -106,4 +106,11 @@ extension FamilyMemberStoreRenderProxy {
         proxy2.setPreferredDirection(to: tempDirection)
     }
     
+    func getTheDirection(from fromPosition: SMPoint, to toPosition: SMPoint) -> HorizontalDirection? {
+        guard !fromPosition.x.isEqual(to: toPosition.x) else {
+            return nil
+        }
+        return fromPosition.x.isLess(than: toPosition.x) ? .right : .left
+    }
+    
 }
