@@ -11,6 +11,17 @@ import SwiftMath
 class ViewController: UIViewController {
     
     private let canvasController = CanvasController()
+    private var family = FamilyMemberStore()
+    
+    private var root: FamView { return FamView(self.view) }
+    private let buttonStack = FamHStack()
+    private let addParentButton = FamButton()
+    private let addChildButton = FamButton()
+    private let addSpouseButton = FamButton()
+    private let renderButton = FamButton()
+    private let resetButton = FamButton()
+    private var controls = [FamControl]()
+    private var selected: FamilyMember? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,11 +56,79 @@ class ViewController: UIViewController {
 //            .setBackgroundColor(to: .blue)
 //        backgroundLayer.addSubview(boxView)
         
-        let family = self.createFamily()
-        let root = family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
-        (FamilyMemberStoreRenderProxy(family, root: root).orderedFamilyMemberProxies.forEach({ print($0.familyMember.firstName) }))
+        self.family = self.createFamily()
         
-        let render = FamilyMemberStoreRenderProxy(family, root: root)
+        self.renderFamily()
+        
+        self.root
+            .addSubview(self.buttonStack)
+        self.buttonStack
+            .setSpacing(to: 10)
+            .addView(self.addChildButton)
+            .addView(self.addParentButton)
+            .addView(self.addSpouseButton)
+            .addView(self.renderButton)
+            .addView(self.resetButton)
+            .constrainCenterHorizontal()
+            .constrainBottom(padding: 100)
+        self.addChildButton
+            .setLabel(to: "Add Child")
+            .setOnTap({
+                guard let selected = self.selected else {
+                    return
+                }
+                let newMember = FamilyMember(firstName: "\(selected.firstName)'s Child", sex: Int.random(in: 1...2) == 1 ? .male : .female, family: self.family)
+                selected.assignChild(newMember)
+                if let selectedSpouse = selected.spouse {
+                    selectedSpouse.assignChild(newMember)
+                }
+                self.renderFamily()
+            })
+        self.addParentButton
+            .setLabel(to: "Add Parents")
+            .setOnTap({
+                guard let selected = self.selected else {
+                    return
+                }
+                if selected.hasNoParents {
+                    let father = FamilyMember(firstName: "\(selected.firstName)'s Father", sex: .male, family: self.family)
+                    let mother = FamilyMember(firstName: "\(selected.firstName)'s Mother", sex: .female, family: self.family)
+                    father.assignSpouse(mother)
+                    selected.assignParents(father, mother)
+                    self.renderFamily()
+                }
+            })
+        self.addSpouseButton
+            .setLabel(to: "Add Spouse")
+            .setOnTap({
+                guard let selected = self.selected else {
+                    return
+                }
+                if !selected.hasSpouse {
+                    let newMember = FamilyMember(firstName: "\(selected.firstName)'s Spouse", sex: Int.random(in: 1...2) == 1 ? .male : .female, family: self.family)
+                    selected.assignSpouse(newMember)
+                    self.renderFamily()
+                }
+            })
+        self.renderButton
+            .setLabel(to: "Render")
+            .setOnTap({
+                self.renderFamily()
+            })
+        self.resetButton
+            .setLabel(to: "Reset")
+            .setOnTap({
+                self.family = self.createFamily()
+                self.selected = nil
+                self.renderFamily()
+            })
+    }
+    
+    func renderFamily() {
+        let root = self.family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
+//        (FamilyMemberStoreRenderProxy(self.family, root: root).orderedFamilyMemberProxies.forEach({ print($0.familyMember.firstName) }))
+        
+        let render = FamilyMemberStoreRenderProxy(self.family, root: root)
         
         let connectionLayer = FamView()
             .setFrame(to: self.canvasController.canvasRect.cgRect)
@@ -60,11 +139,11 @@ class ViewController: UIViewController {
                 assertionFailure("Missing positions for parents")
                 continue
             }
-            print(coupleConnection.leftPartner.familyMember.firstName)
-            print(coupleConnection.rightPartner.familyMember.firstName)
+//            print(coupleConnection.leftPartner.familyMember.firstName)
+//            print(coupleConnection.rightPartner.familyMember.firstName)
             position1 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             position2 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
-            print("\(position1.toString()) -> \(position2.toString())")
+//            print("\(position1.toString()) -> \(position2.toString())")
             let view = FamView(LineView(startPoint: position1.cgPoint, endPoint: position2.cgPoint))
             view.view.translatesAutoresizingMaskIntoConstraints = false
             connectionLayer.addSubview(view)
@@ -97,7 +176,6 @@ class ViewController: UIViewController {
             ))
             line2.view.translatesAutoresizingMaskIntoConstraints = false
             connectionLayer.addSubview(line2)
-            print("Line drawn")
         }
         
         let drawLayer = FamView()
@@ -105,7 +183,7 @@ class ViewController: UIViewController {
         self.canvasController.addLayer(drawLayer)
         for proxy in render.orderedFamilyMemberProxies {
             if let position = proxy.position {
-                let view = FamView().setBackgroundColor(to: .blue)
+                let view = FamControl().setBackgroundColor(to: .blue)
                 let text = FamText().setText(to: proxy.familyMember.firstName + " " + (proxy.position?.toString()  ?? "-")).setTextColor(to: .white)
                 drawLayer.addSubview(view)
                 view.addSubview(text)
@@ -114,10 +192,14 @@ class ViewController: UIViewController {
                     width: 80,
                     height: 80
                 ).cgRect)
+                view.setOnRelease({
+                    self.selected = proxy.familyMember
+                    print("SELECTED \(proxy.familyMember.fullName)")
+                })
                 text.setFrame(to: CGRect(x: 0, y: 0, width: 80, height: 80))
+                self.controls.append(view)
             }
         }
-        
     }
     
     func createFamily() -> FamilyMemberStore {

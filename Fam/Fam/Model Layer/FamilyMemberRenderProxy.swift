@@ -25,16 +25,18 @@ class FamilyMemberRenderProxy {
             next.append(spouse)
         }
         next.append(contentsOf: self.familyMember.exSpouses)
-        if let mother = self.familyMember.mother {
-            next.append(mother)
-            if let motherSpouse = mother.spouse, self.familyMember.fatherID != motherSpouse.id {
-                next.append(motherSpouse)
+        let parents = self.familyMember.parents.sorted(by: {
+            // Sort by id, then by sex (sex takes precedence over id)
+            if $0.sex == $1.sex {
+                return $0.id < $1.id
+            } else {
+                return $0.sex == self.familyMember.sex.oppositeSex && $1.sex == self.familyMember.sex
             }
-        }
-        if let father = self.familyMember.father {
-            next.append(father)
-            if let fatherSpouse = father.spouse, self.familyMember.motherID != fatherSpouse.id {
-                next.append(fatherSpouse)
+        })
+        for parent in parents {
+            next.append(parent)
+            if let parentSpouse = parent.spouse, !self.familyMember.parentIDs.contains(parentSpouse.id) {
+                next.append(parentSpouse)
             }
         }
         for child in self.familyMember.children {

@@ -12,12 +12,15 @@ class FamilyMember {
     public enum Sex {
         case male
         case female
+        
+        public var oppositeSex: Sex {
+            return self == .male ? .female : .male
+        }
     }
     
     public let id: UUID
     private weak var family: FamilyMemberStore?
-    private(set) var motherID: UUID?
-    private(set) var fatherID: UUID?
+    private(set) var parentIDs: [UUID]
     private(set) var spouseID: UUID?
     private(set) var exSpousesIDs: [UUID]
     private(set) var firstName: String
@@ -35,14 +38,11 @@ class FamilyMember {
         // Append id so if their names are the same, there's consistency between persistent renders
         return self.fullName + self.id.uuidString
     }
-    public var parentIDs: [UUID] {
-        return [self.motherID, self.fatherID].compactMap({ $0 })
-    }
     public var childrenIDs: [UUID] {
         var ids = [UUID]()
         let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
         for familyMember in allFamilyMembers {
-            if familyMember.motherID == self.id || familyMember.fatherID == self.id {
+            if familyMember.parentIDs.contains(self.id) {
                 ids.append(familyMember.id)
             }
         }
@@ -57,18 +57,6 @@ class FamilyMember {
             }
         }
         return ids
-    }
-    public var mother: FamilyMember? {
-        if let motherID {
-            return self.family?.getFamilyMember(id: motherID)
-        }
-        return nil
-    }
-    public var father: FamilyMember? {
-        if let fatherID {
-            return self.family?.getFamilyMember(id: fatherID)
-        }
-        return nil
     }
     public var spouse: FamilyMember? {
         if let spouseID {
@@ -98,7 +86,7 @@ class FamilyMember {
         var children = [FamilyMember]()
         let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
         for familyMember in allFamilyMembers {
-            if familyMember.motherID == self.id || familyMember.fatherID == self.id {
+            if familyMember.parentIDs.contains(self.id) {
                 children.append(familyMember)
             }
         }
@@ -110,12 +98,7 @@ class FamilyMember {
             directFamily.append(spouse)
         }
         directFamily.append(contentsOf: self.exSpouses)
-        if let mother = self.mother {
-            directFamily.append(mother)
-        }
-        if let father = self.father {
-            directFamily.append(father)
-        }
+        directFamily.append(contentsOf: self.parents)
         directFamily.append(contentsOf: self.children)
         directFamily.append(contentsOf: self.siblings)
         return directFamily
@@ -133,7 +116,16 @@ class FamilyMember {
         return self.sons.filter({ $0.hasChildren })
     }
     public var hasNoParents: Bool {
-        return self.fatherID == nil && self.motherID == nil
+        return self.parentIDs.count == 0
+    }
+    public var hasBothParents: Bool {
+        return self.parentIDs.count == 2
+    }
+    public var hasSingleParent: Bool {
+        return self.parentIDs.count == 1
+    }
+    public var hasSpouse: Bool {
+        return self.spouseID != nil
     }
     public var hasAFamily: Bool {
         return self.family != nil
@@ -157,8 +149,7 @@ class FamilyMember {
     init(firstName: String, lastName: String? = nil, sex: Sex, family: FamilyMemberStore) {
         self.id = UUID()
         self.family = family
-        self.motherID = nil
-        self.fatherID = nil
+        self.parentIDs = [UUID]()
         self.spouseID = nil
         self.exSpousesIDs = [UUID]()
         self.firstName = firstName
@@ -181,11 +172,11 @@ class FamilyMember {
     }
     
     func isMother(of familyMember: FamilyMember) -> Bool {
-        return familyMember.motherID == self.id
+        return self.sex == .female && familyMember.parentIDs.contains(self.id)
     }
     
     func isFather(of familyMember: FamilyMember) -> Bool {
-        return familyMember.fatherID == self.id
+        return self.sex == .male && familyMember.parentIDs.contains(self.id)
     }
     
     func isParent(of familyMember: FamilyMember) -> Bool {
@@ -198,13 +189,16 @@ class FamilyMember {
             return false
         }
         assert(self.hasAFamily, "Member doesn't belong to a family")
-        let sharedFather = self.fatherID != nil && familyMember.fatherID == self.fatherID
-        let sharedMother = self.motherID != nil && familyMember.motherID == self.motherID
-        return sharedFather || sharedMother
+        for parentID in self.parentIDs {
+            if familyMember.parentIDs.contains(parentID) {
+                return true
+            }
+        }
+        return false
     }
     
     func isChild(of familyMember: FamilyMember) -> Bool {
-        return self.motherID == familyMember.id || self.fatherID == familyMember.id
+        return self.parentIDs.contains(familyMember.id)
     }
     
     func assignSpouse(_ spouse: FamilyMember) {
@@ -230,12 +224,11 @@ class FamilyMember {
             assertionFailure("Members don't have the same family")
             return
         }
-        switch self.sex {
-        case .male:
-            child.fatherID = self.id
-        case .female:
-            child.motherID = self.id
+        guard child.parentIDs.count < 2 else {
+            assertionFailure("Family members cannot have more than two parents")
+            return
         }
+        child.parentIDs.append(self.id)
     }
     
     func assignChildren(_ children: FamilyMember...) {
@@ -249,12 +242,11 @@ class FamilyMember {
             assertionFailure("Members don't have the same family")
             return
         }
-        switch parent.sex {
-        case .male:
-            self.fatherID = parent.id
-        case .female:
-            self.motherID = parent.id
+        guard self.parentIDs.count < 2 else {
+            assertionFailure("Family members cannot have more than two parents")
+            return
         }
+        self.parentIDs.append(parent.id)
     }
     
     func assignParents(_ parent1: FamilyMember, _ parent2: FamilyMember) {
