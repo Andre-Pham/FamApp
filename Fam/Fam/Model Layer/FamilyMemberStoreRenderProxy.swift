@@ -25,8 +25,10 @@ import SwiftMath
 // - Fix bugs:
 // - [DONE] Give Carolyn parents. There's no reason Carolyn and Joe shouldn't switch positions, but they don't.
 // - Give Cees a spouse and a child. They should be moved to the end of their siblings. The rule is, in a row of siblings, those with parents should be on the ends.
-// - Give Thahn-Lien parents. Her parents' positions should be swapped with Will and Johanna.
+// - [DONE] Give Thahn-Lien parents. Her parents' positions should be swapped with Will and Johanna. Why are they over to the right. And why is Andre all the way to the right too.
 // - [DONE] Give Jade Husband 3 children.
+// - Give Thahn-Lien parents. Then give Carolyn parents. This creates a conflict that doesn't need to exist. Carolyn and above would need to swap with will + children... Tricky..
+// - Give Jade Husband 3 children. Give give Andre a spouse, then lots of children. There's a gap!
 // TODO: After that:
 // - Start creating the UI! woo hoo
 
@@ -110,11 +112,28 @@ class FamilyMemberStoreRenderProxy {
                 // Enforce RULE 2
                 self.positionProxyAdjacentToSiblings(proxy: proxy)
                 
+                // Resolve any conflicts that can be resolved by swapping parents
+                self.resolveConnectionConflictsBySwappingCouples(for: proxy)
+                
                 // Resolve any connection conflicts that occurred
                 self.resolveConnectionConflicts(for: proxy)
                 
                 // Swap spouse positions if applicable
                 self.swapCouplePositionsIfApplicable(for: proxy)
+                
+                // TODO: - Cleanup routine
+                // Here, run a cleanup routine on ALL placed proxies.
+                // Anyone in a weird position where they can be placed in a much more reasonable position should be done so.
+                // Like if a child is placed super far away from their parents, and there's a space right under the parents with
+                // no conflicts, it's a no brainer.
+                // I should only implement this after the actual algorithm places everyone with conflicts.
+                // It's just to make it look nicer.
+                // Test thoroughly for situations that cause functional but spaced-weird positions, and fix them here.
+                //
+                // The current idea is:
+                // 1. Find the ideal position for a proxy (or a couple, whatever)
+                // 2. Move the proxy to the closest free position to that ideal position, given the space between that new position and the proxy's old position are empty
+                // An easy example is placing parents closer between their children (in the middle of them)
                 
                 assert(proxy.hasPosition)
                 break
@@ -182,6 +201,7 @@ class FamilyMemberStoreRenderProxy {
             directionPreference: .right
         ).compactMap({ $0.position })
         if !directChildrenWithRightPreferencePositions.isEmpty {
+            // Move proxy right of children who prefers right and has kids
             let farthestRight = SMPointCollection(points: directChildrenWithRightPreferencePositions).maxX
             if let farthestRight, farthestRight.isGreater(than: proxyPosition.x) {
                 self.anchorCouple(
@@ -197,6 +217,7 @@ class FamilyMemberStoreRenderProxy {
             directionPreference: .left
         ).compactMap({ $0.position })
         if !directChildrenWithLeftPreferencePositions.isEmpty {
+            // Move proxy left of children who prefers left and has kids
             let farthestLeft = SMPointCollection(points: directChildrenWithLeftPreferencePositions).minX
             if let farthestLeft, farthestLeft.isLess(than: proxyPosition.x) {
                 self.anchorCouple(
@@ -302,6 +323,181 @@ class FamilyMemberStoreRenderProxy {
         )
         // After moving the sibling adjacent to their siblings, ensure position conflicts are resolved
         self.resolveRenderConflicts(direction: direction, for: proxy)
+    }
+    
+    /// Attempts to resolve connection conflicts by:
+    /// 1. Getting this proxy and their spouse (if they have one)
+    /// 2. Checking every other couple's position relative to them to see if they create a connection conflict
+    /// 3. If they do, and swapping their positions resolves the conflict, swap them and return
+    private func resolveConnectionConflictsBySwappingCouples(for proxy: FamilyMemberRenderProxy) {
+        let otherProxies = self.getSameLevelProxies(as: proxy, includeProxy: false)
+        for otherProxy in otherProxies {
+            guard self.connectionConflictCreatedBy(proxy, otherProxy) else {
+                continue
+            }
+            // Now we know at this point - a connection conflict occurs
+            guard let revert = self.swapCouplesPositionsIfPossible(proxy, otherProxy) else {
+                // If revert isn't defined, the swap wasn't possible - continue
+                continue
+            }
+            if self.connectionConflictCreatedBy(proxy, otherProxy) {
+                // Conflict still exists - revert
+                revert()
+                continue
+            } else {
+                // Success - the two proxy couples created a conflict, swapping them removed the conflict without any position conflicts created
+                return
+            }
+        }
+    }
+    
+    /// Checks if two parents create a connection conflict.
+    /// - Parameters:
+    ///   - parent1: A parent (if part of a couple, either is fine)
+    ///   - parent2: Another parent (either single or from a DIFFERENT couple)
+    /// - Returns: True if the parents from different families create a connection conflict
+    private func connectionConflictCreatedBy(_ parent1: FamilyMemberRenderProxy, _ parent2: FamilyMemberRenderProxy) -> Bool {
+        guard parent1.hasPosition, parent2.hasPosition else {
+            assertionFailure("Checking if proxies create a connection conflict when they don't even have positions")
+            return false
+        }
+        guard let parent1To2Direction = self.getTheDirection(from: parent1.position!, to: parent2.position!) else {
+            assertionFailure("Both proxies share the same position")
+            return false
+        }
+        let children1 = self.getDirectChildrenProxies(for: parent1)
+        let children2 = self.getDirectChildrenProxies(for: parent2)
+        switch parent1To2Direction {
+        case .right:
+//            let parent1X = parent1.position!.x
+//            let couple1FurthestRightX = max(parent1X, self.getSpouseProxy(for: parent1)?.position?.x ?? parent1X)
+//            let parent2X = parent2.position!.x
+//            let couple2FurthestLeftX = min(parent2X, self.getSpouseProxy(for: parent2)?.position?.x ?? parent2X)
+            guard let children1FurthestRightX = children1.compactMap({ $0.position?.x }).max(),
+                  let children2FurthestLeftX = children2.compactMap({ $0.position?.x }).min() else {
+                // Children on both sides are required for a conflict
+                return false
+            }
+            if children1FurthestRightX.isGreater(than: children2FurthestLeftX) {
+                return true
+            }
+        case .left:
+            guard let children1FurthestLeftX = children1.compactMap({ $0.position?.x }).min(),
+                  let children2FurthestRightX = children2.compactMap({ $0.position?.x }).max() else {
+                // Children on both sides are required for a conflict
+                return false
+            }
+            if children1FurthestLeftX.isLess(than: children2FurthestRightX) {
+                return true
+            }
+        }
+        return false
+    }
+    
+    /// Swaps two couple's positions, if possible.
+    /// If successful, returns revert function.
+    /// If unsuccessful, returns nil.
+    func swapCouplesPositionsIfPossible(
+        _ couple1Proxy: FamilyMemberRenderProxy,
+        _ couple2Proxy: FamilyMemberRenderProxy
+    ) -> (() -> Void)? {
+        let couple1Spouse = self.getSpouseProxy(for: couple1Proxy)
+        let couple2Spouse = self.getSpouseProxy(for: couple2Proxy)
+        // Check that each "couple" at least has one person, and that person has a position
+        guard couple1Proxy.hasPosition || couple1Spouse?.hasPosition ?? false else {
+            return nil
+        }
+        guard couple2Proxy.hasPosition || couple2Spouse?.hasPosition ?? false else {
+            return nil
+        }
+        // Couples, by left/right preference
+        let couple1Left = couple1Proxy.preferredDirection == .left ? couple1Proxy : couple1Spouse
+        let couple1Right = couple1Proxy.preferredDirection == .right ? couple1Proxy : couple1Spouse
+        let couple2Left = couple2Proxy.preferredDirection == .left ? couple2Proxy : couple2Spouse
+        let couple2Right = couple2Proxy.preferredDirection == .right ? couple2Proxy : couple2Spouse
+        // Original positions
+        let couple1LeftStartPosition = couple1Left?.position
+        let couple1RightStartPosition = couple1Right?.position
+        let couple2LeftStartPosition = couple2Left?.position
+        let couple2RightStartPosition = couple2Right?.position
+        let revert = {
+            couple1Left?.setPosition(to: couple1LeftStartPosition)
+            couple1Right?.setPosition(to: couple1RightStartPosition)
+            couple2Left?.setPosition(to: couple2LeftStartPosition)
+            couple2Right?.setPosition(to: couple2RightStartPosition)
+        }
+        // Move each proxy
+        if let couple1Left, couple1Left.hasPosition {
+            if let couple2LeftStartPosition {
+                couple1Left.setPosition(to: couple2LeftStartPosition)
+            } else if let couple2RightStartPosition {
+                if couple1Right == nil {
+                    couple1Left.setPosition(to: couple2RightStartPosition)
+                } else {
+                    couple1Left.setPosition(to: couple2RightStartPosition - SMPoint(x: Self.POSITION_PADDING, y: 0))
+                }
+            } else {
+                assertionFailure("Error in logic - at least couple2Left or couple2Right must have a position")
+            }
+        }
+        if let couple1Right, couple1Right.hasPosition {
+            if let couple2RightStartPosition {
+                couple1Right.setPosition(to: couple2RightStartPosition)
+            } else if let couple2LeftStartPosition {
+                if couple1Left == nil {
+                    couple1Right.setPosition(to: couple2LeftStartPosition)
+                } else {
+                    couple1Right.setPosition(to: couple2LeftStartPosition + SMPoint(x: Self.POSITION_PADDING, y: 0))
+                }
+            } else {
+                assertionFailure("Error in logic - at least couple2Left or couple2Right must have a position")
+            }
+        }
+        if let couple2Left, couple2Left.hasPosition {
+            if let couple1LeftStartPosition {
+                couple2Left.setPosition(to: couple1LeftStartPosition)
+            } else if let couple1RightStartPosition {
+                if couple2Right == nil {
+                    couple2Left.setPosition(to: couple1RightStartPosition)
+                } else {
+                    couple2Left.setPosition(to: couple1RightStartPosition - SMPoint(x: Self.POSITION_PADDING, y: 0))
+                }
+            } else {
+                assertionFailure("Error in logic - at least couple1Left or couple1Right must have a position")
+            }
+        }
+        if let couple2Right, couple2Right.hasPosition {
+            if let couple1RightStartPosition {
+                couple2Right.setPosition(to: couple1RightStartPosition)
+            } else if let couple1LeftStartPosition {
+                if couple2Left == nil {
+                    couple2Right.setPosition(to: couple1LeftStartPosition)
+                } else {
+                    couple2Right.setPosition(to: couple1LeftStartPosition + SMPoint(x: Self.POSITION_PADDING, y: 0))
+                }
+            } else {
+                assertionFailure("Error in logic - at least couple1Left or couple1Right must have a position")
+            }
+        }
+        // Check for any conflicts created
+        // This must be done after moving all (potential) four proxies - otherwise they conflict with each other
+        if let couple1Left, self.positionConflictExists(for: couple1Left) {
+            revert()
+            return nil
+        }
+        if let couple1Right, self.positionConflictExists(for: couple1Right) {
+            revert()
+            return nil
+        }
+        if let couple2Left, self.positionConflictExists(for: couple2Left) {
+            revert()
+            return nil
+        }
+        if let couple2Right, self.positionConflictExists(for: couple2Right) {
+            revert()
+            return nil
+        }
+        return revert
     }
     
     /// Attempts to resolve connection conflicts (When connections cross over one another).

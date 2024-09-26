@@ -77,7 +77,9 @@ class ViewController: UIViewController {
                 guard let selected = self.selected else {
                     return
                 }
-                let newMember = FamilyMember(firstName: "\(selected.firstName)'s Child", sex: Int.random(in: 1...2) == 1 ? .male : .female, family: self.family)
+                let newMemberSex: FamilyMember.Sex = Int.random(in: 1...2) == 1 ? .male : .female
+                let newMemberSexLetter = newMemberSex == .female ? "(F)" : "(M)"
+                let newMember = FamilyMember(firstName: "\(selected.firstName)'s Child \(newMemberSexLetter)", sex: newMemberSex, family: self.family)
                 selected.assignChild(newMember)
                 if let selectedSpouse = selected.spouse {
                     selectedSpouse.assignChild(newMember)

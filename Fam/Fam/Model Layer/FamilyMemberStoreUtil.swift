@@ -81,12 +81,18 @@ extension FamilyMemberStoreRenderProxy {
         })
     }
     
-    func getSameLevelProxies(as proxy: FamilyMemberRenderProxy) -> [FamilyMemberRenderProxy] {
+    /// Get all the proxies with a y position equal to the passed proxy.
+    /// - Parameters:
+    ///   - proxy: The proxy whose y position will be used
+    ///   - includeProxy: True to include the passed proxy in the results (default is true)
+    /// - Returns: Proxies that have the same y position as the passed proxy
+    func getSameLevelProxies(as proxy: FamilyMemberRenderProxy, includeProxy: Bool = true) -> [FamilyMemberRenderProxy] {
         guard let level = proxy.position?.y else {
             assertionFailure("Attempting to get proxies that match the y value of a proxy with no y value")
             return []
         }
-        return self.familyMemberProxiesStore.values.filter({ $0.position?.y == level })
+        let levelProxies = self.familyMemberProxiesStore.values.filter({ $0.position?.y == level })
+        return includeProxy ? levelProxies : levelProxies.filter({ $0.id != proxy.id })
     }
     
     func getParentsPositionsAverage(for proxy: FamilyMemberRenderProxy) -> SMPoint? {

@@ -13,8 +13,8 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Default Constants
     
-    private static let DEFAULT_CANVAS_WIDTH = 3000.0
-    private static let DEFAULT_CANVAS_HEIGHT = 3000.0
+    private static let DEFAULT_CANVAS_WIDTH = 4000.0
+    private static let DEFAULT_CANVAS_HEIGHT = 4000.0
     private static let DEFAULT_CANVAS_COLOR = UIColor.clear
     private static let DEFAULT_BOUNCE = true
     private static let DEFAULT_MIN_ZOOM_SCALE = 0.2
