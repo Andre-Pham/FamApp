@@ -11,6 +11,9 @@ class Family {
     
     public let id = UUID()
     private var familyMembers = [UUID: FamilyMember]()
+    public var familyMembersCount: Int {
+        return self.familyMembers.count
+    }
     
     init() { }
     

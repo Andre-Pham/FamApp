@@ -143,7 +143,7 @@ class FamilyRenderProxy {
         let root = self.orderedFamilyMemberProxies.first!
         root.setPosition(to: SMPoint())
         for index in 1..<self.orderedFamilyMemberProxies.count {
-            if let stopAtStep, index > stopAtStep {
+            if let stopAtStep, index >= stopAtStep {
                 return
             }
             let proxy = self.orderedFamilyMemberProxies[index]

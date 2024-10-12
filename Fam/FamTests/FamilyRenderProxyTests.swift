@@ -19,6 +19,17 @@ final class FamilyRenderProxyTests: XCTestCase {
         XCTAssertEqual(render.countConnectionConflicts(), 0, "Found unexpected connection conflicts in family tree render, expected 0")
     }
     
+    // Test for every additional member in the family tree, there should be no render conflicts
+    func testNoUnexpectedConflictsEveryStep() throws {
+        let family = MockFamilies.standard
+        let root = family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
+        for step in 1...family.familyMembersCount {
+            let render = FamilyRenderProxy(family, root: root, stopAtStep: step)
+            XCTAssertEqual(render.countPositionConflicts(), 0, "Found unexpected position conflicts in family tree render at step \(step), expected 0")
+            XCTAssertEqual(render.countConnectionConflicts(), 0, "Found unexpected connection conflicts in family tree render at step \(step), expected 0")
+        }
+    }
+    
     // Test a family tree that is guaranteed to have one connection conflict (logically inevitable) doesn't cause additional conflicts to occur
     func testNoAdditionalConflicts() throws {
         let family = MockFamilies.standardWithConflict
@@ -58,6 +69,7 @@ final class FamilyRenderProxyTests: XCTestCase {
         }
     }
     
+    // Test all spouses were positioned adjacent (next) to each other, and towards their "preferred direction"
     func testSpousesPositionedAdjacent() throws {
         let family = MockFamilies.standardWithConflict
         let root = family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
@@ -81,14 +93,29 @@ final class FamilyRenderProxyTests: XCTestCase {
         }
     }
     
+    // Test all siblings are placed at the same level (y)
     func testSiblingsPositionedSameLevel() throws {
-        
+        let family = MockFamilies.standard
+        let root = family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
+        let render = FamilyRenderProxy(family, root: root, stopAtStep: nil)
+        let proxies = render.orderedFamilyMemberProxies
+        for proxy in proxies {
+            let siblings = render.getSiblingProxies(for: proxy)
+            let siblingsIsSameLevel = siblings.map({ $0.position!.y.isEqual(to: proxy.position!.y) })
+            XCTAssert(siblingsIsSameLevel.allSatisfy({ $0 }), "Not all siblings were positioned at the same level")
+        }
     }
     
+    // Test all parents are placed the level above their children
     func testParentsPositionedLevelAboveChildren() throws {
-        
+        let family = MockFamilies.standard
+        let root = family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
+        let render = FamilyRenderProxy(family, root: root, stopAtStep: nil)
+        let proxies = render.orderedFamilyMemberProxies
+        for parent in proxies where parent.familyMember.isParent {
+            let children = render.getDirectChildrenProxies(for: parent)
+            let childrenIsLevelBelow = children.map({ ($0.position!.y + FamilyRenderProxy.POSITION_PADDING).isEqual(to: parent.position!.y) })
+        }
     }
-    
-    // TODO: steps (check no conflicts for all steps)
 
 }
