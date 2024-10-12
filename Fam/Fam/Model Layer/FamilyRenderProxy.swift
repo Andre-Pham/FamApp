@@ -1,5 +1,5 @@
 //
-//  FamilyMemberStoreRenderProxy.swift
+//  FamilyRenderProxy.swift
 //  Fam
 //
 //  Created by Andre Pham on 18/4/2024.
@@ -34,7 +34,7 @@ import SwiftMath
 // TODO: After that:
 // - Start creating the UI! woo hoo
 
-class FamilyMemberStoreRenderProxy {
+class FamilyRenderProxy {
     
     public static let POSITION_PADDING = 150.0
     public static let COUPLES_PADDING = 100.0
@@ -42,10 +42,10 @@ class FamilyMemberStoreRenderProxy {
     /// A store of all the family members
     private(set) var familyMemberProxiesStore = [UUID: FamilyMemberRenderProxy]()
     private(set) var orderedFamilyMemberProxies = [FamilyMemberRenderProxy]()
-    private(set) var coupleConnections = [CoupleConnectionRender]()
-    private(set) var childConnections = [ChildConnectionRender]()
+    private(set) var coupleConnections = [CoupleConnectionRenderProxy]()
+    private(set) var childConnections = [ChildConnectionRenderProxy]()
     
-    init(_ family: FamilyMemberStore, root: FamilyMember, stopAtStep: Int?) {
+    init(_ family: Family, root: FamilyMember, stopAtStep: Int?) {
         print("--------------------------------------------------------------")
         print("STARTING RENDER (step: \(stopAtStep ?? 0))")
         print("--------------------------------------------------------------")
@@ -99,7 +99,7 @@ class FamilyMemberStoreRenderProxy {
     /// - Parameters:
     ///   - family: The family members to be generated into an order
     ///   - root: The family member to start the breadth first search from
-    private func generateOrderedFamilyMembers(family: FamilyMemberStore, root: FamilyMember) {
+    private func generateOrderedFamilyMembers(family: Family, root: FamilyMember) {
         var visited = Set<UUID>()
         visited.insert(root.id)
         var queue = [FamilyMember]()
@@ -887,7 +887,7 @@ class FamilyMemberStoreRenderProxy {
         to position: SMPoint,
         proxy: FamilyMemberRenderProxy,
         anchor: HorizontalDirection,
-        gap: Double = FamilyMemberStoreRenderProxy.POSITION_PADDING
+        gap: Double = FamilyRenderProxy.POSITION_PADDING
     ) {
         if let spouseProxy = self.getSpouseProxy(for: proxy) {
             let rightPreference = proxy.preferredDirection == .right ? proxy : spouseProxy
@@ -919,7 +919,7 @@ class FamilyMemberStoreRenderProxy {
         conflictCondition: ((_ proxy: FamilyMemberRenderProxy) -> Bool)? = nil,
         direction: HorizontalDirection?,
         for proxies: FamilyMemberRenderProxy...,
-        offsetIncrement: Double = FamilyMemberStoreRenderProxy.POSITION_PADDING,
+        offsetIncrement: Double = FamilyRenderProxy.POSITION_PADDING,
         groupSpouse: Bool = true
     ) {
         let resolvedConflictCondition = conflictCondition ?? self.positionConflictExists(for:)
@@ -1046,7 +1046,7 @@ class FamilyMemberStoreRenderProxy {
                     continue
                 }
                 connectedCouples[proxy.id] = spouseID
-                self.coupleConnections.append(CoupleConnectionRender(
+                self.coupleConnections.append(CoupleConnectionRenderProxy(
                     partner1: proxy,
                     partner2: spouseProxy
                 ))
@@ -1065,7 +1065,7 @@ class FamilyMemberStoreRenderProxy {
                     assertionFailure("Could not find child when it should exist")
                     continue
                 }
-                self.childConnections.append(ChildConnectionRender(
+                self.childConnections.append(ChildConnectionRenderProxy(
                     parentsConnection: coupleConnection,
                     child: childProxy
                 ))

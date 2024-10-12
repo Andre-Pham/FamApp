@@ -19,7 +19,7 @@ class FamilyMember {
     }
     
     public let id: UUID
-    private weak var family: FamilyMemberStore?
+    private weak var family: Family?
     private(set) var parentIDs: [UUID]
     private(set) var spouseID: UUID?
     private(set) var exSpousesIDs: [UUID]
@@ -147,7 +147,7 @@ class FamilyMember {
         return self.sex == .female && self.hasChildren
     }
     
-    init(firstName: String, lastName: String? = nil, sex: Sex, family: FamilyMemberStore) {
+    init(firstName: String, lastName: String? = nil, sex: Sex, family: Family) {
         self.id = UUID()
         self.family = family
         self.parentIDs = [UUID]()

@@ -1,5 +1,5 @@
 //
-//  CoupleConnectionRender.swift
+//  CoupleConnectionRenderProxy.swift
 //  Fam
 //
 //  Created by Andre Pham on 18/4/2024.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class CoupleConnectionRender {
+class CoupleConnectionRenderProxy {
     
     public let leftPartner: FamilyMemberRenderProxy
     public let rightPartner: FamilyMemberRenderProxy

@@ -1,5 +1,5 @@
 //
-//  FamilyMemberStore.swift
+//  Family.swift
 //  Fam
 //
 //  Created by Andre Pham on 17/4/2024.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FamilyMemberStore {
+class Family {
     
     public let id = UUID()
     private var familyMembers = [UUID: FamilyMember]()

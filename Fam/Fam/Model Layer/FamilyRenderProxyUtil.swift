@@ -8,7 +8,7 @@
 import Foundation
 import SwiftMath
 
-extension FamilyMemberStoreRenderProxy {
+extension FamilyRenderProxy {
     
     func getDirectChildrenProxies(
         for proxy: FamilyMemberRenderProxy,

@@ -11,7 +11,7 @@ import SwiftMath
 class ViewController: UIViewController {
     
     private let canvasController = CanvasController()
-    private var family = FamilyMemberStore()
+    private var family = Family()
     
     private var root: FamView { return FamView(self.view) }
     private let buttonStack = FamHStack()
@@ -153,7 +153,7 @@ class ViewController: UIViewController {
         let root = self.family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
 //        (FamilyMemberStoreRenderProxy(self.family, root: root).orderedFamilyMemberProxies.forEach({ print($0.familyMember.firstName) }))
         
-        let render = FamilyMemberStoreRenderProxy(self.family, root: root, stopAtStep: self.step == 0 ? nil : self.step)
+        let render = FamilyRenderProxy(self.family, root: root, stopAtStep: self.step == 0 ? nil : self.step)
         
         let connectionLayer = FamView()
             .setFrame(to: self.canvasController.canvasRect.cgRect)
@@ -231,8 +231,8 @@ class ViewController: UIViewController {
         print("====================================")
     }
     
-    func createFamily() -> FamilyMemberStore {
-        let family = FamilyMemberStore()
+    func createFamily() -> Family {
+        let family = Family()
         // Direct
         let andre = FamilyMember(firstName: "Andre", sex: .male, family: family)
         let stephanie = FamilyMember(firstName: "Stephanie", sex: .female, family: family)
