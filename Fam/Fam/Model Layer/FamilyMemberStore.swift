@@ -23,8 +23,7 @@ class FamilyMemberStore {
     }
     
     func getAllFamilyMembers() -> [FamilyMember] {
-        // Sort for consistent ordering
-        return Array(self.familyMembers.values).sorted(by: { $0.firstName < $1.firstName })
+        return Array(self.familyMembers.values).sorted(by: { $0.consistentSortingID < $1.consistentSortingID })
     }
     
     func addFamilyMember(_ familyMember: FamilyMember) {
