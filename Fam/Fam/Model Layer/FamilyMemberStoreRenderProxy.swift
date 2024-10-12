@@ -28,8 +28,8 @@ import SwiftMath
 // - [DONE] Give Thahn-Lien parents. Her parents' positions should be swapped with Will and Johanna. Why are they over to the right. And why is Andre all the way to the right too.
 // - [DONE] Give Jade Husband 3 children.
 // - [DONE] Give Thahn-Lien parents. Then give Carolyn parents. Stop at step 20.
-// - Give Thahn-Lien parents. Then give Carolyn parents. Then stop at step 25. SOMETIMES THIS WORKS, SOMETIMES IT DOES NOT - ITS WACK
-// - Give Thahn-Lien parents. Then give Carolyn parents. This creates a conflict that doesn't need to exist. Carolyn and above would need to swap with will + children... Tricky..
+// - [DONE] Give Thahn-Lien parents. Then give Carolyn parents. Then stop at step 25.
+// - [DONE] Give Thahn-Lien parents. Then give Carolyn parents. This creates a conflict that doesn't need to exist. Carolyn and above would need to swap with will + children... Tricky..
 // - Give Jade Husband 3 children. Give give Andre a spouse, then lots of children. There's a gap!
 // TODO: After that:
 // - Start creating the UI! woo hoo
