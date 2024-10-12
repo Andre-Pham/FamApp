@@ -16,6 +16,9 @@ class FamilyMemberRenderProxy {
     public var id: UUID {
         return self.familyMember.id
     }
+    public var consistentSortingID: String {
+        return self.familyMember.consistentSortingID
+    }
     public var hasPosition: Bool {
         return self.position != nil
     }

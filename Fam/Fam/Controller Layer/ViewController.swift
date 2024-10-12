@@ -20,8 +20,12 @@ class ViewController: UIViewController {
     private let addSpouseButton = FamButton()
     private let renderButton = FamButton()
     private let resetButton = FamButton()
+    private let minusStepButton = FamButton()
+    private let stepText = FamText()
+    private let plusStepButton = FamButton()
     private var controls = [FamControl]()
     private var selected: FamilyMember? = nil
+    private var step = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,6 +73,9 @@ class ViewController: UIViewController {
             .addView(self.addSpouseButton)
             .addView(self.renderButton)
             .addView(self.resetButton)
+            .addView(self.minusStepButton)
+            .addView(self.stepText)
+            .addView(self.plusStepButton)
             .constrainCenterHorizontal()
             .constrainBottom(padding: 100)
         self.addChildButton
@@ -124,13 +131,29 @@ class ViewController: UIViewController {
                 self.selected = nil
                 self.renderFamily()
             })
+        self.minusStepButton
+            .setLabel(to: "-")
+            .setOnTap({
+                self.step = max(0, self.step - 1)
+                self.stepText.setText(to: String(self.step))
+                self.renderFamily()
+            })
+        self.stepText
+            .setText(to: String(self.step))
+        self.plusStepButton
+            .setLabel(to: "+")
+            .setOnTap({
+                self.step += 1
+                self.stepText.setText(to: String(self.step))
+                self.renderFamily()
+            })
     }
     
     func renderFamily() {
         let root = self.family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
 //        (FamilyMemberStoreRenderProxy(self.family, root: root).orderedFamilyMemberProxies.forEach({ print($0.familyMember.firstName) }))
         
-        let render = FamilyMemberStoreRenderProxy(self.family, root: root)
+        let render = FamilyMemberStoreRenderProxy(self.family, root: root, stopAtStep: self.step == 0 ? nil : self.step)
         
         let connectionLayer = FamView()
             .setFrame(to: self.canvasController.canvasRect.cgRect)
@@ -138,7 +161,7 @@ class ViewController: UIViewController {
         self.canvasController.addLayer(connectionLayer)
         for coupleConnection in render.coupleConnections {
             guard var position1 = coupleConnection.leftPartner.position?.clone(), var position2 = coupleConnection.rightPartner.position?.clone() else {
-                assertionFailure("Missing positions for parents")
+//                assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
 //            print(coupleConnection.leftPartner.familyMember.firstName)
@@ -155,7 +178,7 @@ class ViewController: UIViewController {
             guard var parentPosition1 = childConnection.parentsConnection.leftPartner.position?.clone(),
                   var parentPosition2 = childConnection.parentsConnection.rightPartner.position?.clone(),
                   var childPosition = childConnection.child.position?.clone() else {
-                assertionFailure("Missing positions for parents")
+//                assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
             // TODO: In the future, the connections down from the two parents shouldn't be duplicated
@@ -202,6 +225,10 @@ class ViewController: UIViewController {
                 self.controls.append(view)
             }
         }
+        print("====================================")
+        print("Position conflicts: \(render.countPositionConflicts())")
+        print("Connection conflicts: \(render.countConnectionConflicts())")
+        print("====================================")
     }
     
     func createFamily() -> FamilyMemberStore {

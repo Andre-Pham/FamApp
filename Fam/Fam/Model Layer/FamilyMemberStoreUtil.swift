@@ -86,13 +86,25 @@ extension FamilyMemberStoreRenderProxy {
     ///   - proxy: The proxy whose y position will be used
     ///   - includeProxy: True to include the passed proxy in the results (default is true)
     /// - Returns: Proxies that have the same y position as the passed proxy
-    func getSameLevelProxies(as proxy: FamilyMemberRenderProxy, includeProxy: Bool = true) -> [FamilyMemberRenderProxy] {
+    func getSameLevelProxies(
+        as proxy: FamilyMemberRenderProxy,
+        includeProxy: Bool = true,
+        includeProxySpouse: Bool = true
+    ) -> [FamilyMemberRenderProxy] {
         guard let level = proxy.position?.y else {
             assertionFailure("Attempting to get proxies that match the y value of a proxy with no y value")
             return []
         }
-        let levelProxies = self.familyMemberProxiesStore.values.filter({ $0.position?.y == level })
-        return includeProxy ? levelProxies : levelProxies.filter({ $0.id != proxy.id })
+        var levelProxies = self.familyMemberProxiesStore.values
+            .filter({ $0.position?.y == level })
+            .sorted(by: { $0.consistentSortingID < $1.consistentSortingID })
+        if !includeProxy {
+            levelProxies.removeAll(where: { $0.id == proxy.id })
+        }
+        if !includeProxySpouse, let proxySpouse = self.getSpouseProxy(for: proxy) {
+            levelProxies.removeAll(where: { $0.id == proxySpouse.id })
+        }
+        return levelProxies
     }
     
     func getParentsPositionsAverage(for proxy: FamilyMemberRenderProxy) -> SMPoint? {
@@ -117,6 +129,39 @@ extension FamilyMemberStoreRenderProxy {
             return nil
         }
         return fromPosition.x.isLess(than: toPosition.x) ? .right : .left
+    }
+    
+    func checkProxiesAreAdjacent(_ proxies: [FamilyMemberRenderProxy], spacing: Double) -> Bool {
+        guard !proxies.isEmpty else {
+            assertionFailure("Checking proxies are adjacent when no proxies were passed in")
+            return false
+        }
+        guard proxies.allSatisfy({ $0.hasPosition }) else {
+            assertionFailure("Checking proxies are adjacent when they don't even have a position")
+            return false
+        }
+        guard proxies.allSatisfy({ $0.position!.y == proxies[0].position!.y }) else {
+            assertionFailure("Checking proxies are adjacent when they're not even on the same level")
+            return false
+        }
+        guard proxies.count > 1 else {
+            assertionFailure("Requires minimum two proxies to check if they're adjacent")
+            return true
+        }
+        guard spacing.isGreaterThanZero() else {
+            assertionFailure("Spacing between proxies must be a positive distance")
+            return false
+        }
+        let proxyXPositionsSorted = proxies.map({ $0.position!.x }).sorted()
+        for (index, proxyXPosition) in proxyXPositionsSorted.enumerated() {
+            let firstProxy = proxyXPositionsSorted[0]
+            let expectedDistanceToFirstProxy = spacing*Double(index)
+            let isExpectedDistance = (proxyXPosition - expectedDistanceToFirstProxy).isEqual(to: firstProxy)
+            if !isExpectedDistance {
+                return false
+            }
+        }
+        return true
     }
     
 }

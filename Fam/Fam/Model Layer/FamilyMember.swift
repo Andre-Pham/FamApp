@@ -33,6 +33,7 @@ class FamilyMember {
         return self.firstName
     }
     /// An id that is used for sorting that attempts to return a consistent ordering of family members despite being random
+    /// `.sorted(by: { $0.consistentSortingID < $1.consistentSortingID })`
     public var consistentSortingID: String {
         // Use name first for consistency between non-persistent renders and deleting then re-adding family members
         // Append id so if their names are the same, there's consistency between persistent renders
