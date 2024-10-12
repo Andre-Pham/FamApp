@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		B649B7462C0971AB004364C2 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = B649B7452C0971AB004364C2 /* Int.swift */; };
 		B649B7482C0971CC004364C2 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = B649B7472C0971CC004364C2 /* Double.swift */; };
+		B67985AB2CBA7D36005E38CB /* FamilyRenderProxyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */; };
+		B67985AE2CBA7F33005E38CB /* MockFamilies.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AD2CBA7F33005E38CB /* MockFamilies.swift */; };
 		B6E308762BD002B70032B923 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308752BD002B70032B923 /* AppDelegate.swift */; };
 		B6E308782BD002B70032B923 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308772BD002B70032B923 /* SceneDelegate.swift */; };
 		B6E3087A2BD002B70032B923 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308792BD002B70032B923 /* ViewController.swift */; };
@@ -77,6 +79,8 @@
 /* Begin PBXFileReference section */
 		B649B7452C0971AB004364C2 /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
 		B649B7472C0971CC004364C2 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
+		B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyRenderProxyTests.swift; sourceTree = "<group>"; };
+		B67985AD2CBA7F33005E38CB /* MockFamilies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockFamilies.swift; sourceTree = "<group>"; };
 		B6E308722BD002B70032B923 /* Fam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6E308752BD002B70032B923 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B6E308772BD002B70032B923 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -154,6 +158,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B67985AC2CBA7F00005E38CB /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				B67985AD2CBA7F33005E38CB /* MockFamilies.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
 		B6E308692BD002B70032B923 = {
 			isa = PBXGroup;
 			children = (
@@ -191,6 +203,7 @@
 		B6E3088B2BD002B80032B923 /* FamTests */ = {
 			isa = PBXGroup;
 			children = (
+				B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */,
 				B6E3088C2BD002B80032B923 /* FamTests.swift */,
 			);
 			path = FamTests;
@@ -234,6 +247,7 @@
 		B6E308B02BD004550032B923 /* Model Layer */ = {
 			isa = PBXGroup;
 			children = (
+				B67985AC2CBA7F00005E38CB /* Mocks */,
 				B6E309022BD05D250032B923 /* ChildConnectionRenderProxy.swift */,
 				B6E309002BD05CBD0032B923 /* CoupleConnectionRenderProxy.swift */,
 				B6E308BC2BD009C60032B923 /* Family.swift */,
@@ -550,6 +564,7 @@
 				B6E308E62BD0114B0032B923 /* FamText.swift in Sources */,
 				B6E936DB2C3847440044AAB9 /* HorizontalDirection.swift in Sources */,
 				B6E308B92BD0059E0032B923 /* NumericComparisons.swift in Sources */,
+				B67985AE2CBA7F33005E38CB /* MockFamilies.swift in Sources */,
 				B6E308F22BD0114B0032B923 /* FamLabelledTextInput.swift in Sources */,
 				B6E308F12BD0114B0032B923 /* FamImage.swift in Sources */,
 				B6E308782BD002B70032B923 /* SceneDelegate.swift in Sources */,
@@ -564,6 +579,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B67985AB2CBA7D36005E38CB /* FamilyRenderProxyTests.swift in Sources */,
 				B6E3088D2BD002B80032B923 /* FamTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -32,6 +32,11 @@ import SwiftMath
 // - [DONE] Give Thahn-Lien parents. Then give Carolyn parents. This creates a conflict that doesn't need to exist. Carolyn and above would need to swap with will + children... Tricky..
 // - Give Jade Husband 3 children. Give give Andre a spouse, then lots of children. There's a gap!
 // TODO: After that:
+// - Generate an algorithm to automatically pick the root - refer to my reminders app
+// - Write a billion tests to make sure this algorithm stays in tact
+// - Write up a proper steps implementation - save stopAtStep as a variable and uncomment the assertions and all that, stopAtStep is not temp
+// - Write a proper implementation for tracing - save an array of traces (strings) and have an option to print out or log them or whatever, they're super helpful for debugging
+// TODO: After that:
 // - Start creating the UI! woo hoo
 
 class FamilyRenderProxy {
@@ -55,7 +60,7 @@ class FamilyRenderProxy {
         self.generatePositions(stopAtStep: stopAtStep)
         self.generateCoupleConnections()
         self.generateChildConnections()
-//        self.bringCouplesCloser(by: Self.POSITION_PADDING - Self.COUPLES_PADDING)
+        self.bringCouplesCloser(by: Self.POSITION_PADDING - Self.COUPLES_PADDING)
         print("--------------------------------------------------------------")
         print("COMPLETED RENDER (step: \(stopAtStep ?? 0))")
         print("--------------------------------------------------------------")
