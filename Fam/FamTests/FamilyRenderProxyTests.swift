@@ -114,7 +114,8 @@ final class FamilyRenderProxyTests: XCTestCase {
         let proxies = render.orderedFamilyMemberProxies
         for parent in proxies where parent.familyMember.isParent {
             let children = render.getDirectChildrenProxies(for: parent)
-            let childrenIsLevelBelow = children.map({ ($0.position!.y + FamilyRenderProxy.POSITION_PADDING).isEqual(to: parent.position!.y) })
+            let childrenIsLevelBelow = children.map({ ($0.position!.y - FamilyRenderProxy.POSITION_PADDING).isEqual(to: parent.position!.y) })
+            XCTAssert(childrenIsLevelBelow.allSatisfy({ $0 }), "Not all parents were positioned above their children")
         }
     }
 

@@ -121,9 +121,6 @@ class FamilyRenderProxy {
                 }
             }
         }
-//        for a in self.orderedFamilyMemberProxies {
-//            print(a.familyMember.fullName)
-//        }
     }
     
     /// Populates the "id to family member" dictionary based on the ordered family members.
@@ -159,14 +156,22 @@ class FamilyRenderProxy {
                 }
                 
                 // Enforce RULE 1
+                print("[TRACE] [CALL] {positionProxyRelativeToChildren}")
                 self.positionProxyRelativeToChildren(proxy: proxy)
+                print("[TRACE] [CALL] {positionProxyRelativeToParents}")
                 self.positionProxyRelativeToParents(proxy: proxy)
                 
                 // Enforce RULE 2
+                print("[TRACE] [CALL] {positionProxyAdjacentToSiblings}")
                 self.positionProxyAdjacentToSiblings(proxy: proxy)
                 
                 // Resolve any conflicts that can be resolved by swapping parents
-                self.resolveConnectionConflictsBySwappingCouples(for: proxy)
+                print("[TRACE] [CALL] {resolveConnectionConflictsBySwappingParentCouples}")
+                self.resolveConnectionConflictsBySwappingParentCouples(for: proxy)
+                
+                // Resolve any conflicts that can be resolved by swapping children of parents
+                print("[TRACE] [CALL] {resolveConnectionConflictsBySwappingChildCouples}")
+                self.resolveConnectionConflictsBySwappingChildCouples(for: proxy)
                 
                 // - Give Thahn-Lien parents. Then give Carolyn parents. Then stop at step 25.
                 // TODO: Swap sibling positions if applicable
@@ -178,16 +183,25 @@ class FamilyRenderProxy {
                 // [couple1 husband] [couple1 wife] [proxy] -> [proxy] [couple1 husband] [couple1 wife]
                 // [couple1 husband] [couple1 wife] [proxy] [couple2 husband] [couple2 wife] -> [proxy] [couple1 husband] [couple1 wife] [couple2 husband] [couple2 wife]
                 // [couple1 husband] [couple1 wife] [proxy] [proxy wife] -> [proxy] [proxy wife] [couple1 husband] [couple1 wife]
+                print("[TRACE] [CALL] {resolveConnectionConflictsBySwappingSiblings}")
                 self.resolveConnectionConflictsBySwappingSiblings(for: proxy)
                 
                 // Resolve any connection conflicts that occurred
+                print("[TRACE] [CALL] {resolveConnectionConflicts}")
                 self.resolveConnectionConflicts(for: proxy)
                 
                 // Swap spouse positions if applicable
+                print("[TRACE] [CALL] {swapCouplePositionsIfApplicable}")
                 self.swapCouplePositionsIfApplicable(for: proxy)
                 
+                print("[TRACE] [CALL] For all proxies: {resolveConnectionConflictsBySwappingParentCouples}")
                 for anyProxy in self.orderedFamilyMemberProxies where anyProxy.hasPosition {
-                    self.resolveConnectionConflictsBySwappingCouples(for: anyProxy)
+                    self.resolveConnectionConflictsBySwappingParentCouples(for: anyProxy)
+                }
+                
+                print("[TRACE] [CALL] For all proxies: {resolveConnectionConflictsBySwappingChildCouples}")
+                for anyProxy in self.orderedFamilyMemberProxies where anyProxy.hasPosition {
+                    self.resolveConnectionConflictsBySwappingChildCouples(for: anyProxy)
                 }
                 
                 // TODO: - Cleanup routine
@@ -412,11 +426,12 @@ class FamilyRenderProxy {
     /// 1. Getting this proxy
     /// 2. Checking every other couple's position relative to them to see if they create a connection conflict
     /// 3. If they do, and swapping their positions resolves the conflict, swap them and return
-    private func resolveConnectionConflictsBySwappingCouples(for proxy: FamilyMemberRenderProxy) {
+    private func resolveConnectionConflictsBySwappingParentCouples(for proxy: FamilyMemberRenderProxy) {
         guard proxy.familyMember.isParent else {
             return
         }
         let otherProxies = self.getSameLevelProxies(as: proxy, includeProxy: false, includeProxySpouse: false)
+            .filter({ $0.familyMember.isParent })
         for otherProxy in otherProxies {
             guard self.connectionConflictCreatedBy(proxy, otherProxy) else {
                 continue
@@ -432,7 +447,38 @@ class FamilyRenderProxy {
                 continue
             } else {
                 // Success - the two proxy couples created a conflict, swapping them removed the conflict without any position conflicts created
-                print("[TRACE] {resolveConnectionConflictsBySwappingCouples} Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(otherProxy.familyMember.fullName) \(otherProxy.position?.toString() ?? "nil")")
+                print("[TRACE] {resolveConnectionConflictsBySwappingParentCouples} Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(otherProxy.familyMember.fullName) \(otherProxy.position?.toString() ?? "nil")")
+                return
+            }
+        }
+    }
+    
+    private func resolveConnectionConflictsBySwappingChildCouples(for proxy: FamilyMemberRenderProxy) {
+        guard let proxyParent = self.getParentProxies(for: proxy).first else {
+            return
+        }
+        let otherProxies = self.getSameLevelProxies(as: proxy, includeProxy: false, includeProxySpouse: false)
+            // We don't wish to include siblings - they share the same parents, a parent can't create a conflict with itself
+            .filter({ !$0.familyMember.isSibling(to: proxy.familyMember) })
+        for otherProxy in otherProxies {
+            guard let otherProxyParent = self.getParentProxies(for: otherProxy).first else {
+                continue
+            }
+            guard self.connectionConflictCreatedBy(proxyParent, otherProxyParent) else {
+                continue
+            }
+            // Now we know at this point - a connection conflict occurs
+            guard let revert = self.swapCouplesPositionsIfPossible(proxy, otherProxy) else {
+                // If revert isn't defined, the swap wasn't possible - continue
+                continue
+            }
+            if self.connectionConflictCreatedBy(proxyParent, otherProxyParent) || self.connectionConflictCreatedBy(proxy, otherProxy) {
+                // Conflict still exists - revert
+                revert()
+                continue
+            } else {
+                // Success - the two proxies' parent couples created a conflict, swapping the child proxies removed the conflict without any position conflicts created
+                print("[TRACE] {resolveConnectionConflictsBySwappingChildCouples} Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(otherProxy.familyMember.fullName) \(otherProxy.position?.toString() ?? "nil")")
                 return
             }
         }
@@ -535,7 +581,7 @@ class FamilyRenderProxy {
         return self.swapCouplesPositionsIfPossible(sibling1Proxy, sibling2Proxy)
     }
     
-    /// Swaps two couple's positions, if possible.
+    /// Swaps two couple's positions, if possible. Doesn't actually have to be couples - each "couple" can be just a single person.
     /// If successful, returns revert function.
     /// If unsuccessful, returns nil.
     private func swapCouplesPositionsIfPossible(

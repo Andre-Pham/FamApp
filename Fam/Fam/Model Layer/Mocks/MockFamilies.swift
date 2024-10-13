@@ -9,6 +9,8 @@ import Foundation
 
 enum MockFamilies {
     
+    // MARK: - General Mocks
+    
     /// A standard family tree
     public static var standard: Family {
         let family = Family()
@@ -98,6 +100,73 @@ enum MockFamilies {
         clashMother.assignSpouse(clashFather)
         clashMother.assignChildren(jadeHusband)
         clashFather.assignChildren(jadeHusband)
+        return family
+    }
+    
+    // MARK: - Regression Cases
+    // These are cases that caused problems in the past and hence should be tested for in the future
+    
+    // This was rendering a connection conflict when we expected none
+    public static var regression1: Family {
+        let family = Family()
+        // Direct
+        let andre = FamilyMember(firstName: "Andre", sex: .male, family: family)
+        let stephanie = FamilyMember(firstName: "Stephanie", sex: .female, family: family)
+        let tristan = FamilyMember(firstName: "Tristan", sex: .male, family: family)
+        let heather = FamilyMember(firstName: "Heather", sex: .female, family: family)
+        // Heather's side
+        let jo = FamilyMember(firstName: "Jo", sex: .male, family: family)
+        let carolyn = FamilyMember(firstName: "Carolyn", sex: .female, family: family)
+        let ralph = FamilyMember(firstName: "Ralph", sex: .male, family: family)
+        let carol = FamilyMember(firstName: "Carol", sex: .female, family: family)
+        let hugh = FamilyMember(firstName: "Hugh", sex: .male, family: family)
+        let conner = FamilyMember(firstName: "Conner", sex: .male, family: family)
+        let anna = FamilyMember(firstName: "Anna", sex: .female, family: family)
+        let ken = FamilyMember(firstName: "Ken", sex: .male, family: family)
+        let debra = FamilyMember(firstName: "Debra", sex: .female, family: family)
+        let will = FamilyMember(firstName: "Will", sex: .male, family: family)
+        let johanna = FamilyMember(firstName: "Johanna", sex: .female, family: family)
+        let cees = FamilyMember(firstName: "Cees", sex: .female, family: family)
+        let ceesSpouse = FamilyMember(firstName: "Cees Husband", sex: .male, family: family)
+        // Tristan's side
+        let thanh = FamilyMember(firstName: "Thanh-Lien", sex: .female, family: family)
+        let ky = FamilyMember(firstName: "Ky", sex: .male, family: family)
+        let dao = FamilyMember(firstName: "Dao", sex: .female, family: family)
+        let kyMother = FamilyMember(firstName: "Ky Mother", sex: .female, family: family)
+        let kyFather = FamilyMember(firstName: "Ky Father", sex: .male, family: family)
+        let khoi = FamilyMember(firstName: "Khoi", sex: .male, family: family)
+        let thanhMother = FamilyMember(firstName: "Thahn-Lien Mother", sex: .female, family: family)
+        let thanhFather = FamilyMember(firstName: "Thahn-Lien Father", sex: .male, family: family)
+        let carolynMother = FamilyMember(firstName: "Carolyn Mother", sex: .female, family: family)
+        let carolynFather = FamilyMember(firstName: "Carolyn Father", sex: .male, family: family)
+        // Heather's side relationships
+        tristan.assignSpouse(heather)
+        tristan.assignChildren(andre, stephanie)
+        heather.assignChildren(andre, stephanie)
+        jo.assignSpouse(carolyn)
+        jo.assignChildren(heather, ralph, ken)
+        carolyn.assignChildren(heather, ralph, ken)
+        ken.assignSpouse(debra)
+        ralph.assignSpouse(carol)
+        ralph.assignChildren(hugh, conner, anna)
+        carol.assignChildren(hugh, conner, anna)
+        will.assignSpouse(johanna)
+        will.assignChildren(cees, jo)
+        johanna.assignChildren(cees, jo)
+        cees.assignSpouse(ceesSpouse)
+        // Tristan's side relationships
+        thanh.assignSpouse(ky)
+        thanh.assignChildren(tristan, dao, khoi)
+        ky.assignChildren(tristan, dao, khoi)
+        kyMother.assignSpouse(kyFather)
+        kyMother.assignChildren(ky)
+        kyFather.assignChildren(ky)
+        thanhMother.assignSpouse(thanhFather)
+        thanhMother.assignChildren(thanh)
+        thanhFather.assignChildren(thanh)
+        carolynMother.assignSpouse(carolynFather)
+        carolynMother.assignChildren(carolyn)
+        carolynFather.assignChildren(carolyn)
         return family
     }
     
