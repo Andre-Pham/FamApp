@@ -18,7 +18,6 @@
 		B6E3087D2BD002B70032B923 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B6E3087B2BD002B70032B923 /* Main.storyboard */; };
 		B6E3087F2BD002B80032B923 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B6E3087E2BD002B80032B923 /* Assets.xcassets */; };
 		B6E308822BD002B80032B923 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B6E308802BD002B80032B923 /* LaunchScreen.storyboard */; };
-		B6E3088D2BD002B80032B923 /* FamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E3088C2BD002B80032B923 /* FamTests.swift */; };
 		B6E308972BD002B80032B923 /* FamUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308962BD002B80032B923 /* FamUITests.swift */; };
 		B6E308992BD002B80032B923 /* FamUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308982BD002B80032B923 /* FamUITestsLaunchTests.swift */; };
 		B6E308A72BD003290032B923 /* SwiftSerialization in Frameworks */ = {isa = PBXBuildFile; productRef = B6E308A62BD003290032B923 /* SwiftSerialization */; };
@@ -92,7 +91,6 @@
 		B6E308812BD002B80032B923 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B6E308832BD002B80032B923 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B6E308882BD002B80032B923 /* FamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		B6E3088C2BD002B80032B923 /* FamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamTests.swift; sourceTree = "<group>"; };
 		B6E308922BD002B80032B923 /* FamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6E308962BD002B80032B923 /* FamUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamUITests.swift; sourceTree = "<group>"; };
 		B6E308982BD002B80032B923 /* FamUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamUITestsLaunchTests.swift; sourceTree = "<group>"; };
@@ -171,7 +169,6 @@
 		B6E308692BD002B70032B923 = {
 			isa = PBXGroup;
 			children = (
-				B67985AF2CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift */,
 				B6E308742BD002B70032B923 /* Fam */,
 				B6E3088B2BD002B80032B923 /* FamTests */,
 				B6E308952BD002B80032B923 /* FamUITests */,
@@ -206,8 +203,8 @@
 		B6E3088B2BD002B80032B923 /* FamTests */ = {
 			isa = PBXGroup;
 			children = (
+				B67985AF2CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift */,
 				B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */,
-				B6E3088C2BD002B80032B923 /* FamTests.swift */,
 			);
 			path = FamTests;
 			sourceTree = "<group>";
@@ -583,7 +580,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B67985AB2CBA7D36005E38CB /* FamilyRenderProxyTests.swift in Sources */,
-				B6E3088D2BD002B80032B923 /* FamTests.swift in Sources */,
 				B67985B02CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
