@@ -232,7 +232,7 @@ class ViewController: UIViewController {
     }
     
     func createFamily() -> Family {
-        return MockFamilies.regression1
+        return MockFamilies.standard
     }
 
 }
