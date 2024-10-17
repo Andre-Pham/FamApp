@@ -67,8 +67,8 @@ class FamilyRenderProxy {
         self.traceStack.trace(Trace(type: .outcome, message: "Connection conflicts: \(self.countConnectionConflicts())"))
     }
     
-    func generateTraceStack(expanded: Bool = false) -> String {
-        return self.traceStack.generate(expanded: expanded)
+    func generateTraceStack(includedTypes: [Trace.TraceType] = Trace.TraceType.allCases, expanded: Bool = false) -> String {
+        return self.traceStack.generate(includeTypes: includedTypes, expanded: expanded)
     }
     
     func countConnectionConflicts() -> Int {

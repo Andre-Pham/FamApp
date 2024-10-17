@@ -18,7 +18,7 @@ class Trace {
     private static let END_PREFIX = "[END]"
     private static let INFO_PREFIX = "[INFO]"
     
-    enum TraceType {
+    enum TraceType: CaseIterable {
         /// Something was done
         case action
         /// Something was called

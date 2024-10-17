@@ -33,9 +33,13 @@ class TraceStack {
         }
     }
     
-    func generate(expanded: Bool = false) -> String {
+    func generate(
+        includeTypes: [Trace.TraceType] = Trace.TraceType.allCases,
+        expanded: Bool = false
+    ) -> String {
         let sortedTraces = [self.startTrace].compactMap({ $0 }) + self.traces + [self.endTrace, self.conclusionTrace].compactMap({ $0 })
-        let traceDescriptions = sortedTraces.map({ expanded ? $0.expandedDescription : $0.description })
+        let filteredTraces = sortedTraces.filter({ includeTypes.contains($0.type) })
+        let traceDescriptions = filteredTraces.map({ expanded ? $0.expandedDescription : $0.description })
         return traceDescriptions.joined(separator: "\n")
     }
     
