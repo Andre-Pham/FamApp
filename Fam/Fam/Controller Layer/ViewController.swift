@@ -154,6 +154,7 @@ class ViewController: UIViewController {
 //        (FamilyMemberStoreRenderProxy(self.family, root: root).orderedFamilyMemberProxies.forEach({ print($0.familyMember.firstName) }))
         
         let render = FamilyRenderProxy(self.family, root: root, stopAtStep: self.step == 0 ? nil : self.step)
+        print(render.generateTraceStack())
         
         let connectionLayer = FamView()
             .setFrame(to: self.canvasController.canvasRect.cgRect)
@@ -225,10 +226,6 @@ class ViewController: UIViewController {
                 self.controls.append(view)
             }
         }
-        print("====================================")
-        print("Position conflicts: \(render.countPositionConflicts())")
-        print("Connection conflicts: \(render.countConnectionConflicts())")
-        print("====================================")
     }
     
     func createFamily() -> Family {

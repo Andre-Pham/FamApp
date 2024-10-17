@@ -49,11 +49,14 @@ class FamilyRenderProxy {
     private(set) var orderedFamilyMemberProxies = [FamilyMemberRenderProxy]()
     private(set) var coupleConnections = [CoupleConnectionRenderProxy]()
     private(set) var childConnections = [ChildConnectionRenderProxy]()
+    private var traceStack = TraceStack()
     
     init(_ family: Family, root: FamilyMember, stopAtStep: Int?) {
         print("--------------------------------------------------------------")
         print("STARTING RENDER (step: \(stopAtStep ?? 0))")
         print("--------------------------------------------------------------")
+        self.traceStack.trace(Trace(type: .start, message: "Starting render"))
+        self.traceStack.trace(Trace(type: .start, message: "Ending at step: \(stopAtStep == nil ? "no limit" : String(stopAtStep!))"))
         assert(family.contains(familyMember: root), "Family doesn't contain family member")
         self.generateOrderedFamilyMembers(family: family, root: root)
         self.generateFamilyMemberStore()
@@ -64,6 +67,14 @@ class FamilyRenderProxy {
         print("--------------------------------------------------------------")
         print("COMPLETED RENDER (step: \(stopAtStep ?? 0))")
         print("--------------------------------------------------------------")
+        self.traceStack.trace(Trace(type: .end, message: "Completed render"))
+        self.traceStack.trace(Trace(type: .end, message: "Ended at step: \(stopAtStep == nil ? "no limit" : String(stopAtStep!))"))
+        self.traceStack.trace(Trace(type: .outcome, message: "Position conflicts: \(self.countPositionConflicts())"))
+        self.traceStack.trace(Trace(type: .outcome, message: "Connection conflicts: \(self.countConnectionConflicts())"))
+    }
+    
+    func generateTraceStack(expanded: Bool = false) -> String {
+        return self.traceStack.generate(expanded: expanded)
     }
     
     func countConnectionConflicts() -> Int {
@@ -157,20 +168,25 @@ class FamilyRenderProxy {
                 
                 // Enforce RULE 1
                 print("[TRACE] [CALL] {positionProxyRelativeToChildren}")
+                self.traceStack.trace(Trace(type: .call, functionName: "positionProxyRelativeToChildren"))
                 self.positionProxyRelativeToChildren(proxy: proxy)
                 print("[TRACE] [CALL] {positionProxyRelativeToParents}")
+                self.traceStack.trace(Trace(type: .call, functionName: "positionProxyRelativeToParents"))
                 self.positionProxyRelativeToParents(proxy: proxy)
                 
                 // Enforce RULE 2
                 print("[TRACE] [CALL] {positionProxyAdjacentToSiblings}")
+                self.traceStack.trace(Trace(type: .call, functionName: "positionProxyAdjacentToSiblings"))
                 self.positionProxyAdjacentToSiblings(proxy: proxy)
                 
                 // Resolve any conflicts that can be resolved by swapping parents
                 print("[TRACE] [CALL] {resolveConnectionConflictsBySwappingParentCouples}")
+                self.traceStack.trace(Trace(type: .call, functionName: "resolveConnectionConflictsBySwappingParentCouples"))
                 self.resolveConnectionConflictsBySwappingParentCouples(for: proxy)
                 
                 // Resolve any conflicts that can be resolved by swapping children of parents
                 print("[TRACE] [CALL] {resolveConnectionConflictsBySwappingChildCouples}")
+                self.traceStack.trace(Trace(type: .call, functionName: "resolveConnectionConflictsBySwappingChildCouples"))
                 self.resolveConnectionConflictsBySwappingChildCouples(for: proxy)
                 
                 // - Give Thahn-Lien parents. Then give Carolyn parents. Then stop at step 25.
@@ -184,22 +200,27 @@ class FamilyRenderProxy {
                 // [couple1 husband] [couple1 wife] [proxy] [couple2 husband] [couple2 wife] -> [proxy] [couple1 husband] [couple1 wife] [couple2 husband] [couple2 wife]
                 // [couple1 husband] [couple1 wife] [proxy] [proxy wife] -> [proxy] [proxy wife] [couple1 husband] [couple1 wife]
                 print("[TRACE] [CALL] {resolveConnectionConflictsBySwappingSiblings}")
+                self.traceStack.trace(Trace(type: .call, functionName: "resolveConnectionConflictsBySwappingSiblings"))
                 self.resolveConnectionConflictsBySwappingSiblings(for: proxy)
                 
                 // Resolve any connection conflicts that occurred
                 print("[TRACE] [CALL] {resolveConnectionConflicts}")
+                self.traceStack.trace(Trace(type: .call, functionName: "resolveConnectionConflicts"))
                 self.resolveConnectionConflicts(for: proxy)
                 
                 // Swap spouse positions if applicable
                 print("[TRACE] [CALL] {swapCouplePositionsIfApplicable}")
+                self.traceStack.trace(Trace(type: .call, functionName: "swapCouplePositionsIfApplicable"))
                 self.swapCouplePositionsIfApplicable(for: proxy)
                 
                 print("[TRACE] [CALL] For all proxies: {resolveConnectionConflictsBySwappingParentCouples}")
+                self.traceStack.trace(Trace(type: .call, functionName: "resolveConnectionConflictsBySwappingParentCouples", message: "Called for all proxies"))
                 for anyProxy in self.orderedFamilyMemberProxies where anyProxy.hasPosition {
                     self.resolveConnectionConflictsBySwappingParentCouples(for: anyProxy)
                 }
                 
                 print("[TRACE] [CALL] For all proxies: {resolveConnectionConflictsBySwappingChildCouples}")
+                self.traceStack.trace(Trace(type: .call, functionName: "resolveConnectionConflictsBySwappingChildCouples", message: "Called for all proxies"))
                 for anyProxy in self.orderedFamilyMemberProxies where anyProxy.hasPosition {
                     self.resolveConnectionConflictsBySwappingChildCouples(for: anyProxy)
                 }
@@ -242,29 +263,37 @@ class FamilyRenderProxy {
         if proxy.familyMember.isSpouse(to: otherProxy.familyMember) {
             proxy.setPosition(to: relativePosition + SMPoint(x: Self.POSITION_PADDING*proxy.preferredDirection.directionMultiplier, y: 0.0))
             print("[TRACE] \(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")")
+            self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")"))
             // No direction preference - you're being placed relative to your spouse which already has a position
             self.resolveRenderConflicts(direction: nil, for: proxy)
             print("[TRACE] \(proxy.familyMember.fullName) placed relative to spouse: \(proxy.position?.toString() ?? "nil")")
+            self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) placed relative to spouse: \(proxy.position?.toString() ?? "nil")"))
             return true
         } else if proxy.familyMember.isExSpouse(to: otherProxy.familyMember) {
             proxy.setPosition(to: relativePosition + SMPoint(x: Self.POSITION_PADDING*proxy.preferredDirection.directionMultiplier, y: 0.0))
             print("[TRACE] \(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")")
+            self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")"))
             self.resolveRenderConflicts(direction: proxy.preferredDirection, for: proxy)
             print("[TRACE] \(proxy.familyMember.fullName) placed relative to ex spouse: \(proxy.position?.toString() ?? "nil")")
+            self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) placed relative to ex spouse: \(proxy.position?.toString() ?? "nil")"))
             return true
         } else if proxy.familyMember.isParent(of: otherProxy.familyMember) {
             relativePosition -= SMPoint(x: 0.0, y: Self.POSITION_PADDING)
             proxy.setPosition(to: relativePosition)
             print("[TRACE] \(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")")
+            self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")"))
             self.resolveRenderConflicts(direction: nil, for: proxy)
             print("[TRACE] \(proxy.familyMember.fullName) placed relative to child: \(proxy.position?.toString() ?? "nil")")
+            self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) placed relative to child: \(proxy.position?.toString() ?? "nil")"))
             return true
         } else if proxy.familyMember.isChild(of: otherProxy.familyMember) {
             relativePosition += SMPoint(x: 0.0, y: Self.POSITION_PADDING)
             proxy.setPosition(to: relativePosition)
             print("[TRACE] \(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")")
+            self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")"))
             self.resolveRenderConflicts(direction: nil, for: proxy)
             print("[TRACE] \(proxy.familyMember.fullName) placed relative to parent: \(proxy.position?.toString() ?? "nil")")
+            self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) placed relative to parent: \(proxy.position?.toString() ?? "nil")"))
             return true
         }
         return false
@@ -303,6 +332,11 @@ class FamilyRenderProxy {
                 )
                 self.resolveRenderConflicts(direction: .right, for: proxy)
                 print("[TRACE] {positionProxyRelativeToChildren} \(proxy.familyMember.fullName) moved right of children who prefer right and have kids: \(proxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action,
+                    functionName: "positionProxyRelativeToChildren",
+                    message: "\(proxy.familyMember.fullName) moved right of children who prefer right and have kids: \(proxy.position?.toString() ?? "nil")"
+                ))
             }
         }
         let directChildrenWithLeftPreferencePositions = self.getDirectChildrenProxies(
@@ -320,6 +354,11 @@ class FamilyRenderProxy {
                 )
                 self.resolveRenderConflicts(direction: .left, for: proxy)
                 print("[TRACE] {positionProxyRelativeToChildren} \(proxy.familyMember.fullName) moved left of children who prefer left and have kids: \(proxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action,
+                    functionName: "positionProxyRelativeToChildren",
+                    message: "\(proxy.familyMember.fullName) moved left of children who prefer left and have kids: \(proxy.position?.toString() ?? "nil")"
+                ))
             }
         }
     }
@@ -359,6 +398,11 @@ class FamilyRenderProxy {
                 )
                 self.resolveRenderConflicts(direction: .left, for: proxy)
                 print("[TRACE] {positionProxyRelativeToParents} \(proxy.familyMember.fullName) moved left of parents: \(proxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action, 
+                    functionName: "positionProxyRelativeToParents",
+                    message: "\(proxy.familyMember.fullName) moved left of parents: \(proxy.position?.toString() ?? "nil")"
+                ))
             }
         case .left:
             // Proxy prefers left - proxy must be right of parents (moved right)
@@ -371,6 +415,11 @@ class FamilyRenderProxy {
                 )
                 self.resolveRenderConflicts(direction: .right, for: proxy)
                 print("[TRACE] {positionProxyRelativeToParents} \(proxy.familyMember.fullName) moved right of parents: \(proxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action,
+                    functionName: "positionProxyRelativeToParents",
+                    message: "\(proxy.familyMember.fullName) moved right of parents: \(proxy.position?.toString() ?? "nil")"
+                ))
             }
         }
     }
@@ -420,6 +469,11 @@ class FamilyRenderProxy {
         // After moving the sibling adjacent to their siblings, ensure position conflicts are resolved
         self.resolveRenderConflicts(direction: direction, for: proxy)
         print("[TRACE] {positionProxyAdjacentToSiblings} \(proxy.familyMember.fullName) moved adjacent to siblings: \(proxy.position?.toString() ?? "nil")")
+        self.traceStack.trace(Trace(
+            type: .action,
+            functionName: "positionProxyAdjacentToSiblings",
+            message: "\(proxy.familyMember.fullName) moved adjacent to siblings: \(proxy.position?.toString() ?? "nil")"
+        ))
     }
     
     /// Attempts to resolve connection conflicts by:
@@ -448,6 +502,11 @@ class FamilyRenderProxy {
             } else {
                 // Success - the two proxy couples created a conflict, swapping them removed the conflict without any position conflicts created
                 print("[TRACE] {resolveConnectionConflictsBySwappingParentCouples} Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(otherProxy.familyMember.fullName) \(otherProxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action,
+                    functionName: "resolveConnectionConflictsBySwappingParentCouples",
+                    message: "Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(otherProxy.familyMember.fullName) \(otherProxy.position?.toString() ?? "nil")"
+                ))
                 return
             }
         }
@@ -479,6 +538,11 @@ class FamilyRenderProxy {
             } else {
                 // Success - the two proxies' parent couples created a conflict, swapping the child proxies removed the conflict without any position conflicts created
                 print("[TRACE] {resolveConnectionConflictsBySwappingChildCouples} Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(otherProxy.familyMember.fullName) \(otherProxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action, 
+                    functionName: "resolveConnectionConflictsBySwappingChildCouples",
+                    message: "Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(otherProxy.familyMember.fullName) \(otherProxy.position?.toString() ?? "nil")"
+                ))
                 return
             }
         }
@@ -509,6 +573,11 @@ class FamilyRenderProxy {
             } else {
                 // Success - the two proxy siblings created a conflict, swapping them removed the conflict without any position conflicts created
                 print("[TRACE] {resolveConnectionConflictsBySwappingSiblings} Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(siblingProxy.familyMember.fullName) \(siblingProxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action,
+                    functionName: "resolveConnectionConflictsBySwappingSiblings",
+                    message: "Swapped: \(proxy.familyMember.fullName) \(proxy.position?.toString() ?? "nil") and \(siblingProxy.familyMember.fullName) \(siblingProxy.position?.toString() ?? "nil")"
+                ))
                 return
             }
         }
@@ -773,6 +842,11 @@ class FamilyRenderProxy {
                     for: proxyBeingResolved
                 )
                 print("[TRACE] {resolveConnectionConflicts} \(proxy.familyMember.fullName) resolved connection conflicts by moving left: \(proxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action,
+                    functionName: "resolveConnectionConflicts",
+                    message: "\(proxy.familyMember.fullName) resolved connection conflicts by moving left: \(proxy.position?.toString() ?? "nil")"
+                ))
             }
             if let closestOtherParentToLeft,
                let closestOtherParentToLeftX = closestOtherParentToLeft.position?.x,
@@ -796,6 +870,11 @@ class FamilyRenderProxy {
                     for: proxyBeingResolved
                 )
                 print("[TRACE] {resolveConnectionConflicts} \(proxy.familyMember.fullName) resolved connection conflicts by moving right: \(proxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action,
+                    functionName: "resolveConnectionConflicts",
+                    message: "\(proxy.familyMember.fullName) resolved connection conflicts by moving right: \(proxy.position?.toString() ?? "nil")"
+                ))
             }
             if let closestOtherParentToLeft,
                let closestOtherParentToRight,
@@ -832,6 +911,11 @@ class FamilyRenderProxy {
                 guard self.positionConflictExists(for: proxyBeingResolved) else {
                     // If at this stage there are no conflicts, then there's no problem
                     print("[TRACE] {resolveConnectionConflicts} \(proxy.familyMember.fullName) resolved connection conflicts by resetting position: \(proxy.position?.toString() ?? "nil")")
+                    self.traceStack.trace(Trace(
+                        type: .action, 
+                        functionName: "resolveConnectionConflicts",
+                        message: "\(proxy.familyMember.fullName) resolved connection conflicts by resetting position: \(proxy.position?.toString() ?? "nil")"
+                    ))
                     return
                 }
                 // 3. Resolve position render conflicts for everyone that isn't them or their spouse or their parents
@@ -888,6 +972,11 @@ class FamilyRenderProxy {
                     proxyToMove.position?.translate(by: SMPoint(x: Self.POSITION_PADDING*directionOfEveryoneToMove.directionMultiplier, y: 0))
                 }
                 print("[TRACE] {resolveConnectionConflicts} \(proxy.familyMember.fullName) resolved connection conflicts by moving everyone else: \(proxy.position?.toString() ?? "nil")")
+                self.traceStack.trace(Trace(
+                    type: .action,
+                    functionName: "resolveConnectionConflicts",
+                    message: "\(proxy.familyMember.fullName) resolved connection conflicts by moving everyone else: \(proxy.position?.toString() ?? "nil")"
+                ))
             }
         }
     }
