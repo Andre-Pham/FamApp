@@ -33,4 +33,10 @@ class Family {
         self.familyMembers[familyMember.id] = familyMember
     }
     
+    func generateCache() {
+        for familyMember in self.familyMembers.values {
+            familyMember.generateCache()
+        }
+    }
+    
 }

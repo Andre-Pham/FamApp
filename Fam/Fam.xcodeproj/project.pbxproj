@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B6285ED32CC362ED00218C94 /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6285ED22CC362ED00218C94 /* TestUtils.swift */; };
 		B649B7462C0971AB004364C2 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = B649B7452C0971AB004364C2 /* Int.swift */; };
 		B649B7482C0971CC004364C2 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = B649B7472C0971CC004364C2 /* Double.swift */; };
 		B67985AB2CBA7D36005E38CB /* FamilyRenderProxyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */; };
@@ -79,6 +80,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B6285ED22CC362ED00218C94 /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
 		B649B7452C0971AB004364C2 /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
 		B649B7472C0971CC004364C2 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
 		B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyRenderProxyTests.swift; sourceTree = "<group>"; };
@@ -162,6 +164,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B6285ED12CC362DE00218C94 /* Testing */ = {
+			isa = PBXGroup;
+			children = (
+				B6285ED22CC362ED00218C94 /* TestUtils.swift */,
+			);
+			path = Testing;
+			sourceTree = "<group>";
+		};
 		B67985AC2CBA7F00005E38CB /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
@@ -260,6 +270,7 @@
 		B6E308B02BD004550032B923 /* Model Layer */ = {
 			isa = PBXGroup;
 			children = (
+				B6285ED12CC362DE00218C94 /* Testing */,
 				B67985B32CBB6F2D005E38CB /* Tracing */,
 				B67985AC2CBA7F00005E38CB /* Mocks */,
 				B6E309022BD05D250032B923 /* ChildConnectionRenderProxy.swift */,
@@ -580,6 +591,7 @@
 				B6E308E62BD0114B0032B923 /* FamText.swift in Sources */,
 				B6E936DB2C3847440044AAB9 /* HorizontalDirection.swift in Sources */,
 				B6E308B92BD0059E0032B923 /* NumericComparisons.swift in Sources */,
+				B6285ED32CC362ED00218C94 /* TestUtils.swift in Sources */,
 				B67985AE2CBA7F33005E38CB /* MockFamilies.swift in Sources */,
 				B6E308F22BD0114B0032B923 /* FamLabelledTextInput.swift in Sources */,
 				B6E308F12BD0114B0032B923 /* FamImage.swift in Sources */,

@@ -39,7 +39,11 @@ class FamilyMember {
         // Append id so if their names are the same, there's consistency between persistent renders
         return self.fullName + self.id.uuidString
     }
+    private var childrenIDsCache: [UUID]? = nil
     public var childrenIDs: [UUID] {
+        if let childrenIDsCache {
+            return childrenIDsCache
+        }
         var ids = [UUID]()
         let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
         for familyMember in allFamilyMembers {
@@ -49,7 +53,11 @@ class FamilyMember {
         }
         return ids
     }
+    private var siblingIDsCache: [UUID]? = nil
     public var siblingIDs: [UUID] {
+        if let siblingIDsCache {
+            return siblingIDsCache
+        }
         var ids = [UUID]()
         let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
         for familyMember in allFamilyMembers {
@@ -73,25 +81,11 @@ class FamilyMember {
             self.family?.getFamilyMember(id: $0)
         })
     }
-    public var siblings: [FamilyMember] {
-        var siblings = [FamilyMember]()
-        let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
-        for familyMember in allFamilyMembers {
-            if self.isSibling(to: familyMember) {
-                siblings.append(familyMember)
-            }
-        }
-        return siblings
-    }
     public var children: [FamilyMember] {
-        var children = [FamilyMember]()
-        let allFamilyMembers = self.family?.getAllFamilyMembers() ?? []
-        for familyMember in allFamilyMembers {
-            if familyMember.parentIDs.contains(self.id) {
-                children.append(familyMember)
-            }
-        }
-        return children
+        return self.childrenIDs.compactMap({ self.family?.getFamilyMember(id: $0) })
+    }
+    public var siblings: [FamilyMember] {
+        return self.siblingIDs.compactMap({ self.family?.getFamilyMember(id: $0) })
     }
     public var directFamily: [FamilyMember] {
         var directFamily = [FamilyMember]()
@@ -158,6 +152,14 @@ class FamilyMember {
         self.sex = sex
         
         family.addFamilyMember(self)
+    }
+    
+    func generateCache() {
+        // Make sure to invalidate cache first (cache -> nil), otherwise cache is assigned to cache
+        self.siblingIDsCache = nil
+        self.siblingIDsCache = self.siblingIDs
+        self.childrenIDsCache = nil
+        self.childrenIDsCache = self.childrenIDs
     }
     
     func isPerson(_ familyMember: FamilyMember) -> Bool {

@@ -52,6 +52,7 @@ class FamilyRenderProxy {
     private var traceStack = TraceStack()
     
     init(_ family: Family, root: FamilyMember, stopAtStep: Int?) {
+        family.generateCache()
         self.traceStack.trace(Trace(type: .start, message: "Starting render"))
         self.traceStack.trace(Trace(type: .start, message: "Ending at step: \(stopAtStep == nil ? "no limit" : String(stopAtStep!))"))
         assert(family.contains(familyMember: root), "Family doesn't contain family member")
