@@ -12,6 +12,8 @@ class Family {
     public let id = UUID()
     private var familyMembers = [UUID: FamilyMember]()
     private var orderedFamilyMembersCache: [FamilyMember]? = nil
+    /// True if the cache is still valid. Default is false because there is no cache.
+    private(set) var cacheIsValid = false
     public var familyMembersCount: Int {
         return self.familyMembers.count
     }
@@ -35,9 +37,12 @@ class Family {
     
     func addFamilyMember(_ familyMember: FamilyMember) {
         self.familyMembers[familyMember.id] = familyMember
+        // Adding a family member invalidates cache
+        self.cacheIsValid = false
     }
     
     func getFamilyMemberWithMostAncestors() -> FamilyMember? {
+        assert(self.cacheIsValid, "Expected to have valid cache before calling this")
         let familyMembers = self.getAllFamilyMembers()
         guard !familyMembers.isEmpty else {
             return nil
@@ -77,6 +82,7 @@ class Family {
         for familyMember in self.familyMembers.values {
             familyMember.generateCache()
         }
+        self.cacheIsValid = true
     }
     
 }
