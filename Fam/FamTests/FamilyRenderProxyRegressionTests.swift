@@ -12,8 +12,7 @@ final class FamilyRenderProxyRegressionTests: XCTestCase {
 
     func testRegression1() throws {
         let family = MockFamilies.regression1
-        let root = family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
-        let render = FamilyRenderProxy(family, root: root, stopAtStep: nil)
+        let render = FamilyRenderProxy(family)
         XCTAssertEqual(render.countPositionConflicts(), 0, "Found unexpected position conflicts in family tree render, expected 0")
         XCTAssertEqual(render.countConnectionConflicts(), 0, "Found unexpected connection conflicts in family tree render, expected 0")
     }

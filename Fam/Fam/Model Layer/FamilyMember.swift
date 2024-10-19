@@ -264,4 +264,22 @@ class FamilyMember {
         return false
     }
     
+    func isDescendant(of familyMember: FamilyMember) -> Bool {
+        return familyMember.isAncestor(of: self)
+    }
+    
+    func isAncestor(of familyMember: FamilyMember) -> Bool {
+        if self.id == familyMember.id {
+            return true
+        }
+        // Depth-first search through the parents of the familyMember
+        for parent in familyMember.parents {
+            if self.isAncestor(of: parent) {
+                return true
+            }
+        }
+        // If no parents are ancestors, return false
+        return false
+    }
+    
 }

@@ -11,6 +11,7 @@ class Family {
     
     public let id = UUID()
     private var familyMembers = [UUID: FamilyMember]()
+    private var orderedFamilyMembersCache: [FamilyMember]? = nil
     public var familyMembersCount: Int {
         return self.familyMembers.count
     }
@@ -26,6 +27,9 @@ class Family {
     }
     
     func getAllFamilyMembers() -> [FamilyMember] {
+        if let orderedFamilyMembersCache {
+            return orderedFamilyMembersCache
+        }
         return Array(self.familyMembers.values).sorted(by: { $0.consistentSortingID < $1.consistentSortingID })
     }
     
@@ -33,7 +37,43 @@ class Family {
         self.familyMembers[familyMember.id] = familyMember
     }
     
+    func getFamilyMemberWithMostAncestors() -> FamilyMember? {
+        let familyMembers = self.getAllFamilyMembers()
+        guard !familyMembers.isEmpty else {
+            return nil
+        }
+        guard familyMembers.count > 1 else {
+            return familyMembers[0]
+        }
+        var result = familyMembers[0]
+        var resultAncestorCount = {
+            var count = 0
+            for familyMember in familyMembers {
+                if result.isDescendant(of: familyMember) {
+                    count += 1
+                }
+            }
+            return count
+        }()
+        for familyMember in familyMembers {
+            var count = 0
+            for otherFamilyMember in familyMembers {
+                if familyMember.isDescendant(of: otherFamilyMember) {
+                    count += 1
+                }
+            }
+            if count > resultAncestorCount {
+                result = familyMember
+                resultAncestorCount = count
+            }
+        }
+        return result
+    }
+    
     func generateCache() {
+        // Make sure to invalidate cache first (cache -> nil), otherwise cache is assigned to cache
+        self.orderedFamilyMembersCache = nil
+        self.orderedFamilyMembersCache = self.getAllFamilyMembers()
         for familyMember in self.familyMembers.values {
             familyMember.generateCache()
         }

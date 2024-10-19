@@ -150,10 +150,7 @@ class ViewController: UIViewController {
     }
     
     func renderFamily() {
-        let root = self.family.getAllFamilyMembers().first(where: { $0.firstName == "Andre" })!
-//        (FamilyMemberStoreRenderProxy(self.family, root: root).orderedFamilyMemberProxies.forEach({ print($0.familyMember.firstName) }))
-        
-        let render = FamilyRenderProxy(self.family, root: root, stopAtStep: self.step == 0 ? nil : self.step)
+        let render = FamilyRenderProxy(self.family, stopAtStep: self.step == 0 ? nil : self.step)
         print(render.generateTraceStack())
         
         let connectionLayer = FamView()
