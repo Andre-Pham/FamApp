@@ -160,7 +160,7 @@ extension FamUIViewProtocol {
     /// - Returns: An reference to the view's instance
     @discardableResult
     func reframeIntoWindow(animationDuration: Double? = nil, padding: Double = 0.0, inset: Double = 0.0) -> Self {
-        guard let window = Environment.inst.window else {
+        guard let window = WindowContext.window else {
             print("Unable to find the key window.")
             return self
         }

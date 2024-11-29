@@ -10,6 +10,10 @@
 		B6285ED32CC362ED00218C94 /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6285ED22CC362ED00218C94 /* TestUtils.swift */; };
 		B649B7462C0971AB004364C2 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = B649B7452C0971AB004364C2 /* Int.swift */; };
 		B649B7482C0971CC004364C2 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = B649B7472C0971CC004364C2 /* Double.swift */; };
+		B65BB9C52CFA1020002BEC0D /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65BB9C42CFA1020002BEC0D /* AppContext.swift */; };
+		B65BB9C72CFA102A002BEC0D /* DeviceContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65BB9C62CFA102A002BEC0D /* DeviceContext.swift */; };
+		B65BB9C92CFA1034002BEC0D /* WindowContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65BB9C82CFA1034002BEC0D /* WindowContext.swift */; };
+		B65BB9CB2CFA104B002BEC0D /* XcodeContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65BB9CA2CFA104B002BEC0D /* XcodeContext.swift */; };
 		B67985AB2CBA7D36005E38CB /* FamilyRenderProxyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */; };
 		B67985AE2CBA7F33005E38CB /* MockFamilies.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AD2CBA7F33005E38CB /* MockFamilies.swift */; };
 		B67985B02CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AF2CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift */; };
@@ -25,7 +29,6 @@
 		B6E308992BD002B80032B923 /* FamUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308982BD002B80032B923 /* FamUITestsLaunchTests.swift */; };
 		B6E308A72BD003290032B923 /* SwiftSerialization in Frameworks */ = {isa = PBXBuildFile; productRef = B6E308A62BD003290032B923 /* SwiftSerialization */; };
 		B6E308AA2BD003360032B923 /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = B6E308A92BD003360032B923 /* SwiftMath */; };
-		B6E308AF2BD004230032B923 /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308AE2BD004230032B923 /* Environment.swift */; };
 		B6E308B92BD0059E0032B923 /* NumericComparisons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308B82BD0059E0032B923 /* NumericComparisons.swift */; };
 		B6E308BD2BD009C60032B923 /* Family.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308BC2BD009C60032B923 /* Family.swift */; };
 		B6E308BF2BD009D50032B923 /* FamilyMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308BE2BD009D50032B923 /* FamilyMember.swift */; };
@@ -83,6 +86,10 @@
 		B6285ED22CC362ED00218C94 /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
 		B649B7452C0971AB004364C2 /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
 		B649B7472C0971CC004364C2 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
+		B65BB9C42CFA1020002BEC0D /* AppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContext.swift; sourceTree = "<group>"; };
+		B65BB9C62CFA102A002BEC0D /* DeviceContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceContext.swift; sourceTree = "<group>"; };
+		B65BB9C82CFA1034002BEC0D /* WindowContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowContext.swift; sourceTree = "<group>"; };
+		B65BB9CA2CFA104B002BEC0D /* XcodeContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeContext.swift; sourceTree = "<group>"; };
 		B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyRenderProxyTests.swift; sourceTree = "<group>"; };
 		B67985AD2CBA7F33005E38CB /* MockFamilies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockFamilies.swift; sourceTree = "<group>"; };
 		B67985AF2CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyRenderProxyRegressionTests.swift; sourceTree = "<group>"; };
@@ -100,7 +107,6 @@
 		B6E308922BD002B80032B923 /* FamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6E308962BD002B80032B923 /* FamUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamUITests.swift; sourceTree = "<group>"; };
 		B6E308982BD002B80032B923 /* FamUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		B6E308AE2BD004230032B923 /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		B6E308B82BD0059E0032B923 /* NumericComparisons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumericComparisons.swift; sourceTree = "<group>"; };
 		B6E308BC2BD009C60032B923 /* Family.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Family.swift; sourceTree = "<group>"; };
 		B6E308BE2BD009D50032B923 /* FamilyMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyMember.swift; sourceTree = "<group>"; };
@@ -172,6 +178,17 @@
 			path = Testing;
 			sourceTree = "<group>";
 		};
+		B65BB9C32CFA0FAD002BEC0D /* Context */ = {
+			isa = PBXGroup;
+			children = (
+				B65BB9C42CFA1020002BEC0D /* AppContext.swift */,
+				B65BB9C62CFA102A002BEC0D /* DeviceContext.swift */,
+				B65BB9C82CFA1034002BEC0D /* WindowContext.swift */,
+				B65BB9CA2CFA104B002BEC0D /* XcodeContext.swift */,
+			);
+			path = Context;
+			sourceTree = "<group>";
+		};
 		B67985AC2CBA7F00005E38CB /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
@@ -212,10 +229,10 @@
 		B6E308742BD002B70032B923 /* Fam */ = {
 			isa = PBXGroup;
 			children = (
+				B65BB9C32CFA0FAD002BEC0D /* Context */,
 				B6E308AB2BD003C10032B923 /* App */,
 				B6E308B42BD0048D0032B923 /* Swift */,
 				B6E308B52BD0049A0032B923 /* Strings */,
-				B6E308AD2BD004150032B923 /* Environment */,
 				B6E308B02BD004550032B923 /* Model Layer */,
 				B6E308B12BD004620032B923 /* Controller Layer */,
 				B6E308B32BD004780032B923 /* View Layer */,
@@ -257,14 +274,6 @@
 				B6E308772BD002B70032B923 /* SceneDelegate.swift */,
 			);
 			path = Lifecycle;
-			sourceTree = "<group>";
-		};
-		B6E308AD2BD004150032B923 /* Environment */ = {
-			isa = PBXGroup;
-			children = (
-				B6E308AE2BD004230032B923 /* Environment.swift */,
-			);
-			path = Environment;
 			sourceTree = "<group>";
 		};
 		B6E308B02BD004550032B923 /* Model Layer */ = {
@@ -561,6 +570,7 @@
 				B6E309032BD05D250032B923 /* ChildConnectionRenderProxy.swift in Sources */,
 				B6E308EC2BD0114B0032B923 /* FamChipMultiState.swift in Sources */,
 				B6E3087A2BD002B70032B923 /* ViewController.swift in Sources */,
+				B65BB9C52CFA1020002BEC0D /* AppContext.swift in Sources */,
 				B6E308E12BD0114B0032B923 /* FamControl.swift in Sources */,
 				B6E308C52BD00F470032B923 /* CanvasController.swift in Sources */,
 				B6E308E42BD0114B0032B923 /* FamContextMenuView.swift in Sources */,
@@ -573,8 +583,8 @@
 				B6E308EF2BD0114B0032B923 /* FamView.swift in Sources */,
 				B6E308BF2BD009D50032B923 /* FamilyMember.swift in Sources */,
 				B6E308EA2BD0114B0032B923 /* FamDatePicker.swift in Sources */,
+				B65BB9C72CFA102A002BEC0D /* DeviceContext.swift in Sources */,
 				B6E308FD2BD011A30032B923 /* FamDimensions.swift in Sources */,
-				B6E308AF2BD004230032B923 /* Environment.swift in Sources */,
 				B6E308762BD002B70032B923 /* AppDelegate.swift in Sources */,
 				B649B7462C0971AB004364C2 /* Int.swift in Sources */,
 				B6E308FC2BD011A30032B923 /* FamFonts.swift in Sources */,
@@ -596,8 +606,10 @@
 				B6E308F22BD0114B0032B923 /* FamLabelledTextInput.swift in Sources */,
 				B6E308F12BD0114B0032B923 /* FamImage.swift in Sources */,
 				B6E308782BD002B70032B923 /* SceneDelegate.swift in Sources */,
+				B65BB9C92CFA1034002BEC0D /* WindowContext.swift in Sources */,
 				B6E308E02BD0114B0032B923 /* FamScrollView.swift in Sources */,
 				B6E308E82BD0114B0032B923 /* FamChipButton.swift in Sources */,
+				B65BB9CB2CFA104B002BEC0D /* XcodeContext.swift in Sources */,
 				B6E308DE2BD0114B0032B923 /* FamVStack.swift in Sources */,
 				B6E308EE2BD0114B0032B923 /* FamSegmentedSlider.swift in Sources */,
 			);
