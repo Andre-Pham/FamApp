@@ -210,9 +210,9 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Layer Functions
     
-    func addLayer(_ view: FamUIView) {
+    func addLayer(_ view: UIView) {
 //        self.layers.append(view.view)
-        self.canvasContainer.addSubview(view.view)
+        self.canvasContainer.addSubview(view)
     }
     
     // MARK: - Scroll and Zoom Functions

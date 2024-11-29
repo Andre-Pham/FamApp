@@ -13,7 +13,6 @@ class ViewController: UIViewController {
     private let canvasController = CanvasController()
     private var family = Family()
     
-    private var root: FamView { return FamView(self.view) }
     private let buttonStack = FamHStack()
     private let addParentButton = FamButton()
     private let addChildButton = FamButton()
@@ -64,18 +63,18 @@ class ViewController: UIViewController {
         
         self.renderFamily()
         
-        self.root
-            .addSubview(self.buttonStack)
+        self.view
+            .add(self.buttonStack)
         self.buttonStack
             .setSpacing(to: 10)
-            .addView(self.addChildButton)
-            .addView(self.addParentButton)
-            .addView(self.addSpouseButton)
-            .addView(self.renderButton)
-            .addView(self.resetButton)
-            .addView(self.minusStepButton)
-            .addView(self.stepText)
-            .addView(self.plusStepButton)
+            .append(self.addChildButton)
+            .append(self.addParentButton)
+            .append(self.addSpouseButton)
+            .append(self.renderButton)
+            .append(self.resetButton)
+            .append(self.minusStepButton)
+            .append(self.stepText)
+            .append(self.plusStepButton)
             .constrainCenterHorizontal()
             .constrainBottom(padding: 100)
         self.addChildButton
@@ -154,6 +153,7 @@ class ViewController: UIViewController {
         print(render.generateTraceStack())
         
         let connectionLayer = FamView()
+            .disableAutoLayout()
             .setFrame(to: self.canvasController.canvasRect.cgRect)
             .setBackgroundColor(to: .white)
         self.canvasController.addLayer(connectionLayer)
@@ -167,9 +167,8 @@ class ViewController: UIViewController {
             position1 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             position2 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
 //            print("\(position1.toString()) -> \(position2.toString())")
-            let view = FamView(LineView(startPoint: position1.cgPoint, endPoint: position2.cgPoint))
-            view.view.translatesAutoresizingMaskIntoConstraints = false
-            connectionLayer.addSubview(view)
+            let view = LineView(startPoint: position1.cgPoint, endPoint: position2.cgPoint).useAutoLayout()
+            connectionLayer.add(view)
         }
         
         for childConnection in render.childConnections {
@@ -185,29 +184,28 @@ class ViewController: UIViewController {
             parentPosition2 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             childPosition += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             let positionBetweenParents = SMLineSegment(origin: parentPosition1, end: parentPosition2).midPoint
-            let line1 = FamView(LineView(
+            let line1 = LineView(
               
                 startPoint: positionBetweenParents.cgPoint,
                 endPoint: (positionBetweenParents + SMPoint(x: 0, y: 50)).cgPoint
-            ))
-            line1.view.translatesAutoresizingMaskIntoConstraints = false
-            connectionLayer.addSubview(line1)
-            let line2 = FamView(LineView(
+            ).useAutoLayout()
+            connectionLayer.add(line1)
+            let line2 = LineView(
             
                 startPoint: (positionBetweenParents + SMPoint(x: 0, y: 50)).cgPoint,
                 endPoint: (childPosition - SMPoint(x: 0, y: 40)).cgPoint
-            ))
-            line2.view.translatesAutoresizingMaskIntoConstraints = false
-            connectionLayer.addSubview(line2)
+            ).useAutoLayout()
+            connectionLayer.add(line2)
         }
         
         let drawLayer = FamView()
+            .disableAutoLayout()
             .setFrame(to: self.canvasController.canvasRect.cgRect)
         self.canvasController.addLayer(drawLayer)
         for proxy in render.orderedFamilyMemberProxies {
             if let position = proxy.position {
-                let view = FamControl().setBackgroundColor(to: .blue)
-                let text = FamText().setText(to: proxy.familyMember.firstName + " " + (proxy.position?.toString()  ?? "-")).setTextColor(to: .white)
+                let view = FamControl().setBackgroundColor(to: .blue).disableAutoLayout()
+                let text = FamText().disableAutoLayout().setText(to: proxy.familyMember.firstName + " " + (proxy.position?.toString()  ?? "-")).setTextColor(to: .white)
                 drawLayer.addSubview(view)
                 view.addSubview(text)
                 view.setFrame(to: SMRect(

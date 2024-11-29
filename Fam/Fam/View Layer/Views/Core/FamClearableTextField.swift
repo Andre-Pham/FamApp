@@ -1,35 +1,78 @@
 //
-//  FamTextInput.swift
+//  FamClearableTextField.swift
 //  Fam
 //
-//  Created by Andre Pham on 8/3/2024.
+//  Created by Andre Pham on 29/3/2024.
 //
 
 import Foundation
 import UIKit
 
-class FamTextInput: FamUIView {
+class FamClearableTextField: FamView {
     
-    private let textInput = PaddedTextField()
+    private static let CLEAR_BUTTON_SIZE_FRACTION = 0.56
+    private static let CLEAR_BUTTON_ICON_SIZE_FRACTION = 0.56
+    private static let TEXT_INPUT_HEIGHT = 48.0
+    
+    private let stack = FamHStack()
+    private let textInput = TextField()
+    private let textClearControl = FamControl()
+    private let textClearCircle = FamView()
+    private let textClearIcon = FamIcon()
     private var onSubmit: (() -> Void)? = nil
     private var onFocus: (() -> Void)? = nil
     private var onUnfocus: (() -> Void)? = nil
-    public var view: UIView {
-        return self.textInput
-    }
     public var text: String {
         return self.textInput.text ?? ""
     }
     
-    override init() {
-        super.init()
-        self.view.translatesAutoresizingMaskIntoConstraints = false
-        self.setFont(to: FamFont(font: FamFonts.Poppins.Medium, size: 18))
-        self.setTextColor(to: FamColors.textDark1)
-        self.setBackgroundColor(to: FamColors.secondaryComponentFill)
-        self.setCornerRadius(to: FamDimensions.foregroundCornerRadius)
-        self.setHeightConstraint(to: FamDimensions.textInputHeight)
+    override func setup() {
+        super.setup()
+        self.add(self.stack)
+        
+        self.stack
+            .constrainAllSides(respectSafeArea: false)
+            .setBackgroundColor(to: FamColors.secondaryComponentFill)
+            .setCornerRadius(to: FamDimensions.foregroundCornerRadius)
+            .append(self.textInput)
+            .append(self.textClearControl)
+        
+        self.textInput
+            .useAutoLayout()
+            .setHeightConstraint(to: Self.TEXT_INPUT_HEIGHT)
+        
+        self.textClearControl
+            .setHeightConstraint(to: Self.TEXT_INPUT_HEIGHT)
+            .setWidthConstraint(to: Self.TEXT_INPUT_HEIGHT)
+            .add(self.textClearCircle)
+            .add(self.textClearIcon)
+            .setOnRelease({
+                self.setText(to: nil)
+                self.textInput.becomeFirstResponder()
+            })
+        
+        self.textClearCircle
+            .constrainCenter(respectSafeArea: false)
+            .setWidthConstraint(to: Self.TEXT_INPUT_HEIGHT*Self.CLEAR_BUTTON_SIZE_FRACTION)
+            .setHeightConstraint(to: Self.TEXT_INPUT_HEIGHT*Self.CLEAR_BUTTON_SIZE_FRACTION)
+            .setCornerRadius(to: Self.TEXT_INPUT_HEIGHT*Self.CLEAR_BUTTON_SIZE_FRACTION/2.0)
+            .setOpacity(to: 0.8) // Not too much contrast desired
+            .setBackgroundColor(to: FamColors.textDark3)
+            .setInteractions(enabled: false)
+        
+        self.textClearIcon
+            .setSymbol(systemName: "xmark")
+            .setWeight(to: .black)
+            .constrainCenter(respectSafeArea: false)
+            .setSize(to: Self.TEXT_INPUT_HEIGHT*Self.CLEAR_BUTTON_SIZE_FRACTION*Self.CLEAR_BUTTON_ICON_SIZE_FRACTION)
+            .setColor(to: FamColors.secondaryComponentFill)
+        
+        self
+            .setFont(to: FamFont(font: FamFonts.Poppins.Medium, size: 18))
+            .setTextColor(to: FamColors.textDark1)
+        
         self.textInput.addTarget(self, action: #selector(self.handleSubmit), for: .editingDidEndOnExit)
+        
         NotificationCenter.default.addObserver(self, selector: #selector(self.textFieldDidBeginEditing), name: UITextField.textDidBeginEditingNotification, object: self.textInput)
         NotificationCenter.default.addObserver(self, selector: #selector(self.textFieldDidEndEditing), name: UITextField.textDidEndEditingNotification, object: self.textInput)
     }
@@ -42,11 +85,11 @@ class FamTextInput: FamUIView {
         self.onSubmit?()
     }
     
-    @objc func textFieldDidBeginEditing(notification: NSNotification) {
+    @objc private func textFieldDidBeginEditing(notification: NSNotification) {
         self.onFocus?()
     }
 
-    @objc func textFieldDidEndEditing(notification: NSNotification) {
+    @objc private func textFieldDidEndEditing(notification: NSNotification) {
         self.onUnfocus?()
     }
     
@@ -112,9 +155,9 @@ class FamTextInput: FamUIView {
     
 }
 
-fileprivate class PaddedTextField: UITextField {
+fileprivate class TextField: UITextField {
     
-    private let padding = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+    private let padding = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 0)
 
     override func textRect(forBounds bounds: CGRect) -> CGRect {
         return bounds.inset(by: self.padding)

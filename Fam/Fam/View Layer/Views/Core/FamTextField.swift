@@ -1,97 +1,46 @@
 //
-//  FamLabelledTextInput.swift
+//  FamTextField.swift
 //  Fam
 //
-//  Created by Andre Pham on 8/3/2024.
+//  Created by Andre Pham on 4/8/2023.
 //
 
 import Foundation
 import UIKit
 
-class FamLabelledTextInput: FamUIView {
+class FamTextField: FamView {
     
-    private let label = FamText()
-    private let stack = FamVStack()
-    private let textInput = PaddedTextField()
+    private let textInput = TextField()
     private var onSubmit: (() -> Void)? = nil
-    private var onEdit: (() -> Void)? = nil
     private var onFocus: (() -> Void)? = nil
     private var onUnfocus: (() -> Void)? = nil
-    public var view: UIView {
-        return self.stack.view
-    }
     public var text: String {
         return self.textInput.text ?? ""
     }
     
-    override init() {
-        super.init()
-        self.textInput.translatesAutoresizingMaskIntoConstraints = false
-        self.setFont(to: FamFont(font: FamFonts.Poppins.Medium, size: 16))
+    override func setup() {
+        super.setup()
+        self.add(self.textInput)
+        self.textInput
+            .useAutoLayout()
+            .constrainAllSides(respectSafeArea: false)
+        self.setFont(to: FamFont(font: FamFonts.Poppins.Medium, size: 18))
         self.setTextColor(to: FamColors.textDark1)
-        self.setCornerRadius(to: 12)
         self.setBackgroundColor(to: FamColors.secondaryComponentFill)
-        self.setHeightConstraint(to: 72)
-        
-        self.stack
-            .addGap(size: 12)
-            .addView(self.label)
-            .addSpacer()
-            .addView(FamView(self.textInput))
-            .addGap(size: 12)
-        
-        FamView(self.textInput)
-            .constrainHorizontal()
-        
-        self.label
-            .constrainHorizontal(padding: 14)
-            .setFont(to: FamFont(font: FamFonts.Poppins.Medium, size: 14))
-            .setTextColor(to: FamColors.textDark3)
-        
+        self.setCornerRadius(to: FamDimensions.foregroundCornerRadius)
+        self.setHeightConstraint(to: 48)
         self.textInput.addTarget(self, action: #selector(self.handleSubmit), for: .editingDidEndOnExit)
-        self.textInput.addTarget(self, action: #selector(self.handleEdit), for: .editingChanged)
         NotificationCenter.default.addObserver(self, selector: #selector(self.textFieldDidBeginEditing), name: UITextField.textDidBeginEditingNotification, object: self.textInput)
         NotificationCenter.default.addObserver(self, selector: #selector(self.textFieldDidEndEditing), name: UITextField.textDidEndEditingNotification, object: self.textInput)
-        
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onTap))
-        self.view.addGestureRecognizer(tapGestureRecognizer)
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
     
-    @objc private func onTap() {
-        self.textInput.becomeFirstResponder()
-    }
-    
-    @objc private func handleSubmit() {
-        self.onSubmit?()
-    }
-    
-    @objc private func handleEdit() {
-        self.onEdit?()
-    }
-    
-    @objc func textFieldDidBeginEditing(notification: NSNotification) {
-        self.stack.addBorder(width: 2.0, color: FamColors.textDark1)
-        self.onFocus?()
-    }
-
-    @objc func textFieldDidEndEditing(notification: NSNotification) {
-        self.stack.removeBorder()
-        self.onUnfocus?()
-    }
-    
     @discardableResult
     func setOnSubmit(_ callback: (() -> Void)?) -> Self {
         self.onSubmit = callback
-        return self
-    }
-    
-    @discardableResult
-    func setOnEdit(_ callback: (() -> Void)?) -> Self {
-        self.onEdit = callback
         return self
     }
     
@@ -110,6 +59,12 @@ class FamLabelledTextInput: FamUIView {
     @discardableResult
     func setSubmitLabel(to label: UIReturnKeyType) -> Self {
         self.textInput.returnKeyType = label
+        return self
+    }
+    
+    @discardableResult
+    func setPlaceholder(to text: String?) -> Self {
+        self.textInput.placeholder = text
         return self
     }
     
@@ -143,17 +98,23 @@ class FamLabelledTextInput: FamUIView {
         return self
     }
     
-    @discardableResult
-    func setLabel(to label: String) -> Self {
-        self.label.setText(to: label)
-        return self
+    @objc private func handleSubmit() {
+        self.onSubmit?()
+    }
+    
+    @objc private func textFieldDidBeginEditing(notification: NSNotification) {
+        self.onFocus?()
+    }
+
+    @objc private func textFieldDidEndEditing(notification: NSNotification) {
+        self.onUnfocus?()
     }
     
 }
 
-fileprivate class PaddedTextField: UITextField {
+fileprivate class TextField: UITextField {
     
-    private let padding = UIEdgeInsets(top: 0, left: 14, bottom: 0, right: 14)
+    private let padding = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
 
     override func textRect(forBounds bounds: CGRect) -> CGRect {
         return bounds.inset(by: self.padding)

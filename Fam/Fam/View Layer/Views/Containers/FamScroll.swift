@@ -1,36 +1,26 @@
 //
-//  FamHStack.swift
+//  FamScroll.swift
 //  Fam
 //
-//  Created by Andre Pham on 30/6/2023.
+//  Created by Andre Pham on 2/2/2024.
 //
 
 import Foundation
 import UIKit
 
-class FamHStack: FamView {
+class FamScroll: FamView {
     
-    private let stack = UIStackView()
+    private let scrollView = UIScrollView()
     public var viewCount: Int {
-        return self.stack.arrangedSubviews.count
-    }
-    private var horizontalSpacer: UIView {
-        let spacerView = UIView()
-        spacerView.useAutoLayout()
-        spacerView.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        spacerView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        return spacerView
+        return self.scrollView.subviews.count
     }
     
     override func setup() {
         super.setup()
-        self.add(self.stack)
-        self.stack
+        self.add(self.scrollView)
+        self.scrollView
             .useAutoLayout()
             .constrainAllSides(respectSafeArea: false)
-        self.stack.axis = .horizontal
-        self.stack.alignment = .center
-        self.stack.isLayoutMarginsRelativeArrangement = false
     }
     
     @discardableResult
@@ -38,56 +28,46 @@ class FamHStack: FamView {
         if animated {
             view.setOpacity(to: 0.0)
             view.setHidden(to: true)
-            self.stack.addArrangedSubview(view)
+            self.scrollView.add(view)
             UIView.animate(withDuration: 0.2, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 2, options: [.curveEaseOut], animations: {
                 view.setOpacity(to: 1.0)
                 view.setHidden(to: false)
             })
         } else {
-            self.stack.addArrangedSubview(view)
+            self.scrollView.add(view)
         }
         return self
     }
     
     @discardableResult
     func insert(_ view: UIView, at position: Int, animated: Bool = false) -> Self {
-        let validatedPosition = min(position, self.stack.arrangedSubviews.count)
+        let validatedPosition = min(position, self.viewCount)
         if animated {
             view.setOpacity(to: 0.0)
             view.setHidden(to: true)
-            self.stack.insertArrangedSubview(view, at: validatedPosition)
+            self.scrollView.insertSubview(view, at: validatedPosition)
             UIView.animate(withDuration: 0.2, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 2, options: [.curveEaseOut], animations: {
                 view.setOpacity(to: 1.0)
                 view.setHidden(to: false)
             })
         } else {
-            self.stack.insertArrangedSubview(view, at: validatedPosition)
+            self.scrollView.insertSubview(view, at: validatedPosition)
         }
         return self
     }
     
     @discardableResult
-    func appendSpacer(animated: Bool = false) -> Self {
-        return self.append(self.horizontalSpacer, animated: animated)
-    }
-    
-    @discardableResult
-    func insertSpacer(at position: Int, animated: Bool = false) -> Self {
-        return self.insert(self.horizontalSpacer, at: position, animated: animated)
-    }
-    
-    @discardableResult
     func appendGap(size: Double, animated: Bool = false) -> Self {
-        let gapView = FamView().setWidthConstraint(to: size)
+        let gapView = FamView().setHeightConstraint(to: size)
         return self.append(gapView, animated: animated)
     }
     
     @discardableResult
     func insertGap(size: Double, at position: Int, animated: Bool = false) -> Self {
-        let gapView = FamView().setWidthConstraint(to: size)
+        let gapView = FamView().setHeightConstraint(to: size)
         return self.insert(gapView, at: position, animated: animated)
     }
-  
+    
     @discardableResult
     func removeAnimated(_ view: UIView) -> Self {
         UIView.animate(withDuration: 0.2, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 2, options: [.curveEaseOut], animations: {
@@ -106,19 +86,45 @@ class FamHStack: FamView {
         guard position >= 0, self.viewCount > position else {
             return self
         }
-        let view = self.stack.arrangedSubviews[position]
+        let view = self.scrollView.subviews[position]
         return self.removeAnimated(view)
     }
     
     @discardableResult
-    func setSpacing(to spacing: CGFloat) -> Self {
-        self.stack.spacing = spacing
+    func setVerticalBounce(to state: Bool) -> Self {
+        self.scrollView.alwaysBounceVertical = state
         return self
     }
     
     @discardableResult
-    func setDistribution(to distribution: UIStackView.Distribution) -> Self {
-        self.stack.distribution = distribution
+    func setHorizontalBounce(to state: Bool) -> Self {
+        self.scrollView.alwaysBounceHorizontal = state
+        return self
+    }
+    
+    @discardableResult
+    func scrollToBottom() -> Self {
+        let bottomOffset = CGPoint(
+            x: 0,
+            y: self.scrollView.contentSize.height - self.scrollView.bounds.size.height + self.scrollView.contentInset.bottom
+        )
+        if bottomOffset.y > 0 {
+            self.scrollView.setContentOffset(bottomOffset, animated: false)
+        }
+        return self
+    }
+    
+    @discardableResult
+    func scrollToBottomAnimated(withEasing easingOption: UIView.AnimationOptions = .curveEaseInOut, duration: Double = 0.3) -> Self {
+        let bottomOffset = CGPoint(
+            x: 0,
+            y: scrollView.contentSize.height - scrollView.bounds.size.height + scrollView.contentInset.bottom
+        )
+        if bottomOffset.y > 0 {
+            UIView.animate(withDuration: duration, delay: 0, options: easingOption, animations: {
+                self.scrollView.contentOffset = bottomOffset
+            }, completion: nil)
+        }
         return self
     }
     

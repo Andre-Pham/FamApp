@@ -2,19 +2,16 @@
 //  FamButton.swift
 //  Fam
 //
-//  Created by Andre Pham on 8/3/2024.
+//  Created by Andre Pham on 14/6/2023.
 //
 
 import Foundation
 import UIKit
 
-class FamButton: FamUIView {
+class FamButton: FamView {
     
     private let button = UIButton(type: .custom)
     private var onTap: (() -> Void)? = nil
-    public var view: UIView {
-        return self.button
-    }
     public var color: UIColor? {
         return self.button.tintColor
     }
@@ -22,15 +19,18 @@ class FamButton: FamUIView {
         return UIButton.Configuration.filled()
     }
     
-    override init() {
-        super.init()
-        self.view.translatesAutoresizingMaskIntoConstraints = false
+    override func setup() {
+        super.setup()
+        self.add(self.button)
+        self.button
+            .useAutoLayout()
+            .constrainAllSides(respectSafeArea: false)
         var config = UIButton.Configuration.filled()
-        config.background.cornerRadius = FamDimensions.foregroundCornerRadius
+        config.background.cornerRadius = 24
         config.contentInsets = NSDirectionalEdgeInsets(
-            top: 10,
+            top: 14,
             leading: 22,
-            bottom: 10,
+            bottom: 14,
             trailing: 22
         )
         self.button.configuration = config
@@ -75,8 +75,8 @@ class FamButton: FamUIView {
     }
     
     @discardableResult
-    func isDisabled(_ isDisabled: Bool) -> Self {
-        self.button.isEnabled = !isDisabled
+    func setDisabled(to state: Bool) -> Self {
+        self.button.isEnabled = !state
         return self
     }
     

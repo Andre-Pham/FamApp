@@ -1,69 +1,28 @@
 //
-//  FamView.swift
+//  UIView.swift
 //  Fam
 //
-//  Created by Andre Pham on 8/3/2024.
+//  Created by Andre Pham on 30/11/2024.
 //
 
 import Foundation
 import UIKit
 
-typealias FamUIView = FamUIViewAbstract & FamUIViewProtocol
-
-// MARK: - Abstract
-
-class FamUIViewAbstract {
-    
-    public let id = UUID()
-    
-    init() { }
-    
-}
-
-// MARK: - Protocol
-
-protocol FamUIViewProtocol {
-    
-    var view: UIView { get }
-    
-}
-extension FamUIViewProtocol {
-    
-    // MARK: - Properties
-    
-    public var isHidden: Bool {
-        return self.view.isHidden
-    }
-    
-    public var frame: CGRect {
-        return self.view.frame
-    }
+extension UIView {
     
     public var opacity: Double {
-        return Double(self.view.layer.opacity)
+        return self.alpha
+    }
+    
+    public var layerOpacity: Double {
+        return Double(self.layer.opacity)
     }
     
     /// The existing size of the view. Subclasses override this method to return a custom value based on the desired layout of any subviews.
     /// For example, UITextView returns the view size of its text, and UIImageView returns the size of the image it is currently displaying.
     public var contentBasedSize: CGSize {
         let maxSize = CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
-        return self.view.sizeThatFits(maxSize)
-    }
-    
-    public var bottomAnchor: NSLayoutYAxisAnchor {
-        return self.view.bottomAnchor
-    }
-    
-    public var topAnchor: NSLayoutYAxisAnchor {
-        return self.view.topAnchor
-    }
-    
-    public var leftAnchor: NSLayoutXAxisAnchor {
-        return self.view.leftAnchor
-    }
-    
-    public var rightAnchor: NSLayoutXAxisAnchor {
-        return self.view.rightAnchor
+        return self.sizeThatFits(maxSize)
     }
     
     public var widthConstraintConstant: Double {
@@ -76,78 +35,87 @@ extension FamUIViewProtocol {
         return self.frame.height
     }
     
-    public var superView: FamView? {
-        if let superView = self.view.superview {
-            return FamView(superView)
-        }
-        return nil
-    }
-    
     public var hasSuperView: Bool {
-        return self.superView != nil
+        return self.superview != nil
     }
     
     // MARK: - Views
     
     @discardableResult
-    func addSubview(_ view: FamUIView) -> Self {
-        self.view.addSubview(view.view)
+    func add(_ subview: UIView) -> Self {
+        self.addSubview(subview)
         return self
     }
     
     @discardableResult
-    func addLayer(_ layer: CALayer) -> Self {
-        self.view.layer.addSublayer(layer)
+    func add(_ layer: CALayer) -> Self {
+        self.layer.addSublayer(layer)
         return self
     }
     
     @discardableResult
-    func clearSubviewsAndLayers() -> Self {
-        self.view.subviews.forEach({ $0.removeFromSuperview() })
-        self.view.layer.sublayers?.forEach({ $0.removeFromSuperlayer() })
+    func remove() -> Self {
+        self.removeFromSuperview()
         return self
     }
     
     @discardableResult
-    func removeFromSuperView() -> Self {
-        self.view.removeFromSuperview()
+    func removeSubviewsAndLayers() -> Self {
+        self.subviews.forEach({ $0.remove() })
+        self.layer.sublayers?.forEach({ $0.removeFromSuperlayer() })
         return self
     }
     
     @discardableResult
     func renderToUIImage() -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, false, UIScreen.main.scale)
+        UIGraphicsBeginImageContextWithOptions(self.bounds.size, false, UIScreen.main.scale)
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
-        self.view.layer.render(in: context)
+        self.layer.render(in: context)
         guard let image = UIGraphicsGetImageFromCurrentImageContext() else { return nil }
         UIGraphicsEndImageContext()
         return image
     }
     
+    /// Checks if this view is within another view's hierarchy of views.
+    /// It iterates over the chain of superviews until it matches the target view or there are no more super views to check.
+    /// - Parameters:
+    ///   - target: The view who's hierarchy is being checked to contain this view
+    /// - Returns: True if the target view's tree of subviews contains this view
+    func existsWithinHierarchy(of target: UIView) -> Bool {
+        var viewToCheck: UIView? = self
+        while let view = viewToCheck {
+            if view === target {
+                return true
+            }
+            viewToCheck = view.superview
+        }
+        return false
+    }
+    
     // MARK: - Frame
     
     @discardableResult
+    func useAutoLayout() -> Self {
+        self.translatesAutoresizingMaskIntoConstraints = false
+        return self
+    }
+    
+    @discardableResult
+    func disableAutoLayout() -> Self {
+        self.translatesAutoresizingMaskIntoConstraints = true
+        return self
+    }
+    
+    @discardableResult
     func setFrame(to rect: CGRect) -> Self {
-        self.view.frame = rect
-        return self
-    }
-    
-    @discardableResult
-    func setClipsToBounds(to state: Bool) -> Self {
-        self.view.clipsToBounds = state
-        return self
-    }
-    
-    @discardableResult
-    func layoutIfNeeded() -> Self {
-        self.view.layoutIfNeeded()
+        self.frame = rect
         return self
     }
     
     @discardableResult
     func layoutIfNeededAnimated(withDuration: Double = 0.3) -> Self {
         UIView.animate(withDuration: withDuration, animations: {
-            self.view.layoutIfNeeded()
+            self.layoutIfNeeded()
         })
         return self
     }
@@ -165,13 +133,13 @@ extension FamUIViewProtocol {
             return self
         }
         // Ensure the view's layout is up to date.
-        self.view.superview?.layoutIfNeeded()
+        self.superview?.layoutIfNeeded()
         // Convert the view's frame to the window's coordinate system to get its position relative to the screen.
-        let viewFrameInWindow = self.view.convert(self.view.bounds, to: window)
+        let viewFrameInWindow = self.convert(self.bounds, to: window)
         // Screen bounds considering the safe area.
         let safeAreaInsets = window.safeAreaInsets
         let screenBounds = window.bounds.inset(by: safeAreaInsets)
-        var newFrame = self.view.frame
+        var newFrame = self.frame
         // Check and adjust for the right edge.
         if viewFrameInWindow.maxX.isGreater(than: screenBounds.maxX - inset) {
             let offsetX = viewFrameInWindow.maxX - screenBounds.maxX
@@ -198,10 +166,10 @@ extension FamUIViewProtocol {
         }
         if let animationDuration {
             UIView.animate(withDuration: animationDuration) {
-                self.view.frame = newFrame
+                self.frame = newFrame
             }
         } else {
-            self.view.frame = newFrame
+            self.frame = newFrame
         }
         return self
     }
@@ -209,48 +177,48 @@ extension FamUIViewProtocol {
     // MARK: - Constraints
     
     @discardableResult
-    func matchWidthConstraint(to other: FamUIView? = nil, respectSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func matchWidthConstraint(to other: UIView? = nil, adjust: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor = respectSafeArea ? target.safeAreaLayoutGuide.widthAnchor : target.widthAnchor
-        self.view.widthAnchor.constraint(equalTo: anchor).isActive = true
+        self.widthAnchor.constraint(equalTo: anchor, constant: adjust).isActive = true
         return self
     }
     
     @discardableResult
-    func matchHeightConstraint(to other: FamUIView? = nil, respectSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func matchHeightConstraint(to other: UIView? = nil, adjust: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor = respectSafeArea ? target.safeAreaLayoutGuide.heightAnchor : target.heightAnchor
-        self.view.widthAnchor.constraint(equalTo: anchor).isActive = true
+        self.heightAnchor.constraint(equalTo: anchor, constant: adjust).isActive = true
         return self
     }
     
     @discardableResult
     func setHeightConstraint(to height: Double) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        self.view.heightAnchor.constraint(equalToConstant: height).isActive = true
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        self.heightAnchor.constraint(equalToConstant: height).isActive = true
         return self
     }
     
     @discardableResult
     func setWidthConstraint(to width: Double) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        self.view.widthAnchor.constraint(equalToConstant: width).isActive = true
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        self.widthAnchor.constraint(equalToConstant: width).isActive = true
         return self
     }
     
     @discardableResult
     func setWidthConstraint(proportion: Double, useParentWidth: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let parentView = self.view.superview else {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let parentView = self.superview else {
             fatalError("No constraint target found")
         }
-        self.view.widthAnchor.constraint(
+        self.widthAnchor.constraint(
             equalTo: useParentWidth ? parentView.widthAnchor : parentView.heightAnchor,
             multiplier: proportion
         ).isActive = true
@@ -259,11 +227,11 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func setHeightConstraint(proportion: Double, useParentHeight: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let parentView = self.view.superview else {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let parentView = self.superview else {
             fatalError("No constraint target found")
         }
-        self.view.widthAnchor.constraint(
+        self.heightAnchor.constraint(
             equalTo: useParentHeight ? parentView.heightAnchor : parentView.widthAnchor,
             multiplier: proportion
         ).isActive = true
@@ -272,22 +240,22 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func setMaxHeightConstraint(to height: Double) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        self.view.heightAnchor.constraint(lessThanOrEqualToConstant: height).isActive = true
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        self.heightAnchor.constraint(lessThanOrEqualToConstant: height).isActive = true
         return self
     }
     
     @discardableResult
     func setMaxWidthConstraint(to width: Double) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        self.view.widthAnchor.constraint(lessThanOrEqualToConstant: width).isActive = true
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        self.widthAnchor.constraint(lessThanOrEqualToConstant: width).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainLeft(to other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainLeft(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor: NSLayoutXAxisAnchor
@@ -296,14 +264,14 @@ extension FamUIViewProtocol {
         } else {
             anchor = respectSafeArea ? target.safeAreaLayoutGuide.leadingAnchor : target.leadingAnchor
         }
-        self.view.leadingAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
+        self.leadingAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainRight(to other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainRight(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor: NSLayoutXAxisAnchor
@@ -312,14 +280,14 @@ extension FamUIViewProtocol {
         } else {
             anchor = respectSafeArea ? target.safeAreaLayoutGuide.trailingAnchor : target.trailingAnchor
         }
-        self.view.trailingAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
+        self.trailingAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainTop(to other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainTop(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor: NSLayoutYAxisAnchor
@@ -328,14 +296,14 @@ extension FamUIViewProtocol {
         } else {
             anchor = respectSafeArea ? target.safeAreaLayoutGuide.topAnchor : target.topAnchor
         }
-        self.view.topAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
+        self.topAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainBottom(to other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainBottom(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor: NSLayoutYAxisAnchor
@@ -344,118 +312,126 @@ extension FamUIViewProtocol {
         } else {
             anchor = respectSafeArea ? target.safeAreaLayoutGuide.bottomAnchor : target.bottomAnchor
         }
-        self.view.bottomAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
+        self.bottomAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainHorizontal(to other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
+    func constrainHorizontal(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
         self.constrainLeft(to: other, padding: padding, toContentLayoutGuide: toContentLayoutGuide)
         self.constrainRight(to: other, padding: padding, toContentLayoutGuide: toContentLayoutGuide)
         return self
     }
     
     @discardableResult
-    func constrainVertical(to other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
+    func constrainVertical(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
         self.constrainTop(to: other, padding: padding, respectSafeArea: respectSafeArea, toContentLayoutGuide: toContentLayoutGuide)
         self.constrainBottom(to: other, padding: padding, respectSafeArea: respectSafeArea, toContentLayoutGuide: toContentLayoutGuide)
         return self
     }
     
     @discardableResult
-    func constrainAllSides(to other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
+    func constrainAllSides(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true, toContentLayoutGuide: Bool = false) -> Self {
         self.constrainHorizontal(to: other, padding: padding, respectSafeArea: respectSafeArea, toContentLayoutGuide: toContentLayoutGuide)
         self.constrainVertical(to: other, padding: padding, respectSafeArea: respectSafeArea, toContentLayoutGuide: toContentLayoutGuide)
         return self
     }
     
     @discardableResult
-    func constrainToUnderneath(of other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainToUnderneath(of other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor = respectSafeArea ? target.safeAreaLayoutGuide.bottomAnchor : target.bottomAnchor
-        self.view.topAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
+        self.topAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainToOnTop(of other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainToOnTop(of other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor = respectSafeArea ? target.safeAreaLayoutGuide.topAnchor : target.topAnchor
-        self.view.bottomAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
+        self.bottomAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainToRightSide(of other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainToRightSide(of other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor = respectSafeArea ? target.safeAreaLayoutGuide.rightAnchor : target.rightAnchor
-        self.view.leftAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
+        self.leftAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainToLeftSide(of other: FamUIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainToLeftSide(of other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor = respectSafeArea ? target.safeAreaLayoutGuide.leftAnchor : target.leftAnchor
-        self.view.rightAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
+        self.rightAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainCenterVertical(to other: FamUIView? = nil, respectSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainCenterVertical(to other: UIView? = nil, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor = respectSafeArea ? target.safeAreaLayoutGuide.centerYAnchor : target.centerYAnchor
-        self.view.centerYAnchor.constraint(equalTo: anchor).isActive = true
+        self.centerYAnchor.constraint(equalTo: anchor).isActive = true
         return self
     }
     
     @discardableResult
-    func constrainCenterHorizontal(to other: FamUIView? = nil, respectSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other?.view ?? self.view.superview else {
+    func constrainCenterHorizontal(to other: UIView? = nil, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
         let anchor = respectSafeArea ? target.safeAreaLayoutGuide.centerXAnchor : target.centerXAnchor
-        self.view.centerXAnchor.constraint(equalTo: anchor).isActive = true
+        self.centerXAnchor.constraint(equalTo: anchor).isActive = true
+        return self
+    }
+    
+    @discardableResult
+    func constrainCenter(to other: UIView? = nil, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        self.constrainCenterVertical(to: other, respectSafeArea: respectSafeArea)
+        self.constrainCenterHorizontal(to: other, respectSafeArea: respectSafeArea)
         return self
     }
     
     @discardableResult
     func constrainBetweenVertical(
-        topView: FamUIView? = nil,
+        topView: UIView? = nil,
         isBeneathTopView: Bool = true,
-        bottomView: FamUIView? = nil,
+        bottomView: UIView? = nil,
         isAboveBottomView: Bool = true,
         topPadding: Double = 0.0,
         bottomPadding: Double = 0.0,
         respectSafeArea: Bool = true
     ) -> Self {
-        guard let topView = topView ?? self.superView else {
+        guard let topView = topView ?? self.superview else {
             fatalError("No top constraint target found")
         }
-        guard let bottomView = bottomView ?? self.superView else {
+        guard let bottomView = bottomView ?? self.superview else {
             fatalError("No bottom constraint target found")
         }
-        guard let superView = self.superView else {
+        guard let superview = self.superview else {
             fatalError("No superview found")
         }
-        let guide = FamView()
-        superView.addSubview(guide)
+        let guide = UIView().useAutoLayout()
+        superview.add(guide)
         if isBeneathTopView {
             guide.constrainToUnderneath(of: topView, padding: topPadding, respectSafeArea: respectSafeArea)
         } else {
@@ -472,25 +448,25 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func constrainBetweenHorizontal(
-        leftView: FamUIView? = nil,
+        leftView: UIView? = nil,
         isBesideLeftView: Bool = true,
-        rightView: FamUIView? = nil,
+        rightView: UIView? = nil,
         isBesideRightView: Bool = true,
         leftPadding: Double = 0.0,
         rightPadding: Double = 0.0,
         respectSafeArea: Bool = true
     ) -> Self {
-        guard let leftView = leftView ?? self.superView else {
+        guard let leftView = leftView ?? self.superview else {
             fatalError("No top constraint target found")
         }
-        guard let rightView = rightView ?? self.superView else {
+        guard let rightView = rightView ?? self.superview else {
             fatalError("No bottom constraint target found")
         }
-        guard let superView = self.superView else {
+        guard let superview = self.superview else {
             fatalError("No superview found")
         }
-        let guide = FamView()
-        superView.addSubview(guide)
+        let guide = UIView().useAutoLayout()
+        superview.add(guide)
         if isBesideLeftView {
             guide.constrainToRightSide(of: leftView, padding: leftPadding, respectSafeArea: respectSafeArea)
         } else {
@@ -506,13 +482,13 @@ extension FamUIViewProtocol {
     }
     
     @discardableResult
-    func constrainHorizontalByProportion(to other: FamUIView? = nil, proportionFromLeft: Double, padding: CGFloat = 0.0, respectsSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other ?? self.superView else {
+    func constrainHorizontalByProportion(to other: UIView? = nil, proportionFromLeft: Double, padding: CGFloat = 0.0, respectsSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
-        let guide = FamView()
-        target.addSubview(guide)
+        let guide = UIView().useAutoLayout()
+        target.add(guide)
         guide
             .constrainLeft()
             .setWidthConstraint(proportion: proportionFromLeft)
@@ -521,13 +497,13 @@ extension FamUIViewProtocol {
     }
     
     @discardableResult
-    func constrainVerticalByProportion(to other: FamUIView? = nil, proportionFromTop: Double, padding: CGFloat = 0.0, respectsSafeArea: Bool = true) -> Self {
-        assert(!self.view.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
-        guard let target = other ?? self.superView else {
+    func constrainVerticalByProportion(to other: UIView? = nil, proportionFromTop: Double, padding: CGFloat = 0.0, respectsSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
             fatalError("No constraint target found")
         }
-        let guide = FamView()
-        target.addSubview(guide)
+        let guide = UIView().useAutoLayout()
+        target.add(guide)
         guide
             .constrainTop()
             .setHeightConstraint(proportion: proportionFromTop)
@@ -537,11 +513,11 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func setPadding(top: CGFloat? = nil, bottom: CGFloat? = nil, left: CGFloat? = nil, right: CGFloat? = nil) -> Self {
-        self.view.layoutMargins = UIEdgeInsets(
-            top: top ?? self.view.layoutMargins.top,
-            left: left ?? self.view.layoutMargins.left,
-            bottom: bottom ?? self.view.layoutMargins.bottom,
-            right: right ?? self.view.layoutMargins.right
+        self.layoutMargins = UIEdgeInsets(
+            top: top ?? self.layoutMargins.top,
+            left: left ?? self.layoutMargins.left,
+            bottom: bottom ?? self.layoutMargins.bottom,
+            right: right ?? self.layoutMargins.right
         )
         return self
     }
@@ -565,10 +541,10 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func removeWidthConstraint() -> Self {
-        for constraint in self.view.constraints {
-            if constraint.firstAttribute == .width && constraint.firstItem as? UIView == self.view {
+        for constraint in self.constraints {
+            if constraint.firstAttribute == .width && constraint.firstItem as? UIView == self {
                 // Remove any width constraints
-                self.view.removeConstraint(constraint)
+                self.removeConstraint(constraint)
             }
         }
         return self
@@ -576,10 +552,10 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func removeHeightConstraint() -> Self {
-        for constraint in self.view.constraints {
-            if constraint.firstAttribute == .height && constraint.firstItem as? UIView == self.view {
+        for constraint in self.constraints {
+            if constraint.firstAttribute == .height && constraint.firstItem as? UIView == self {
                 // Remove any height constraints
-                self.view.removeConstraint(constraint)
+                self.removeConstraint(constraint)
             }
         }
         return self
@@ -589,27 +565,23 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func setBackgroundColor(to color: UIColor) -> Self {
-        self.view.backgroundColor = color
+        self.backgroundColor = color
         return self
     }
     
     @discardableResult
-    func setCornerRadius(to radius: Double) -> Self {
-        self.view.layer.cornerRadius = radius
+    func setCornerRadius(to radius: Double, corners: CACornerMask? = nil) -> Self {
+        self.layer.cornerRadius = radius
+        if let corners {
+            self.layer.maskedCorners = corners
+        }
         return self
     }
     
     @discardableResult
     func addBorder(width: CGFloat = 1.0, color: UIColor = UIColor.red) -> Self {
-        self.view.layer.borderWidth = width
-        self.view.layer.borderColor = color.cgColor
-        return self
-    }
-    
-    @discardableResult
-    func removeBorder() -> Self {
-        self.view.layer.borderWidth = 0.0
-        self.view.layer.borderColor = nil
+        self.layer.borderWidth = width
+        self.layer.borderColor = color.cgColor
         return self
     }
     
@@ -625,36 +597,40 @@ extension FamUIViewProtocol {
         bottom: Bool = false
     ) -> Self {
         if left {
-            let borderView = FamView()
-            self.addSubview(borderView)
+            let borderView = UIView()
+            self.add(borderView)
             borderView
+                .useAutoLayout()
                 .constrainVertical(padding: lengthPadding)
                 .constrainToRightSide(padding: padding)
                 .setWidthConstraint(to: width)
                 .setBackgroundColor(to: color)
         }
         if right {
-            let borderView = FamView()
-            self.addSubview(borderView)
+            let borderView = UIView()
+            self.add(borderView)
             borderView
+                .useAutoLayout()
                 .constrainVertical(padding: lengthPadding)
                 .constrainToLeftSide(padding: padding)
                 .setWidthConstraint(to: width)
                 .setBackgroundColor(to: color)
         }
         if top {
-            let borderView = FamView()
-            self.addSubview(borderView)
+            let borderView = UIView()
+            self.add(borderView)
             borderView
+                .useAutoLayout()
                 .constrainHorizontal(padding: lengthPadding)
                 .constrainToOnTop(padding: padding)
                 .setHeightConstraint(to: width)
                 .setBackgroundColor(to: color)
         }
         if bottom {
-            let borderView = FamView()
-            self.addSubview(borderView)
+            let borderView = UIView()
+            self.add(borderView)
             borderView
+                .useAutoLayout()
                 .constrainHorizontal(padding: lengthPadding)
                 .constrainToUnderneath(padding: padding)
                 .setHeightConstraint(to: width)
@@ -670,19 +646,19 @@ extension FamUIViewProtocol {
         offset: CGSize = CGSize(width: 0, height: 2),
         radius: CGFloat = 3
     ) -> Self {
-        self.view.layer.shadowColor = color.cgColor
-        self.view.layer.shadowOpacity = opacity
-        self.view.layer.shadowOffset = offset
-        self.view.layer.shadowRadius = radius
+        self.layer.shadowColor = color.cgColor
+        self.layer.shadowOpacity = opacity
+        self.layer.shadowOffset = offset
+        self.layer.shadowRadius = radius
         return self
     }
     
     @discardableResult
     func clearShadow() -> Self {
-        self.view.layer.shadowColor = nil
-        self.view.layer.shadowOpacity = 0.0
-        self.view.layer.shadowOffset = CGSize()
-        self.view.layer.shadowRadius = 0.0
+        self.layer.shadowColor = nil
+        self.layer.shadowOpacity = 0.0
+        self.layer.shadowOffset = CGSize()
+        self.layer.shadowRadius = 0.0
         return self
     }
     
@@ -690,31 +666,31 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func setHidden(to isHidden: Bool) -> Self {
-        self.view.isHidden = isHidden
+        self.isHidden = isHidden
         return self
     }
     
     @discardableResult
     func setOpacity(to opacity: Double) -> Self {
-        self.view.alpha = opacity
+        self.alpha = opacity
+        return self
+    }
+    
+    @discardableResult
+    func setLayerOpacity(to opacity: Double) -> Self {
+        self.layer.opacity = Float(opacity)
         return self
     }
     
     @discardableResult
     func setDisabledOpacity() -> Self {
-        self.view.alpha = 0.4
+        self.alpha = 0.4
         return self
     }
     
     @discardableResult
     func setInteractions(enabled: Bool) -> Self {
-        self.view.isUserInteractionEnabled = enabled
-        return self
-    }
-    
-    @discardableResult
-    func setAccessibilityIdentifier(to identifier: String) -> Self {
-        self.view.accessibilityIdentifier = identifier
+        self.isUserInteractionEnabled = enabled
         return self
     }
     
@@ -723,10 +699,10 @@ extension FamUIViewProtocol {
     @discardableResult
     func animateOpacityInteraction() -> Self {
         UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut, .allowUserInteraction], animations: {
-            self.view.alpha = 0.25
+            self.alpha = 0.25
         }) { _ in
             UIView.animate(withDuration: 0.35, delay: 0, options: [.curveEaseInOut, .allowUserInteraction, .beginFromCurrentState], animations: {
-                self.view.alpha = 1.0
+                self.alpha = 1.0
             }, completion: nil)
         }
         return self
@@ -735,7 +711,7 @@ extension FamUIViewProtocol {
     @discardableResult
     func animatePressedOpacity() -> Self {
         UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut, .allowUserInteraction], animations: {
-            self.view.alpha = 0.25
+            self.alpha = 0.25
         }, completion: nil)
         return self
     }
@@ -743,7 +719,7 @@ extension FamUIViewProtocol {
     @discardableResult
     func animateReleaseOpacity() -> Self {
         UIView.animate(withDuration: 0.35, delay: 0, options: [.curveEaseInOut, .allowUserInteraction, .beginFromCurrentState], animations: {
-            self.view.alpha = 1.0
+            self.alpha = 1.0
         }, completion: nil)
         return self
     }
@@ -751,10 +727,10 @@ extension FamUIViewProtocol {
     @discardableResult
     func animateEntrance(duration: Double = 0.2, onCompletion: @escaping () -> Void = {}) -> Self {
         self.setOpacity(to: 0.0)
-        self.view.transform = CGAffineTransform(translationX: 0, y: -10)
+        self.transform = CGAffineTransform(translationX: 0, y: -10)
         UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 2, options: [.curveEaseOut, .allowUserInteraction], animations: {
             self.setOpacity(to: 1.0)
-            self.view.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.transform = CGAffineTransform(translationX: 0, y: 0)
         }) { _ in
             onCompletion()
         }
@@ -765,7 +741,7 @@ extension FamUIViewProtocol {
     func animateExit(duration: Double = 0.2, onCompletion: @escaping () -> Void) -> Self {
         UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 2, options: [.curveEaseOut, .allowUserInteraction], animations: {
             self.setOpacity(to: 0.0)
-            self.view.transform = CGAffineTransform(translationX: 0, y: -10)
+            self.transform = CGAffineTransform(translationX: 0, y: -10)
         }) { _ in
             onCompletion()
         }
@@ -786,7 +762,7 @@ extension FamUIViewProtocol {
     
     @discardableResult
     func setTransformation(to transformation: CGAffineTransform) -> Self {
-        self.view.transform = transformation
+        self.transform = transformation
         return self
     }
     

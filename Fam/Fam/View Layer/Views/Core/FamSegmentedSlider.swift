@@ -2,20 +2,20 @@
 //  FamSegmentedSlider.swift
 //  Fam
 //
-//  Created by Andre Pham on 8/3/2024.
+//  Created by Andre Pham on 7/2/2024.
 //
 
 import Foundation
 import UIKit
 
-class FamSegmentedSlider<T: Any>: FamUIView {
+class FamSegmentedSlider<T: Any>: FamView {
     
     private static var SCRUBBER_DIAMETER: Double { 30.0 }
     private static var DEFAULT_LABEL_WIDTH: Double { 50.0 }
     private static var DEFAULT_LABEL_HEIGHT: Double { 35.0 }
     private static var LABEL_CORNER_RADIUS_HEIGHT_MULTIPLIER: Double { 0.45 }
     
-    private let container = FamGestureView()
+    private let container = FamGesture()
     private let scrubberBackground = FamView()
     private let scrubberLine = FamView()
     private var scrubberLineSegmentIndicators = [FamView]()
@@ -42,9 +42,6 @@ class FamSegmentedSlider<T: Any>: FamUIView {
         }
         return CGFloat(self.segmentIndex)/CGFloat(self.values.count - 1)
     }
-    public var view: UIView {
-        return self.container.view
-    }
     
     private var onStartTracking: (() -> Void)? = nil
     private var onEndTracking: ((_ value: T) -> Void)? = nil
@@ -56,57 +53,70 @@ class FamSegmentedSlider<T: Any>: FamUIView {
     }
     private(set) var isTracking: Bool = false
     
-    override init() {
-        super.init()
+    override func setup() {
+        super.setup()
+        self.add(self.container)
         
         self.container
-            .addSubview(self.scrubberBackground)
-            .addSubview(self.scrubberLine)
-            .addSubview(self.scrubberControl)
+            .constrainAllSides(respectSafeArea: false)
+            .add(self.scrubberBackground)
+            .add(self.scrubberLine)
+            .add(self.scrubberControl)
             .setOnGesture({ gesture in
                 self.onDrag(gesture)
             })
         
         self.scrubberBackground
             .setBackgroundColor(to: FamColors.secondaryComponentFill)
-            .constrainHorizontal()
-            .constrainCenterVertical()
+            .constrainHorizontal(respectSafeArea: false)
+            .constrainCenterVertical(respectSafeArea: false)
             .setHeightConstraint(to: Self.SCRUBBER_DIAMETER)
             .setCornerRadius(to: Self.SCRUBBER_DIAMETER/2.0)
         
         self.scrubberLine
             .setBackgroundColor(to: .black)
             .setOpacity(to: 0.15)
-            .constrainHorizontal(padding: Self.SCRUBBER_DIAMETER/2.0)
-            .constrainCenterVertical()
-            .setHeightConstraint(to: 5.0)
+            .constrainHorizontal(padding: Self.SCRUBBER_DIAMETER/2.0, respectSafeArea: false)
+            .constrainCenterVertical(respectSafeArea: false)
+            .setHeightConstraint(to: 5)
             .setCornerRadius(to: 2.5)
         
         self.scrubberControl
             .setBackgroundColor(to: FamColors.accent)
             .setWidthConstraint(to: Self.SCRUBBER_DIAMETER)
             .setHeightConstraint(to: Self.SCRUBBER_DIAMETER)
-            .constrainCenterVertical()
+            .constrainCenterVertical(respectSafeArea: false)
             .setCornerRadius(to: Self.SCRUBBER_DIAMETER/2.0)
-            .addSubview(self.scrubberLabel)
+            .add(self.scrubberLabel)
         
         self.scrubberLabel
-            .constrainCenterHorizontal()
-            .constrainToOnTop(padding: 10.0)
+            .constrainCenterHorizontal(respectSafeArea: false)
+            .constrainToOnTop(padding: 10.0, respectSafeArea: false)
             .setWidthConstraint(to: Self.DEFAULT_LABEL_WIDTH)
             .setHeightConstraint(to: Self.DEFAULT_LABEL_HEIGHT)
             .setCornerRadius(to: Self.DEFAULT_LABEL_HEIGHT*Self.LABEL_CORNER_RADIUS_HEIGHT_MULTIPLIER)
             .setBackgroundColor(to: FamColors.foregroundFill)
             .addShadow()
-            .addSubview(self.scrubberLabelText)
+            .add(self.scrubberLabelText)
         
         self.scrubberLabelText
-            .constrainCenterVertical()
-            .constrainCenterHorizontal()
+            .constrainCenterVertical(respectSafeArea: false)
+            .constrainCenterHorizontal(respectSafeArea: false)
             .setFont(to: FamFont(font: FamFonts.Quicksand.Bold, size: 16))
             .setTextColor(to: FamColors.textDark1)
         
         self.disableScrubberLabel()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // If any layout occurs the view needs to be re-drawn
+        // Otherwise the position is reset
+        // Includes: device rotation, size class change (on iPad), light/dark mode changes, moving app to background then foreground, etc.
+        // Must occur on the main thread to update (layout callbacks can trigger off the main thread, e.g. size changes on iPad)
+        DispatchQueue.main.async {
+            self.updateCirclePosition(overrideAnimationDuration: 0.0)
+        }
     }
     
     @discardableResult
@@ -131,10 +141,10 @@ class FamSegmentedSlider<T: Any>: FamUIView {
             self.hapticFeedback.impactOccurred()
         }
         if isStartingValue, let animationRestoration {
-            self.setAnimation(duration: animationRestoration)
+            self.setAnimationDuration(to: animationRestoration)
             let timelineWidth = self.container.widthConstraintConstant - Self.SCRUBBER_DIAMETER
             let newPosition = self.progressProportion * timelineWidth + Self.SCRUBBER_DIAMETER / 2
-            self.scrubberControl.view.center.x = newPosition
+            self.scrubberControl.center.x = newPosition
         }
         return self
     }
@@ -172,7 +182,7 @@ class FamSegmentedSlider<T: Any>: FamUIView {
     }
     
     @discardableResult
-    func setAnimation(duration: Double) -> Self {
+    func setAnimationDuration(to duration: Double) -> Self {
         self.animationDuration = duration
         return self
     }
@@ -220,20 +230,21 @@ class FamSegmentedSlider<T: Any>: FamUIView {
     }
     
     private func redrawIndicators() {
-        self.scrubberLineSegmentIndicators.forEach({ $0.removeFromSuperView() })
+        self.scrubberLineSegmentIndicators.forEach({ $0.remove() })
         self.scrubberLineSegmentIndicators.removeAll()
         for indicatorIndex in self.values.indices {
             let indicator = FamView()
             self.scrubberLineSegmentIndicators.append(indicator)
-            self.scrubberLine.addSubview(indicator)
+            self.scrubberLine.add(indicator)
             let height = Self.SCRUBBER_DIAMETER*0.4
             let width = Self.SCRUBBER_DIAMETER*0.4
             let cornerRadius = width/2.0
             indicator
-                .constrainCenterVertical()
+                .constrainCenterVertical(respectSafeArea: false)
                 .constrainHorizontalByProportion(
                     proportionFromLeft: Double(indicatorIndex)/Double(self.values.count == 1 ? 1 : self.values.count - 1),
-                    padding: -width/2.0
+                    padding: -width/2.0,
+                    respectsSafeArea: false
                 )
                 .setBackgroundColor(to: .black)
                 .setHeightConstraint(to: height)
@@ -260,7 +271,7 @@ class FamSegmentedSlider<T: Any>: FamUIView {
             // Calculate the drag position (disregarding segments)
             let containerWidth = self.container.frame.width
             let lineWidth = containerWidth - Self.SCRUBBER_DIAMETER
-            let positionInContainer = gesture.location(in: self.container.view).x
+            let positionInContainer = gesture.location(in: self.container).x
             let positionInLine = {
                 let clampedPosition = min(containerWidth - Self.SCRUBBER_DIAMETER/2.0, max(Self.SCRUBBER_DIAMETER/2.0, positionInContainer))
                 return clampedPosition - Self.SCRUBBER_DIAMETER/2.0
@@ -293,15 +304,16 @@ class FamSegmentedSlider<T: Any>: FamUIView {
         }
     }
     
-    private func updateCirclePosition() {
-        let timelineWidth = self.container.view.bounds.width - Self.SCRUBBER_DIAMETER
+    private func updateCirclePosition(overrideAnimationDuration: Double? = nil) {
+        let timelineWidth = self.container.bounds.width - Self.SCRUBBER_DIAMETER
         let newPosition = self.progressProportion * timelineWidth + Self.SCRUBBER_DIAMETER / 2
-        if let animationDuration {
+        let animationDuration = overrideAnimationDuration ?? self.animationDuration
+        if let animationDuration, animationDuration.isGreaterThanZero() {
             UIView.animate(withDuration: animationDuration, delay: 0, options: [.curveLinear, .allowUserInteraction], animations: {
-                self.scrubberControl.view.center.x = newPosition
+                self.scrubberControl.center.x = newPosition
             })
         } else {
-            self.scrubberControl.view.center.x = newPosition
+            self.scrubberControl.center.x = newPosition
         }
     }
     

@@ -2,28 +2,24 @@
 //  FamChipMultiState.swift
 //  Fam
 //
-//  Created by Andre Pham on 8/3/2024.
+//  Created by Andre Pham on 5/8/2023.
 //
 
 import Foundation
 import UIKit
 
-class FamChipMultiState<T: Any>: FamUIView {
+class FamChipMultiState<T: Any>: FamView {
     
-    private let container = FamView()
     private let button = FamControl()
     private let contentStack = FamHStack()
-    private let imageView = FamImage()
+    private let icon = FamIcon()
     public let label = FamText()
     private(set) var values = [T]()
     private var labels = [String]()
-    private var icons = [UIImage]()
+    private var iconConfigs = [FamIcon.Config]()
     private(set) var stateIndex = 0
     private var onChange: ((_ value: T) -> Void)? = nil
     private var foregroundColor = FamColors.textSecondaryComponent
-    public var view: UIView {
-        return self.container.view
-    }
     public var activeValue: T {
         return self.values[self.stateIndex]
     }
@@ -33,43 +29,39 @@ class FamChipMultiState<T: Any>: FamUIView {
         }
         return self.labels[self.stateIndex]
     }
-    private var activeIcon: UIImage? {
-        guard self.icons.count - 1 >= self.stateIndex else {
+    private var activeIconConfig: FamIcon.Config? {
+        guard self.iconConfigs.count - 1 >= self.stateIndex else {
             return nil
         }
-        return self.icons[self.stateIndex]
+        return self.iconConfigs[self.stateIndex]
     }
     
-    override init() {
-        super.init()
+    override func setup() {
+        super.setup()
         
-        self.container
-            .setHeightConstraint(to: FamDimensions.chipHeight)
+        self
+            .setHeightConstraint(to: 48)
             .setBackgroundColor(to: FamColors.secondaryComponentFill)
             .setCornerRadius(to: FamDimensions.foregroundCornerRadius)
-            .addSubview(self.contentStack)
-            .addSubview(self.button)
+            .add(self.contentStack)
+            .add(self.button)
         
         self.contentStack
-            .constrainVertical()
-            .constrainHorizontal(padding: FamDimensions.chipPaddingHorizontal)
+            .constrainVertical(respectSafeArea: false)
+            .constrainHorizontal(padding: 17, respectSafeArea: false)
             .setSpacing(to: 10)
-            .addView(self.imageView)
-            .addView(self.label)
+            .append(self.icon)
+            .append(self.label)
         
         self.button
-            .constrainAllSides()
+            .constrainAllSides(respectSafeArea: false)
             .setOnPress({
-                self.container.animatePressedOpacity()
+                self.animatePressedOpacity()
             })
             .setOnRelease({
                 self.onTapCallback()
-                self.container.animateReleaseOpacity()
+                self.animateReleaseOpacity()
             })
-        
-        self.imageView
-            .setWidthConstraint(to: 30)
-            .setColor(to: FamColors.textSecondaryComponent)
         
         self.label
             .setFont(to: FamFont(font: FamFonts.Quicksand.SemiBold, size: 20))
@@ -77,21 +69,22 @@ class FamChipMultiState<T: Any>: FamUIView {
     }
     
     private func refresh() {
-        if let icon = self.activeIcon {
-            self.imageView.setImage(icon)
+        if let config = self.activeIconConfig {
+            self.icon.setIcon(to: config)
         }
         if let label = self.activeLabel {
             self.label.setText(to: label)
         }
-        self.imageView.setColor(to: self.foregroundColor)
+        if self.activeIconConfig?.color == nil {
+            // Only match the icon's color to the foreground color if it isn't already explicitly set
+            self.icon.setColor(to: self.foregroundColor)
+        }
         self.label.setTextColor(to: self.foregroundColor)
     }
     
     @discardableResult
     func setFixedWidth(width: Double) -> Self {
-        self.container.setWidthConstraint(to: width)
-        self.contentStack.view.removeConstraints(self.contentStack.view.constraints)
-        self.contentStack.constrainVertical()
+        self.setWidthConstraint(to: width)
         return self
     }
     
@@ -106,28 +99,21 @@ class FamChipMultiState<T: Any>: FamUIView {
     }
     
     @discardableResult
-    func addState(value: T, label: String? = nil, icon: String? = nil) -> Self {
-        assert(!(label == nil && icon == nil), "Label and icon can't simultaneously be nil for this")
+    func addState(value: T, label: String? = nil, iconConfig: FamIcon.Config? = nil) -> Self {
+        assert(!(label == nil && iconConfig == nil), "Label and icon can't simultaneously be nil for this")
         self.values.append(value)
         if let label {
             self.labels.append(label)
         }
-        if let icon {
-            if let image = UIImage(named: icon) {
-                self.icons.append(image)
-            } else if let image = UIImage(systemName: icon) {
-                self.icons.append(image)
-            } else {
-                assertionFailure("Invalid icon provided")
-                self.icons.append(UIImage(systemName: "questionmark.circle.fill")!)
-            }
+        if let iconConfig {
+            self.iconConfigs.append(iconConfig)
         }
         // If we've added state but there's no labels/icons, we assume there are none to come
         if self.labels.isEmpty {
-            self.label.removeFromSuperView()
+            self.label.remove()
         }
-        if self.icons.isEmpty {
-            self.imageView.removeFromSuperView()
+        if self.iconConfigs.isEmpty {
+            self.icon.remove()
         }
         self.refresh()
         return self
@@ -135,7 +121,7 @@ class FamChipMultiState<T: Any>: FamUIView {
     
     @discardableResult
     func setColor(to color: UIColor) -> Self {
-        self.container.setBackgroundColor(to: color)
+        self.setBackgroundColor(to: color)
         return self
     }
     
