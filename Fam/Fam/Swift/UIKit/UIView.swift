@@ -711,16 +711,26 @@ extension UIView {
     @discardableResult
     func animatePressedOpacity() -> Self {
         UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut, .allowUserInteraction], animations: {
-            self.alpha = 0.25
+            self.alpha = 0.4
         }, completion: nil)
         return self
     }
     
     @discardableResult
     func animateReleaseOpacity() -> Self {
-        UIView.animate(withDuration: 0.35, delay: 0, options: [.curveEaseInOut, .allowUserInteraction, .beginFromCurrentState], animations: {
-            self.alpha = 1.0
-        }, completion: nil)
+        // The following is thought out and not the result of a stroke
+        // The reason we need two calls of UIView.animate is because UIScrollView has `delaysContentTouches` set to true
+        // (This means that when you start a scroll gesture on a button/control, it won't consume the gesture and allow scrolling to occur)
+        // (This also means animations get messed up)
+        // First - if we just set the alpha without using UIView.animate with zero delay, it straight up won't work most of the time when tapping quickly
+        // Second - we can't just set it to 0.4 (what `animatePressedOpacity` sets it to), we have to set it lower, otherwise it won't redraw the view and it will remain visually at 1.0 alpha
+        UIView.animate(withDuration: 0.0, delay: 0, options: [.curveEaseInOut, .allowUserInteraction, .beginFromCurrentState], animations: {
+            self.alpha = 0.39
+        }, completion: { _ in
+            UIView.animate(withDuration: 0.35, delay: 0, options: [.curveEaseInOut, .allowUserInteraction, .beginFromCurrentState], animations: {
+                self.alpha = 1.0
+            }, completion: nil)
+        })
         return self
     }
     

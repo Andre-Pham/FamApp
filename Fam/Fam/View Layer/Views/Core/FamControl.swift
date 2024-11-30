@@ -12,6 +12,7 @@ class FamControl: UIControl {
     
     private var onPress: (() -> Void)? = nil
     private var onRelease: (() -> Void)? = nil
+    private var onCancel: (() -> Void)? = nil
     public var isDisabled: Bool {
         return !self.isEnabled
     }
@@ -30,6 +31,7 @@ class FamControl: UIControl {
         self.useAutoLayout()
         self.addTarget(self, action: #selector(self.onPressCallback), for: .touchDown)
         self.addTarget(self, action: #selector(self.onReleaseCallback), for: [.touchUpInside, .touchUpOutside])
+        self.addTarget(self, action: #selector(self.onCancelCallback), for: [.touchCancel])
     }
     
     @discardableResult
@@ -45,6 +47,12 @@ class FamControl: UIControl {
     }
     
     @discardableResult
+    func setOnCancel(_ callback: (() -> Void)?) -> Self {
+        self.onCancel = callback
+        return self
+    }
+    
+    @discardableResult
     func setDisabled(to state: Bool) -> Self {
         self.isEnabled = !state
         return self
@@ -56,6 +64,10 @@ class FamControl: UIControl {
     
     @objc private func onReleaseCallback() {
         self.onRelease?()
+    }
+    
+    @objc private func onCancelCallback() {
+        self.onCancel?()
     }
     
 }

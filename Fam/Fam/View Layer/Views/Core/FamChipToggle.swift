@@ -42,6 +42,9 @@ class FamChipToggle: FamView {
                 self.onTapCallback()
                 self.animateReleaseOpacity()
             })
+            .setOnCancel({
+                self.animateReleaseOpacity()
+            })
         
         self.icon
             .constrainCenter(respectSafeArea: false)

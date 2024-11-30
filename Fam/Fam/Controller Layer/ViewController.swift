@@ -25,6 +25,8 @@ class ViewController: UIViewController {
     private var controls = [FamControl]()
     private var selected: FamilyMember? = nil
     private var step = 0
+    
+    let testView = FamChipToggle()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,7 +63,17 @@ class ViewController: UIViewController {
         
         self.family = self.createFamily()
         
-        self.renderFamily()
+//        self.renderFamily()
+        
+        let autoLayoutLayer = FamView()
+        self.canvasController.addLayer(autoLayoutLayer)
+        autoLayoutLayer.constrainAllSides()
+        autoLayoutLayer
+            .add(self.testView)
+        self.testView
+            .setIcon(to: FamIcon.Config(systemName: "scribble.variable"))
+            .constrainTop(padding: 200)
+            .constrainLeft(padding: 200)
         
         self.view
             .add(self.buttonStack)
