@@ -113,6 +113,12 @@ extension UIView {
     }
     
     @discardableResult
+    func setClipsToBounds(to state: Bool) -> Self {
+        self.clipsToBounds = state
+        return self
+    }
+    
+    @discardableResult
     func layoutIfNeededAnimated(withDuration: Double = 0.3) -> Self {
         UIView.animate(withDuration: withDuration, animations: {
             self.layoutIfNeeded()

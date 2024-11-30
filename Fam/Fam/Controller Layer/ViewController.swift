@@ -27,6 +27,8 @@ class ViewController: UIViewController {
     private var step = 0
     
     let testView = FamChipToggle()
+    let textTest = FamText()
+    let familyMemberView = FamilyTreeMemberView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,6 +76,19 @@ class ViewController: UIViewController {
             .setIcon(to: FamIcon.Config(systemName: "scribble.variable"))
             .constrainTop(padding: 200)
             .constrainLeft(padding: 200)
+        
+        autoLayoutLayer
+            .add(self.textTest)
+        self.textTest
+            .setFont(to: FamFont(font: FamFonts.Quicksand.SemiBold, size: 100))
+            .setText(to: "Hello World")
+        
+        autoLayoutLayer
+            .add(self.familyMemberView)
+        self.familyMemberView
+            .constrainTop(padding: 500)
+            .constrainLeft(padding: 500)
+            .setFamilyMemberName(firstName: "Andre", lastName: "Pham")
         
         self.view
             .add(self.buttonStack)

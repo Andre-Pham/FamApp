@@ -65,6 +65,10 @@
 		B66B214B2CFB69BC001EE08E /* IBMPlexMono-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B66B212D2CFB69BC001EE08E /* IBMPlexMono-BoldItalic.ttf */; };
 		B66B214C2CFB69BC001EE08E /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B66B212E2CFB69BC001EE08E /* Inter-SemiBold.ttf */; };
 		B66B214D2CFB69BC001EE08E /* IBMPlexMono-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B66B212F2CFB69BC001EE08E /* IBMPlexMono-MediumItalic.ttf */; };
+		B66B214F2CFB6A5C001EE08E /* FamilyTreeMemberView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66B214E2CFB6A5C001EE08E /* FamilyTreeMemberView.swift */; };
+		B66B21542CFB6FEA001EE08E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B66B21512CFB6FEA001EE08E /* Preview Assets.xcassets */; };
+		B66B21562CFB6FEA001EE08E /* PreviewContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66B21532CFB6FEA001EE08E /* PreviewContentView.swift */; };
+		B66B21582CFB7010001EE08E /* PreviewObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66B21572CFB7010001EE08E /* PreviewObjects.swift */; };
 		B67985AB2CBA7D36005E38CB /* FamilyRenderProxyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */; };
 		B67985AE2CBA7F33005E38CB /* MockFamilies.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AD2CBA7F33005E38CB /* MockFamilies.swift */; };
 		B67985B02CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985AF2CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift */; };
@@ -171,6 +175,10 @@
 		B66B212D2CFB69BC001EE08E /* IBMPlexMono-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "IBMPlexMono-BoldItalic.ttf"; sourceTree = "<group>"; };
 		B66B212E2CFB69BC001EE08E /* Inter-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.ttf"; sourceTree = "<group>"; };
 		B66B212F2CFB69BC001EE08E /* IBMPlexMono-MediumItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "IBMPlexMono-MediumItalic.ttf"; sourceTree = "<group>"; };
+		B66B214E2CFB6A5C001EE08E /* FamilyTreeMemberView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyTreeMemberView.swift; sourceTree = "<group>"; };
+		B66B21512CFB6FEA001EE08E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		B66B21532CFB6FEA001EE08E /* PreviewContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewContentView.swift; sourceTree = "<group>"; };
+		B66B21572CFB7010001EE08E /* PreviewObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewObjects.swift; sourceTree = "<group>"; };
 		B67985AA2CBA7D36005E38CB /* FamilyRenderProxyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyRenderProxyTests.swift; sourceTree = "<group>"; };
 		B67985AD2CBA7F33005E38CB /* MockFamilies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockFamilies.swift; sourceTree = "<group>"; };
 		B67985AF2CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyRenderProxyRegressionTests.swift; sourceTree = "<group>"; };
@@ -304,8 +312,19 @@
 		B65BB9E72CFA1264002BEC0D /* Custom */ = {
 			isa = PBXGroup;
 			children = (
+				B66B214E2CFB6A5C001EE08E /* FamilyTreeMemberView.swift */,
 			);
 			path = Custom;
+			sourceTree = "<group>";
+		};
+		B66B21502CFB6F78001EE08E /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				B66B21512CFB6FEA001EE08E /* Preview Assets.xcassets */,
+				B66B21532CFB6FEA001EE08E /* PreviewContentView.swift */,
+				B66B21572CFB7010001EE08E /* PreviewObjects.swift */,
+			);
+			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		B67985AC2CBA7F00005E38CB /* Mocks */ = {
@@ -437,9 +456,8 @@
 			children = (
 				B65BB9D12CFA1264002BEC0D /* Views */,
 				B6E308F32BD0115A0032B923 /* Assets */,
-				B6E308F42BD011620032B923 /* Fonts */,
 				B6E308F52BD011690032B923 /* Presets */,
-				B6E3087E2BD002B80032B923 /* Assets.xcassets */,
+				B66B21502CFB6F78001EE08E /* Preview Content */,
 			);
 			path = "View Layer";
 			sourceTree = "<group>";
@@ -465,6 +483,8 @@
 		B6E308F32BD0115A0032B923 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				B6E3087E2BD002B80032B923 /* Assets.xcassets */,
+				B6E308F42BD011620032B923 /* Fonts */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -636,6 +656,7 @@
 				B66B213C2CFB69BC001EE08E /* Quicksand-Regular.ttf in Resources */,
 				B66B21352CFB69BC001EE08E /* Inter-Thin.ttf in Resources */,
 				B66B213E2CFB69BC001EE08E /* Poppins-SemiBoldItalic.ttf in Resources */,
+				B66B21542CFB6FEA001EE08E /* Preview Assets.xcassets in Resources */,
 				B66B213D2CFB69BC001EE08E /* Inter-Light.ttf in Resources */,
 				B66B21342CFB69BC001EE08E /* IBMPlexMono-SemiBold.ttf in Resources */,
 				B66B21492CFB69BC001EE08E /* Poppins-MediumItalic.ttf in Resources */,
@@ -702,6 +723,7 @@
 				B65BB9F22CFA1264002BEC0D /* FamClearableTextField.swift in Sources */,
 				B65BB9FB2CFA1264002BEC0D /* FamChipTextButton.swift in Sources */,
 				B6E308BF2BD009D50032B923 /* FamilyMember.swift in Sources */,
+				B66B21562CFB6FEA001EE08E /* PreviewContentView.swift in Sources */,
 				B65BB9C72CFA102A002BEC0D /* DeviceContext.swift in Sources */,
 				B65BB9FA2CFA1264002BEC0D /* FamScrubber.swift in Sources */,
 				B6E308FD2BD011A30032B923 /* FamDimensions.swift in Sources */,
@@ -713,6 +735,7 @@
 				B649B7462C0971AB004364C2 /* Int.swift in Sources */,
 				B6E308FC2BD011A30032B923 /* FamFonts.swift in Sources */,
 				B6E308C12BD00E1D0032B923 /* FamilyMemberRenderProxy.swift in Sources */,
+				B66B21582CFB7010001EE08E /* PreviewObjects.swift in Sources */,
 				B67985B52CBB6F4C005E38CB /* Trace.swift in Sources */,
 				B6E308C32BD00EBB0032B923 /* FamilyRenderProxy.swift in Sources */,
 				B6E308BD2BD009C60032B923 /* Family.swift in Sources */,
@@ -727,6 +750,7 @@
 				B6285ED32CC362ED00218C94 /* TestUtils.swift in Sources */,
 				B65BB9F42CFA1264002BEC0D /* FamButton.swift in Sources */,
 				B65BB9CE2CFA114D002BEC0D /* UIColor.swift in Sources */,
+				B66B214F2CFB6A5C001EE08E /* FamilyTreeMemberView.swift in Sources */,
 				B67985AE2CBA7F33005E38CB /* MockFamilies.swift in Sources */,
 				B6E308782BD002B70032B923 /* SceneDelegate.swift in Sources */,
 				B65BB9F32CFA1264002BEC0D /* FamText.swift in Sources */,

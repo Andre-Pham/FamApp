@@ -78,4 +78,12 @@ class FamText: UILabel {
         return self
     }
     
+    func fits(text: String) -> Bool {
+        self.layoutIfNeeded()
+        let maxWidth = self.bounds.width
+        let attributes: [NSAttributedString.Key: Any] = [.font: self.font as Any]
+        let size = text.size(withAttributes: attributes)
+        return size.width.isLessOrEqual(to: maxWidth)
+    }
+    
 }
