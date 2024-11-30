@@ -211,22 +211,22 @@
 		B65BB9D22CFA1264002BEC0D /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				B65BB9D32CFA1264002BEC0D /* FamClearableTextField.swift */,
-				B65BB9D42CFA1264002BEC0D /* FamText.swift */,
 				B65BB9D52CFA1264002BEC0D /* FamButton.swift */,
-				B65BB9D62CFA1264002BEC0D /* FamControl.swift */,
-				B65BB9D72CFA1264002BEC0D /* FamChipMultiState.swift */,
-				B65BB9D82CFA1264002BEC0D /* FamTextField.swift */,
-				B65BB9D92CFA1264002BEC0D /* FamSegmentedSlider.swift */,
 				B65BB9DA2CFA1264002BEC0D /* FamChipButton.swift */,
-				B65BB9DB2CFA1264002BEC0D /* FamScrubber.swift */,
+				B65BB9D72CFA1264002BEC0D /* FamChipMultiState.swift */,
 				B65BB9DC2CFA1264002BEC0D /* FamChipTextButton.swift */,
-				B65BB9DD2CFA1264002BEC0D /* FamImage.swift */,
+				B65BB9E22CFA1264002BEC0D /* FamChipToggle.swift */,
+				B65BB9D32CFA1264002BEC0D /* FamClearableTextField.swift */,
+				B65BB9D62CFA1264002BEC0D /* FamControl.swift */,
 				B65BB9DE2CFA1264002BEC0D /* FamGesture.swift */,
 				B65BB9DF2CFA1264002BEC0D /* FamIcon.swift */,
-				B65BB9E02CFA1264002BEC0D /* FamView.swift */,
 				B65BB9E12CFA1264002BEC0D /* FamIconButton.swift */,
-				B65BB9E22CFA1264002BEC0D /* FamChipToggle.swift */,
+				B65BB9DD2CFA1264002BEC0D /* FamImage.swift */,
+				B65BB9DB2CFA1264002BEC0D /* FamScrubber.swift */,
+				B65BB9D92CFA1264002BEC0D /* FamSegmentedSlider.swift */,
+				B65BB9D42CFA1264002BEC0D /* FamText.swift */,
+				B65BB9D82CFA1264002BEC0D /* FamTextField.swift */,
+				B65BB9E02CFA1264002BEC0D /* FamView.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
