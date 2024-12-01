@@ -53,23 +53,11 @@ class ViewController: UIViewController {
         
         self.canvasController.setCanvasBackgroundColor(to: .lightGray)
         
-//        let backgroundLayer = FamView()
-//            .setFrame(to: self.canvasController.canvasRect.cgRect)
-//            .setBackgroundColor(to: .red.withAlphaComponent(0.2))
-//        self.canvasController.addLayer(backgroundLayer)
-//        let box = SMRect(origin: SMPoint(), end: SMPoint(x: 200, y: 200))
-//        let boxView = FamView()
-//            .setFrame(to: box.cgRect)
-//            .setBackgroundColor(to: .blue)
-//        backgroundLayer.addSubview(boxView)
-        
         self.family = self.createFamily()
         
-//        self.renderFamily()
+        self.renderFamily()
         
-        let autoLayoutLayer = FamView()
-        self.canvasController.addLayer(autoLayoutLayer)
-        autoLayoutLayer.constrainAllSides()
+        let autoLayoutLayer = self.canvasController.addLayer()
         autoLayoutLayer
             .add(self.testView)
         self.testView
@@ -179,74 +167,55 @@ class ViewController: UIViewController {
         let render = FamilyRenderProxy(self.family, stopAtStep: self.step == 0 ? nil : self.step)
         print(render.generateTraceStack())
         
-        let connectionLayer = FamView()
-            .disableAutoLayout()
-            .setFrame(to: self.canvasController.canvasRect.cgRect)
-            .setBackgroundColor(to: .white)
-        self.canvasController.addLayer(connectionLayer)
+        let connectionLayer = self.canvasController.addLayer()
+            .setBackgroundColor(to: .blue.withAlphaComponent(0.2))
+        let familyMemberLayer = self.canvasController.addLayer()
+        
         for coupleConnection in render.coupleConnections {
-            guard var position1 = coupleConnection.leftPartner.position?.clone(), var position2 = coupleConnection.rightPartner.position?.clone() else {
-//                assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
+            guard var position1 = coupleConnection.leftPartner.position?.clone(),
+                  var position2 = coupleConnection.rightPartner.position?.clone() else {
+                //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
-//            print(coupleConnection.leftPartner.familyMember.firstName)
-//            print(coupleConnection.rightPartner.familyMember.firstName)
-            position1 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
-            position2 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
-//            print("\(position1.toString()) -> \(position2.toString())")
-            let view = LineView(startPoint: position1.cgPoint, endPoint: position2.cgPoint).useAutoLayout()
-            connectionLayer.add(view)
+            let connectionView = LineView2().setPoints(position1, position2)
+            connectionLayer.add(connectionView)
+            connectionView
+                .constrainLeft(padding: connectionView.boundingBox.minX + self.canvasController.canvasRect.width/2)
+                .constrainTop(padding: connectionView.boundingBox.minY + self.canvasController.canvasRect.height/2)
         }
         
         for childConnection in render.childConnections {
             guard var parentPosition1 = childConnection.parentsConnection.leftPartner.position?.clone(),
                   var parentPosition2 = childConnection.parentsConnection.rightPartner.position?.clone(),
                   var childPosition = childConnection.child.position?.clone() else {
-//                assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
+                //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
             // TODO: In the future, the connections down from the two parents shouldn't be duplicated
             // TODO: These would be tracked as seperate connections - "parent connections" - and the parent connections would connect to the child connections
-            parentPosition1 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
-            parentPosition2 += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
-            childPosition += SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             let positionBetweenParents = SMLineSegment(origin: parentPosition1, end: parentPosition2).midPoint
-            let line1 = LineView(
-              
-                startPoint: positionBetweenParents.cgPoint,
-                endPoint: (positionBetweenParents + SMPoint(x: 0, y: 50)).cgPoint
-            ).useAutoLayout()
-            connectionLayer.add(line1)
-            let line2 = LineView(
-            
-                startPoint: (positionBetweenParents + SMPoint(x: 0, y: 50)).cgPoint,
-                endPoint: (childPosition - SMPoint(x: 0, y: 40)).cgPoint
-            ).useAutoLayout()
-            connectionLayer.add(line2)
+            let connectionView1 = LineView2().setPoints(positionBetweenParents, positionBetweenParents + SMPoint(x: 0, y: 100))
+            connectionLayer.add(connectionView1)
+            connectionView1
+                .constrainLeft(padding: connectionView1.boundingBox.minX + self.canvasController.canvasRect.width/2)
+                .constrainTop(padding: connectionView1.boundingBox.minY + self.canvasController.canvasRect.height/2)
+            let connectionView2 = LineView2().setPoints(positionBetweenParents + SMPoint(x: 0, y: 100), childPosition - SMPoint(x: 0, y: 80))
+            connectionLayer.add(connectionView2)
+            connectionView2
+                .constrainLeft(padding: connectionView2.boundingBox.minX + self.canvasController.canvasRect.width/2)
+                .constrainTop(padding: connectionView2.boundingBox.minY + self.canvasController.canvasRect.height/2)
         }
-        
-        let drawLayer = FamView()
-            .disableAutoLayout()
-            .setFrame(to: self.canvasController.canvasRect.cgRect)
-        self.canvasController.addLayer(drawLayer)
+    
         for proxy in render.orderedFamilyMemberProxies {
-            if let position = proxy.position {
-                let view = FamControl().setBackgroundColor(to: .blue).disableAutoLayout()
-                let text = FamText().disableAutoLayout().setText(to: proxy.familyMember.firstName + " " + (proxy.position?.toString()  ?? "-")).setTextColor(to: .white)
-                drawLayer.addSubview(view)
-                view.addSubview(text)
-                view.setFrame(to: SMRect(
-                    center: position + SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2),
-                    width: 80,
-                    height: 80
-                ).cgRect)
-                view.setOnRelease({
-                    self.selected = proxy.familyMember
-                    print("SELECTED \(proxy.familyMember.fullName)")
-                })
-                text.setFrame(to: CGRect(x: 0, y: 0, width: 80, height: 80))
-                self.controls.append(view)
+            guard let position = proxy.position else {
+                continue
             }
+            let familyMemberView = FamilyTreeMemberView()
+                .setFamilyMemberName(firstName: proxy.familyMember.firstName, lastName: proxy.familyMember.lastName)
+            familyMemberLayer.add(familyMemberView)
+            familyMemberView
+                .constrainCenterLeft(padding: position.x + self.canvasController.canvasRect.width/2)
+                .constrainCenterTop(padding: position.y + self.canvasController.canvasRect.height/2)
         }
     }
     
@@ -254,6 +223,46 @@ class ViewController: UIViewController {
         return MockFamilies.standard
     }
 
+}
+
+class LineView2: FamView {
+    
+    private var startPoint = SMPoint()
+    private var endPoint = SMPoint()
+    private(set) var boundingBox = SMRect(minX: 0, maxX: 0, minY: 0, maxY: 0)
+    
+    override func setup() {
+        super.setup()
+        self.setBackgroundColor(to: .clear)
+    }
+    
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        
+        context.beginPath()
+        context.move(to: self.startPoint.cgPoint)
+        context.addLine(to: self.endPoint.cgPoint)
+        context.setStrokeColor(UIColor.green.cgColor)
+        context.setLineWidth(4)
+        context.strokePath()
+    }
+    
+    @discardableResult
+    func setPoints(_ start: SMPoint, _ end: SMPoint) -> Self {
+        let boundingBox = SMPointCollection(points: [start, end]).boundingBox!
+        boundingBox.expandAllSides(by: 4)
+        self.startPoint = start - boundingBox.origin
+        self.endPoint = end - boundingBox.origin
+        self.boundingBox = boundingBox
+        return self
+            .removeWidthConstraint()
+            .removeHeightConstraint()
+            .setWidthConstraint(to: boundingBox.width)
+            .setHeightConstraint(to: boundingBox.height)
+    }
+    
 }
 
 class LineView: UIView {

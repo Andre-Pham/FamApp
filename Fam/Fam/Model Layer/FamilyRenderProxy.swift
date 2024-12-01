@@ -41,8 +41,9 @@ import SwiftMath
 
 class FamilyRenderProxy {
     
-    public static let POSITION_PADDING = 150.0
-    public static let COUPLES_PADDING = 100.0
+    public static let POSITION_PADDING = 300.0
+    public static let COUPLES_PADDING = 200.0
+    private static let RENDER_POSITIVE_Y_UP = false
     
     /// A store of all the family members
     private(set) var familyMemberProxiesStore = [UUID: FamilyMemberRenderProxy]()
@@ -264,14 +265,14 @@ class FamilyRenderProxy {
             self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) placed relative to ex spouse: \(proxy.position?.toString() ?? "nil")"))
             return true
         } else if proxy.familyMember.isParent(of: otherProxy.familyMember) {
-            relativePosition -= SMPoint(x: 0.0, y: Self.POSITION_PADDING)
+            relativePosition += SMPoint(x: 0.0, y: self.transformY(Self.POSITION_PADDING))
             proxy.setPosition(to: relativePosition)
             self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")"))
             self.resolveRenderConflicts(direction: nil, for: proxy)
             self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) placed relative to child: \(proxy.position?.toString() ?? "nil")"))
             return true
         } else if proxy.familyMember.isChild(of: otherProxy.familyMember) {
-            relativePosition += SMPoint(x: 0.0, y: Self.POSITION_PADDING)
+            relativePosition -= SMPoint(x: 0.0, y: self.transformY(Self.POSITION_PADDING))
             proxy.setPosition(to: relativePosition)
             self.traceStack.trace(Trace(type: .action, message: "\(proxy.familyMember.fullName) initially placed: \(proxy.position?.toString() ?? "nil")"))
             self.resolveRenderConflicts(direction: nil, for: proxy)
@@ -1181,6 +1182,13 @@ class FamilyRenderProxy {
                 ))
             }
         }
+    }
+    
+    private func transformY(_ y: Double) -> Double {
+        if Self.RENDER_POSITIVE_Y_UP {
+            return y
+        }
+        return -y
     }
     
 }

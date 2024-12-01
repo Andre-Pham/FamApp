@@ -18,7 +18,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     private static let DEFAULT_CANVAS_COLOR = UIColor.clear
     private static let DEFAULT_BOUNCE = true
     private static let DEFAULT_MIN_ZOOM_SCALE = 0.2
-    private static let DEFAULT_MAX_ZOOM_SCALE = 10.0
+    private static let DEFAULT_MAX_ZOOM_SCALE = 1.0
     private static let DEFAULT_SHOW_SCROLL_BARS = true
     
     // MARK: - View Properties
@@ -28,7 +28,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Layer Properties
     
-//    private(set) var layers = [UIView]()
+    private(set) var layers = [UIView]()
     
     // MARK: - Rendering Properties
     
@@ -210,9 +210,23 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Layer Functions
     
-    func addLayer(_ view: UIView) {
-//        self.layers.append(view.view)
-        self.canvasContainer.addSubview(view)
+    func addLayer() -> UIView {
+        let newLayer = UIView().useAutoLayout()
+        self.layers.append(newLayer)
+        self.canvasContainer.add(newLayer)
+        newLayer.constrainAllSides()
+        return newLayer
+    }
+    
+    func insertLayer(at position: Int) -> UIView {
+        guard position <= self.layers.count else {
+            return self.addLayer()
+        }
+        let newLayer = UIView().useAutoLayout()
+        self.layers.insert(newLayer, at: position)
+        self.canvasContainer.insert(newLayer, at: position)
+        newLayer.constrainAllSides()
+        return newLayer
     }
     
     // MARK: - Scroll and Zoom Functions

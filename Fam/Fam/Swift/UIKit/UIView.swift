@@ -48,6 +48,24 @@ extension UIView {
     }
     
     @discardableResult
+    func insert(_ subview: UIView, at position: Int) -> Self {
+        self.insertSubview(subview, at: position)
+        return self
+    }
+    
+    @discardableResult
+    func insert(_ subview: UIView, above viewBelow: UIView) -> Self {
+        self.insertSubview(subview, aboveSubview: viewBelow)
+        return self
+    }
+    
+    @discardableResult
+    func insert(_ subview: UIView, below viewAbove: UIView) -> Self {
+        self.insertSubview(subview, belowSubview: viewAbove)
+        return self
+    }
+    
+    @discardableResult
     func add(_ layer: CALayer) -> Self {
         self.layer.addSublayer(layer)
         return self
@@ -414,6 +432,50 @@ extension UIView {
         assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
         self.constrainCenterVertical(to: other, respectSafeArea: respectSafeArea)
         self.constrainCenterHorizontal(to: other, respectSafeArea: respectSafeArea)
+        return self
+    }
+    
+    @discardableResult
+    func constrainCenterLeft(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
+            fatalError("No constraint target found")
+        }
+        let anchor = respectSafeArea ? target.safeAreaLayoutGuide.leftAnchor : target.leftAnchor
+        self.centerXAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
+        return self
+    }
+    
+    @discardableResult
+    func constrainCenterRight(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
+            fatalError("No constraint target found")
+        }
+        let anchor = respectSafeArea ? target.safeAreaLayoutGuide.rightAnchor : target.rightAnchor
+        self.centerXAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
+        return self
+    }
+    
+    @discardableResult
+    func constrainCenterTop(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
+            fatalError("No constraint target found")
+        }
+        let anchor = respectSafeArea ? target.safeAreaLayoutGuide.topAnchor : target.topAnchor
+        self.centerYAnchor.constraint(equalTo: anchor, constant: padding).isActive = true
+        return self
+    }
+
+    @discardableResult
+    func constrainCenterBottom(to other: UIView? = nil, padding: CGFloat = 0.0, respectSafeArea: Bool = true) -> Self {
+        assert(!self.translatesAutoresizingMaskIntoConstraints, "Constraints requirement failed")
+        guard let target = other ?? self.superview else {
+            fatalError("No constraint target found")
+        }
+        let anchor = respectSafeArea ? target.safeAreaLayoutGuide.bottomAnchor : target.bottomAnchor
+        self.centerYAnchor.constraint(equalTo: anchor, constant: -padding).isActive = true
         return self
     }
     
