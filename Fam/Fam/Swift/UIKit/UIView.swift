@@ -48,19 +48,19 @@ extension UIView {
     }
     
     @discardableResult
-    func insert(_ subview: UIView, at position: Int) -> Self {
+    func add(_ subview: UIView, at position: Int) -> Self {
         self.insertSubview(subview, at: position)
         return self
     }
     
     @discardableResult
-    func insert(_ subview: UIView, above viewBelow: UIView) -> Self {
+    func add(_ subview: UIView, above viewBelow: UIView) -> Self {
         self.insertSubview(subview, aboveSubview: viewBelow)
         return self
     }
     
     @discardableResult
-    func insert(_ subview: UIView, below viewAbove: UIView) -> Self {
+    func add(_ subview: UIView, below viewAbove: UIView) -> Self {
         self.insertSubview(subview, belowSubview: viewAbove)
         return self
     }

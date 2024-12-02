@@ -224,7 +224,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         }
         let newLayer = UIView().useAutoLayout()
         self.layers.insert(newLayer, at: position)
-        self.canvasContainer.insert(newLayer, at: position)
+        self.canvasContainer.add(newLayer, at: position)
         newLayer.constrainAllSides()
         return newLayer
     }
