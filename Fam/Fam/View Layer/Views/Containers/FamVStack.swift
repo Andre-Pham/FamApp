@@ -122,4 +122,10 @@ class FamVStack: FamView {
         return self
     }
     
+    @discardableResult
+    func setAlignment(to alignment: UIStackView.Alignment) -> Self {
+        self.stack.alignment = alignment
+        return self
+    }
+    
 }

@@ -839,8 +839,14 @@ extension UIView {
     // MARK: - Transformations
     
     @discardableResult
-    func setTransformation(to transformation: CGAffineTransform) -> Self {
-        self.transform = transformation
+    func setTransformation(to transformation: CGAffineTransform, animated: Bool = false) -> Self {
+        if animated {
+            UIView.animate(withDuration: 0.2, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 2, options: [.curveEaseOut], animations: {
+                self.transform = transformation
+            })
+        } else {
+            self.transform = transformation
+        }
         return self
     }
     
