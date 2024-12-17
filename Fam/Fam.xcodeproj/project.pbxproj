@@ -184,6 +184,7 @@
 		B67985AF2CBB38E1005E38CB /* FamilyRenderProxyRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyRenderProxyRegressionTests.swift; sourceTree = "<group>"; };
 		B67985B12CBB6E7E005E38CB /* TraceStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraceStack.swift; sourceTree = "<group>"; };
 		B67985B42CBB6F4C005E38CB /* Trace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trace.swift; sourceTree = "<group>"; };
+		B6CD91AD2D054913006919B7 /* SwiftMath */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SwiftMath; path = ../../SwiftMath; sourceTree = "<group>"; };
 		B6E308722BD002B70032B923 /* Fam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6E308752BD002B70032B923 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B6E308772BD002B70032B923 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -347,6 +348,7 @@
 		B6E308692BD002B70032B923 = {
 			isa = PBXGroup;
 			children = (
+				B6CD91AD2D054913006919B7 /* SwiftMath */,
 				B6E308742BD002B70032B923 /* Fam */,
 				B6E3088B2BD002B80032B923 /* FamTests */,
 				B6E308952BD002B80032B923 /* FamUITests */,

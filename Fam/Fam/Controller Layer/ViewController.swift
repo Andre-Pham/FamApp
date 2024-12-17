@@ -217,6 +217,18 @@ class ViewController: UIViewController {
                 .constrainCenterLeft(padding: position.x + self.canvasController.canvasRect.width/2)
                 .constrainCenterTop(padding: position.y + self.canvasController.canvasRect.height/2)
         }
+        
+        let testLine = TestLineView().setPoints()
+        familyMemberLayer.add(testLine)
+        testLine
+            .constrainLeft(padding: testLine.boundingBox.minX + self.canvasController.canvasRect.width/2)
+            .constrainTop(padding: testLine.boundingBox.minY + self.canvasController.canvasRect.height/2)
+        
+        let testLine2 = TestLineView().setPoints([SMPoint(x: 0, y: -200), SMPoint(x: 100, y: -400), SMPoint(x: 200, y: -200)])
+        familyMemberLayer.add(testLine2)
+        testLine2
+            .constrainLeft(padding: testLine2.boundingBox.minX + self.canvasController.canvasRect.width/2)
+            .constrainTop(padding: testLine2.boundingBox.minY + self.canvasController.canvasRect.height/2)
     }
     
     func createFamily() -> Family {
@@ -265,34 +277,74 @@ class LineView2: FamView {
     
 }
 
-class LineView: UIView {
-    var startPoint: CGPoint
-    var endPoint: CGPoint
-
-    init(startPoint: CGPoint, endPoint: CGPoint) {
-        let boundingBox = SMPointCollection(points: [SMPoint(startPoint), SMPoint(endPoint)]).boundingBox!
-        let expansion = 4.0
-        boundingBox.expandAllSides(by: expansion)
-        self.startPoint = (SMPoint(startPoint) - boundingBox.origin).cgPoint
-        self.endPoint = (SMPoint(endPoint) - boundingBox.origin).cgPoint
-        super.init(frame: boundingBox.cgRect)
-        self.backgroundColor = .clear
+class TestLineView: FamView {
+    
+    private var points = [SMPoint]()
+    private(set) var boundingBox = SMRect(minX: 0, maxX: 0, minY: 0, maxY: 0)
+    
+    override func setup() {
+        super.setup()
+        self.setBackgroundColor(to: .clear)
     }
-
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
+    
     override func draw(_ rect: CGRect) {
         super.draw(rect)
+        
+        let line = SMPolyline(vertices: self.points)
+//        let roundedLine = line.roundedCorners(radius: 30, controlPointDistance: 60)
+        let roundedLine = line.roundedCorners(pointDistance: 250, controlPointDistance: 200)
 
         guard let context = UIGraphicsGetCurrentContext() else { return }
+        context.addPath(line.cgPath)
+        context.setStrokeColor(UIColor.black.cgColor)
+        context.setLineWidth(6)
+        context.strokePath()
         
-        context.beginPath()
-        context.move(to: self.startPoint)
-        context.addLine(to: self.endPoint)
+        context.addPath(roundedLine.cgPath)
         context.setStrokeColor(UIColor.green.cgColor)
-        context.setLineWidth(4)
+        context.setLineWidth(8)
+        context.strokePath()
+        
+        for bez in roundedLine.sortedBezierEdges {
+            context.addEllipse(in: SMRect(center: bez.origin, width: 20, height: 20).cgRect)
+            context.setFillColor(UIColor.purple.cgColor)
+            context.fillPath()
+            context.addEllipse(in: SMRect(center: bez.originControlPoint, width: 20, height: 20).cgRect)
+            context.setFillColor(UIColor.blue.cgColor)
+            context.fillPath()
+            context.addEllipse(in: SMRect(center: bez.end, width: 20, height: 20).cgRect)
+            context.setFillColor(UIColor.red.cgColor)
+            context.fillPath()
+            context.addEllipse(in: SMRect(center: bez.endControlPoint, width: 20, height: 20).cgRect)
+            context.setFillColor(UIColor.orange.cgColor)
+            context.fillPath()
+        }
+        
+        let boundingBox = roundedLine.boundingBox
+        context.addRect(boundingBox.cgRect)
+        context.setStrokeColor(UIColor.red.cgColor)
+        context.setLineWidth(8)
         context.strokePath()
     }
+    
+    @discardableResult
+    func setPoints(_ points: [SMPoint] = [SMPoint(x: 0, y: 0), SMPoint(x: 0, y: 500), SMPoint(x: 500, y: 700), SMPoint(x: 500, y: 1200)]) -> Self {
+        let line = SMPolyline(vertices: points)
+        let roundedLine = line.roundedCorners(pointDistance: 250, controlPointDistance: 200)
+        dump(roundedLine)
+        
+        let boundingBox = SMPointCollection(points: points).boundingBox!
+        // TODO: This is temp
+        boundingBox.expandAllSides(by: 50)
+        for point in points {
+            self.points.append(point - boundingBox.origin)
+        }
+        self.boundingBox = boundingBox
+        return self
+            .removeWidthConstraint()
+            .removeHeightConstraint()
+            .setWidthConstraint(to: boundingBox.width)
+            .setHeightConstraint(to: boundingBox.height)
+    }
+    
 }
