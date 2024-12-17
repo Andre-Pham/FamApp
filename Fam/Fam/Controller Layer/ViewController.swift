@@ -57,26 +57,26 @@ class ViewController: UIViewController {
         
         self.renderFamily()
         
-        let autoLayoutLayer = self.canvasController.addLayer()
-        autoLayoutLayer
-            .add(self.testView)
-        self.testView
-            .setIcon(to: FamIcon.Config(systemName: "scribble.variable"))
-            .constrainTop(padding: 200)
-            .constrainLeft(padding: 200)
+//        let autoLayoutLayer = self.canvasController.addLayer()
+//        autoLayoutLayer
+//            .add(self.testView)
+//        self.testView
+//            .setIcon(to: FamIcon.Config(systemName: "scribble.variable"))
+//            .constrainTop(padding: 200)
+//            .constrainLeft(padding: 200)
+//        
+//        autoLayoutLayer
+//            .add(self.textTest)
+//        self.textTest
+//            .setFont(to: FamFont(font: FamFonts.Quicksand.SemiBold, size: 100))
+//            .setText(to: "Hello World")
         
-        autoLayoutLayer
-            .add(self.textTest)
-        self.textTest
-            .setFont(to: FamFont(font: FamFonts.Quicksand.SemiBold, size: 100))
-            .setText(to: "Hello World")
-        
-        autoLayoutLayer
-            .add(self.familyMemberView)
-        self.familyMemberView
-            .constrainTop(padding: 500)
-            .constrainLeft(padding: 500)
-            .setFamilyMemberName(firstName: "Andre", lastName: "Pham")
+//        autoLayoutLayer
+//            .add(self.familyMemberView)
+//        self.familyMemberView
+//            .constrainTop(padding: 500)
+//            .constrainLeft(padding: 500)
+//            .setFamilyMemberName(firstName: "Andre", lastName: "Pham")
         
         self.view
             .add(self.buttonStack)
@@ -229,6 +229,31 @@ class ViewController: UIViewController {
         testLine2
             .constrainLeft(padding: testLine2.boundingBox.minX + self.canvasController.canvasRect.width/2)
             .constrainTop(padding: testLine2.boundingBox.minY + self.canvasController.canvasRect.height/2)
+        
+        let testLine3 = LineSegmentView()
+            .setLineSegment(SMLineSegment(origin: SMPoint(x: 100, y: 100), end: SMPoint(x: 500, y: 750)))
+            .setLineWidth(to: 50)
+            .setLineCap(to: .round)
+            .addBorder()
+        familyMemberLayer.add(testLine3)
+        testLine3
+            .constrainToPosition()
+        
+        let testLine4 = LineSegmentView()
+            .setLineSegment(SMLineSegment(origin: SMPoint(x: 600, y: 100), end: SMPoint(x: 1000, y: 100)))
+            .setLineCap(to: .square)
+        familyMemberLayer.add(testLine4)
+        testLine4
+            .constrainToPosition()
+        
+//        let test = FamView()
+//            .setWidthConstraint(to: 5)
+//            .setHeightConstraint(to: 5)
+//            .setBackgroundColor(to: .red)
+//        familyMemberLayer.addSubview(test)
+//        test
+//            .constrainCenterLeft(padding: 100)
+//            .constrainCenterTop(padding: 100)
     }
     
     func createFamily() -> Family {
@@ -236,6 +261,87 @@ class ViewController: UIViewController {
     }
 
 }
+
+class LineSegmentView: FamView {
+    
+    private var lineSegment = SMLineSegment(origin: SMPoint(), end: SMPoint())
+    private var boundingBox = SMRect(origin: SMPoint(), end: SMPoint())
+    private var strokeColor = UIColor.black
+    private var lineWidth = 1.0
+    private var lineCap: CGLineCap = .butt
+    private var dash: (phase: CGFloat, lengths: [CGFloat])? = nil
+    
+    override func setup() {
+        super.setup()
+        self.setBackgroundColor(to: .clear)
+    }
+    
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        context.addPath(self.lineSegment.cgPath)
+        context.setStrokeColor(self.strokeColor.cgColor)
+        context.setLineWidth(self.lineWidth)
+        context.setLineCap(self.lineCap)
+        if let dash {
+            context.setLineDash(phase: dash.phase, lengths: dash.lengths)
+        }
+        context.strokePath()
+    }
+    
+    @discardableResult
+    func constrainToPosition() -> Self {
+        self.constrainLeft(padding: self.boundingBox.minX)
+            .constrainTop(padding: self.boundingBox.minY)
+    }
+    
+    @discardableResult
+    func setLineSegment(_ lineSegment: SMLineSegment) -> Self {
+        self.lineSegment = lineSegment.clone()
+        self.boundingBox = lineSegment.boundingBox
+        self.boundingBox.expandAllSides(by: self.lineWidth)
+        self.lineSegment -= self.boundingBox.origin
+        self.refreshSizeConstraints()
+        return self
+    }
+    
+    @discardableResult
+    func setLineWidth(to width: Double) -> Self {
+        self.lineSegment += self.boundingBox.origin
+        self.boundingBox.expandAllSides(by: width - self.lineWidth)
+        self.lineSegment -= self.boundingBox.origin
+        self.lineWidth = width
+        self.refreshSizeConstraints()
+        return self
+    }
+    
+    @discardableResult
+    func setStrokeColor(to color: UIColor) -> Self {
+        self.strokeColor = color
+        return self
+    }
+    
+    @discardableResult
+    func setLineCap(to lineCap: CGLineCap) -> Self {
+        self.lineCap = lineCap
+        return self
+    }
+    
+    @discardableResult
+    func setDash(to dash: (phase: CGFloat, lengths: [CGFloat])?) -> Self {
+        self.dash = dash
+        return self
+    }
+    
+    private func refreshSizeConstraints() {
+        self.removeWidthConstraint()
+            .removeHeightConstraint()
+            .setWidthConstraint(to: self.boundingBox.width)
+            .setHeightConstraint(to: self.boundingBox.height)
+    }
+    
+}
+
 
 class LineView2: FamView {
     
