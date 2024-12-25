@@ -18,6 +18,6 @@ jobs:
       with:
         swift-version: '5'
     - name: Build
-      run: xcodebuild -project ../../Fam/Fam.xcodeproj -scheme Fam -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' clean build
+      run: xcodebuild -project ./Fam/Fam.xcodeproj -scheme Fam -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' clean build
     - name: Run Tests
-      run: xcodebuild -project ../../Fam/Fam.xcodeproj -scheme Fam -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' test
+      run: xcodebuild -project ./Fam/Fam.xcodeproj -scheme Fam -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' test
