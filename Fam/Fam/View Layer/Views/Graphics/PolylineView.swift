@@ -1,5 +1,5 @@
 //
-//  LineSegmentView.swift
+//  PolylineView.swift
 //  Fam
 //
 //  Created by Andre Pham on 17/12/2024.
@@ -9,9 +9,9 @@ import Foundation
 import UIKit
 import SwiftMath
 
-class LineSegmentView: FamView {
+class PolylineView: FamView {
     
-    private var lineSegment = SMLineSegment(origin: SMPoint(), end: SMPoint())
+    private var polyline = SMPolyline()
     private var boundingBox = SMRect(origin: SMPoint(), end: SMPoint())
     private var strokeColor = UIColor.black
     private var lineWidth = 1.0
@@ -26,7 +26,7 @@ class LineSegmentView: FamView {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        context.addPath(self.lineSegment.cgPath)
+        context.addPath(self.polyline.cgPath)
         context.setStrokeColor(self.strokeColor.cgColor)
         context.setLineWidth(self.lineWidth)
         context.setLineCap(self.lineCap)
@@ -43,20 +43,20 @@ class LineSegmentView: FamView {
     }
     
     @discardableResult
-    func setLineSegment(_ lineSegment: SMLineSegment) -> Self {
-        self.lineSegment = lineSegment
-        self.boundingBox = lineSegment.boundingBox
+    func setPolyline(_ polyline: SMPolyline) -> Self {
+        self.polyline = polyline
+        self.boundingBox = polyline.boundingBox ?? SMRect(minX: 0, maxX: 0, minY: 0, maxY: 0)
         self.boundingBox.expandAllSides(by: self.lineWidth)
-        self.lineSegment -= self.boundingBox.origin
+        self.polyline -= self.boundingBox.origin
         self.refreshSizeConstraints()
         return self
     }
     
     @discardableResult
     func setLineWidth(to width: Double) -> Self {
-        self.lineSegment += self.boundingBox.origin
+        self.polyline += self.boundingBox.origin
         self.boundingBox.expandAllSides(by: width - self.lineWidth)
-        self.lineSegment -= self.boundingBox.origin
+        self.polyline -= self.boundingBox.origin
         self.lineWidth = width
         self.refreshSizeConstraints()
         return self

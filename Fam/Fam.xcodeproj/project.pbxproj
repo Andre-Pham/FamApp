@@ -75,6 +75,8 @@
 		B67985B22CBB6E7E005E38CB /* TraceStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985B12CBB6E7E005E38CB /* TraceStack.swift */; };
 		B67985B52CBB6F4C005E38CB /* Trace.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67985B42CBB6F4C005E38CB /* Trace.swift */; };
 		B6CD91B02D11A840006919B7 /* LineSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CD91AF2D11A840006919B7 /* LineSegmentView.swift */; };
+		B6CD91B22D11AB3C006919B7 /* PolylineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CD91B12D11AB3C006919B7 /* PolylineView.swift */; };
+		B6CD91B42D15A326006919B7 /* CurvilinearEdgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CD91B32D15A326006919B7 /* CurvilinearEdgesView.swift */; };
 		B6E308762BD002B70032B923 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308752BD002B70032B923 /* AppDelegate.swift */; };
 		B6E308782BD002B70032B923 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308772BD002B70032B923 /* SceneDelegate.swift */; };
 		B6E3087A2BD002B70032B923 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E308792BD002B70032B923 /* ViewController.swift */; };
@@ -187,6 +189,8 @@
 		B67985B42CBB6F4C005E38CB /* Trace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trace.swift; sourceTree = "<group>"; };
 		B6CD91AD2D054913006919B7 /* SwiftMath */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SwiftMath; path = ../../SwiftMath; sourceTree = "<group>"; };
 		B6CD91AF2D11A840006919B7 /* LineSegmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineSegmentView.swift; sourceTree = "<group>"; };
+		B6CD91B12D11AB3C006919B7 /* PolylineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolylineView.swift; sourceTree = "<group>"; };
+		B6CD91B32D15A326006919B7 /* CurvilinearEdgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurvilinearEdgesView.swift; sourceTree = "<group>"; };
 		B6E308722BD002B70032B923 /* Fam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6E308752BD002B70032B923 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B6E308772BD002B70032B923 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -352,6 +356,8 @@
 			isa = PBXGroup;
 			children = (
 				B6CD91AF2D11A840006919B7 /* LineSegmentView.swift */,
+				B6CD91B12D11AB3C006919B7 /* PolylineView.swift */,
+				B6CD91B32D15A326006919B7 /* CurvilinearEdgesView.swift */,
 			);
 			path = Graphics;
 			sourceTree = "<group>";
@@ -731,6 +737,7 @@
 				B6E308C52BD00F470032B923 /* CanvasController.swift in Sources */,
 				B6E308FB2BD011A30032B923 /* FamColors.swift in Sources */,
 				B67985B22CBB6E7E005E38CB /* TraceStack.swift in Sources */,
+				B6CD91B22D11AB3C006919B7 /* PolylineView.swift in Sources */,
 				B65BBA002CFA1264002BEC0D /* FamIconButton.swift in Sources */,
 				B65BB9F72CFA1264002BEC0D /* FamTextField.swift in Sources */,
 				B65BB9F22CFA1264002BEC0D /* FamClearableTextField.swift in Sources */,
@@ -756,6 +763,7 @@
 				B6E309012BD05CBD0032B923 /* CoupleConnectionRenderProxy.swift in Sources */,
 				B65BB9FC2CFA1264002BEC0D /* FamImage.swift in Sources */,
 				B6E936D92C32D7A90044AAB9 /* FamilyRenderProxyUtil.swift in Sources */,
+				B6CD91B42D15A326006919B7 /* CurvilinearEdgesView.swift in Sources */,
 				B65BB9F52CFA1264002BEC0D /* FamControl.swift in Sources */,
 				B649B7482C0971CC004364C2 /* Double.swift in Sources */,
 				B6E936DB2C3847440044AAB9 /* HorizontalDirection.swift in Sources */,

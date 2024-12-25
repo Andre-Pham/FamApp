@@ -50,14 +50,14 @@ final class FamilyRenderProxyTests: XCTestCase {
     func testConsistentPositions() throws {
         let referenceFamily = MockFamilies.standard
         let referenceRender = FamilyRenderProxy(referenceFamily)
-        let referencePositions = referenceRender.orderedFamilyMemberProxies.compactMap({ $0.position?.clone() })
+        let referencePositions = referenceRender.orderedFamilyMemberProxies.compactMap({ $0.position })
         let referenceNames = referenceRender.orderedFamilyMemberProxies.compactMap({ $0.familyMember.fullName })
         // Render 25 times, make sure all 25 times match the original render
         for _ in 0..<25 {
             let family = MockFamilies.standard
             XCTAssertNotEqual(family.id, referenceFamily.id, "Comparing family to itself, should be comparing different families")
             let render = FamilyRenderProxy(family)
-            let positions = render.orderedFamilyMemberProxies.compactMap({ $0.position?.clone() })
+            let positions = render.orderedFamilyMemberProxies.compactMap({ $0.position })
             let names = render.orderedFamilyMemberProxies.compactMap({ $0.familyMember.fullName })
             XCTAssertEqual(positions, referencePositions, "Unexpected differences in positions between renders, expected identical")
             XCTAssertEqual(names, referenceNames, "Unexpected different family member ordering between renders, expected identical")

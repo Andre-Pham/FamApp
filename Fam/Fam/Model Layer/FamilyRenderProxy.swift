@@ -81,9 +81,9 @@ class FamilyRenderProxy {
     func countConnectionConflicts() -> Int {
         var connections = [SMLineSegment]()
         for childConnection in self.childConnections {
-            guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position?.clone(),
-                  let parentPosition2 = childConnection.parentsConnection.rightPartner.position?.clone(),
-                  let childPosition = childConnection.child.position?.clone() else {
+            guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position,
+                  let parentPosition2 = childConnection.parentsConnection.rightPartner.position,
+                  let childPosition = childConnection.child.position else {
 //                assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
@@ -247,7 +247,7 @@ class FamilyRenderProxy {
         otherProxy: FamilyMemberRenderProxy
     ) -> Bool {
         assert(!proxy.hasPosition, "Attempting to initially place a proxy when it already has a position")
-        guard var relativePosition = otherProxy.position?.clone() else {
+        guard var relativePosition = otherProxy.position else {
             assertionFailure("Attempting to place a proxy relative to a proxy with no position")
             return false
         }
@@ -647,10 +647,10 @@ class FamilyRenderProxy {
         let couple2Left = couple2Proxy.preferredDirection == .left ? couple2Proxy : couple2Spouse
         let couple2Right = couple2Proxy.preferredDirection == .right ? couple2Proxy : couple2Spouse
         // Original positions
-        let couple1LeftStartPosition = couple1Left?.position?.clone()
-        let couple1RightStartPosition = couple1Right?.position?.clone()
-        let couple2LeftStartPosition = couple2Left?.position?.clone()
-        let couple2RightStartPosition = couple2Right?.position?.clone()
+        let couple1LeftStartPosition = couple1Left?.position
+        let couple1RightStartPosition = couple1Right?.position
+        let couple2LeftStartPosition = couple2Left?.position
+        let couple2RightStartPosition = couple2Right?.position
         let revert = {
             couple1Left?.setPosition(to: couple1LeftStartPosition)
             couple1Right?.setPosition(to: couple1RightStartPosition)
@@ -676,10 +676,10 @@ class FamilyRenderProxy {
             ) == .right
             let couple1DirectionSign: Double = couple1MovesRight ? 1 : -1
             let couple2DirectionSign: Double = couple1MovesRight ? -1 : 1
-            couple1Left?.position?.translateX(couple1ShuffleDistance * couple1DirectionSign)
-            couple1Right?.position?.translateX(couple1ShuffleDistance * couple1DirectionSign)
-            couple2Left?.position?.translateX(couple2ShuffleDistance * couple2DirectionSign)
-            couple2Right?.position?.translateX(couple2ShuffleDistance * couple2DirectionSign)
+            couple1Left?.setPosition(to: couple1Left?.position?.translatedX(by: couple1ShuffleDistance * couple1DirectionSign))
+            couple1Right?.setPosition(to: couple1Right?.position?.translatedX(by: couple1ShuffleDistance * couple1DirectionSign))
+            couple2Left?.setPosition(to: couple2Left?.position?.translatedX(by: couple2ShuffleDistance * couple2DirectionSign))
+            couple2Right?.setPosition(to: couple2Right?.position?.translatedX(by: couple2ShuffleDistance * couple2DirectionSign))
             return revert
         }
         // We can't shuffle them around because they're not adjacent - move each proxy
@@ -941,7 +941,7 @@ class FamilyRenderProxy {
                     proxiesToMove[spouseProxy.id] = spouseProxy
                 }
                 for proxyToMove in proxiesToMove.values {
-                    proxyToMove.position?.translate(by: SMPoint(x: Self.POSITION_PADDING*directionOfEveryoneToMove.directionMultiplier, y: 0))
+                    proxyToMove.setPosition(to: proxyToMove.position?.translatedX(by: Self.POSITION_PADDING*directionOfEveryoneToMove.directionMultiplier))
                 }
                 self.traceStack.trace(Trace(
                     type: .action,
@@ -1062,7 +1062,7 @@ class FamilyRenderProxy {
             let xTranslation = abs(offsetIncrement)*direction.directionMultiplier
             while proxiesToMove.values.contains(where: { resolvedConflictCondition($0) }) {
                 for proxy in proxiesToMove.values {
-                    proxy.position?.translate(by: SMPoint(x: xTranslation, y: 0))
+                    proxy.setPosition(to: proxy.position?.translatedX(by: xTranslation))
                 }
             }
         } else {

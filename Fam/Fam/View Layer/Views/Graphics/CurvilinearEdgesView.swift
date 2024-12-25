@@ -1,17 +1,17 @@
 //
-//  LineSegmentView.swift
+//  CurvilinearEdgesView.swift
 //  Fam
 //
-//  Created by Andre Pham on 17/12/2024.
+//  Created by Andre Pham on 21/12/2024.
 //
 
 import Foundation
 import UIKit
 import SwiftMath
 
-class LineSegmentView: FamView {
+class CurvilinearEdgesView: FamView {
     
-    private var lineSegment = SMLineSegment(origin: SMPoint(), end: SMPoint())
+    private var curvilinearEdges = SMCurvilinearEdges()
     private var boundingBox = SMRect(origin: SMPoint(), end: SMPoint())
     private var strokeColor = UIColor.black
     private var lineWidth = 1.0
@@ -26,7 +26,7 @@ class LineSegmentView: FamView {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        context.addPath(self.lineSegment.cgPath)
+        context.addPath(self.curvilinearEdges.cgPath)
         context.setStrokeColor(self.strokeColor.cgColor)
         context.setLineWidth(self.lineWidth)
         context.setLineCap(self.lineCap)
@@ -43,20 +43,24 @@ class LineSegmentView: FamView {
     }
     
     @discardableResult
-    func setLineSegment(_ lineSegment: SMLineSegment) -> Self {
-        self.lineSegment = lineSegment
-        self.boundingBox = lineSegment.boundingBox
+    func setCurvilinearEdges(_ curvilinearEdges: SMCurvilinearEdges) -> Self {
+        self.curvilinearEdges = curvilinearEdges
+        self.boundingBox = curvilinearEdges.boundingBox ?? SMRect(minX: 0, maxX: 0, minY: 0, maxY: 0)
         self.boundingBox.expandAllSides(by: self.lineWidth)
-        self.lineSegment -= self.boundingBox.origin
+        self.curvilinearEdges -= self.boundingBox.origin
         self.refreshSizeConstraints()
         return self
     }
     
+    // TODO: Optimise setLineWidth for all geometry views, which currently performs two transform operations when only one is needed
+    // let previousBoundingBoxOrigin = self.boundingBox.origin
+    // self.boundingBox.expandAllSides(by: width - self.lineWidth)
+    
     @discardableResult
     func setLineWidth(to width: Double) -> Self {
-        self.lineSegment += self.boundingBox.origin
+        self.curvilinearEdges += self.boundingBox.origin
         self.boundingBox.expandAllSides(by: width - self.lineWidth)
-        self.lineSegment -= self.boundingBox.origin
+        self.curvilinearEdges -= self.boundingBox.origin
         self.lineWidth = width
         self.refreshSizeConstraints()
         return self

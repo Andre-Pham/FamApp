@@ -42,7 +42,7 @@ class Family {
     }
     
     func getFamilyMemberWithMostAncestors() -> FamilyMember? {
-        assert(self.cacheIsValid, "Expected to have valid cache before calling this")
+        assertOutsideUnitTests(self.cacheIsValid, "Expected to have valid cache before calling this")
         let familyMembers = self.getAllFamilyMembers()
         guard !familyMembers.isEmpty else {
             return nil

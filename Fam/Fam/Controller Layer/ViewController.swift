@@ -172,38 +172,40 @@ class ViewController: UIViewController {
         let familyMemberLayer = self.canvasController.addLayer()
         
         for coupleConnection in render.coupleConnections {
-            guard var position1 = coupleConnection.leftPartner.position?.clone(),
-                  var position2 = coupleConnection.rightPartner.position?.clone() else {
+            guard var position1 = coupleConnection.leftPartner.position,
+                  var position2 = coupleConnection.rightPartner.position else {
                 //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
-            let connectionView = LineView2().setPoints(position1, position2)
+            let lineSegment = SMLineSegment(origin: position1, end: position2) + SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
+            let connectionView = LineSegmentView()
+                .setLineSegment(lineSegment)
             connectionLayer.add(connectionView)
-            connectionView
-                .constrainLeft(padding: connectionView.boundingBox.minX + self.canvasController.canvasRect.width/2)
-                .constrainTop(padding: connectionView.boundingBox.minY + self.canvasController.canvasRect.height/2)
+            connectionView.constrainToPosition()
         }
         
         for childConnection in render.childConnections {
-            guard var parentPosition1 = childConnection.parentsConnection.leftPartner.position?.clone(),
-                  var parentPosition2 = childConnection.parentsConnection.rightPartner.position?.clone(),
-                  var childPosition = childConnection.child.position?.clone() else {
+            guard var parentPosition1 = childConnection.parentsConnection.leftPartner.position,
+                  var parentPosition2 = childConnection.parentsConnection.rightPartner.position,
+                  var childPosition = childConnection.child.position else {
                 //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
             // TODO: In the future, the connections down from the two parents shouldn't be duplicated
             // TODO: These would be tracked as seperate connections - "parent connections" - and the parent connections would connect to the child connections
             let positionBetweenParents = SMLineSegment(origin: parentPosition1, end: parentPosition2).midPoint
-            let connectionView1 = LineView2().setPoints(positionBetweenParents, positionBetweenParents + SMPoint(x: 0, y: 100))
+            let connectionLineSegment = SMLineSegment(origin: positionBetweenParents, end: positionBetweenParents + SMPoint(x: 0, y: 100))
+                .translated(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
+            let connectionView1 = LineSegmentView()
+                .setLineSegment(connectionLineSegment)
             connectionLayer.add(connectionView1)
-            connectionView1
-                .constrainLeft(padding: connectionView1.boundingBox.minX + self.canvasController.canvasRect.width/2)
-                .constrainTop(padding: connectionView1.boundingBox.minY + self.canvasController.canvasRect.height/2)
-            let connectionView2 = LineView2().setPoints(positionBetweenParents + SMPoint(x: 0, y: 100), childPosition - SMPoint(x: 0, y: 80))
+            connectionView1.constrainToPosition()
+            let connectionLineSegment2 = SMLineSegment(origin: positionBetweenParents + SMPoint(x: 0, y: 100), end: childPosition - SMPoint(x: 0, y: 80))
+                .translated(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
+            let connectionView2 = LineSegmentView()
+                .setLineSegment(connectionLineSegment2)
             connectionLayer.add(connectionView2)
-            connectionView2
-                .constrainLeft(padding: connectionView2.boundingBox.minX + self.canvasController.canvasRect.width/2)
-                .constrainTop(padding: connectionView2.boundingBox.minY + self.canvasController.canvasRect.height/2)
+            connectionView2.constrainToPosition()
         }
     
         for proxy in render.orderedFamilyMemberProxies {
@@ -218,17 +220,22 @@ class ViewController: UIViewController {
                 .constrainCenterTop(padding: position.y + self.canvasController.canvasRect.height/2)
         }
         
-        let testLine = TestLineView().setPoints()
+        let testGeometry = SMPolyline(vertices: [SMPoint(x: 0, y: 0), SMPoint(x: 0, y: 500), SMPoint(x: 500, y: 700), SMPoint(x: 500, y: 1200)])
+            .translated(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
+        let testLine = CurvilinearEdgesView()
+            .setCurvilinearEdges(testGeometry.roundedCorners(pointDistance: 250, controlPointDistance: 200))
+            .setLineWidth(to: 10)
+            .addBorder()
         familyMemberLayer.add(testLine)
-        testLine
-            .constrainLeft(padding: testLine.boundingBox.minX + self.canvasController.canvasRect.width/2)
-            .constrainTop(padding: testLine.boundingBox.minY + self.canvasController.canvasRect.height/2)
+        testLine.constrainToPosition()
         
-        let testLine2 = TestLineView().setPoints([SMPoint(x: 0, y: -200), SMPoint(x: 100, y: -400), SMPoint(x: 200, y: -200)])
+        let testGeometry2 = SMPolyline(vertices: [SMPoint(x: 0, y: -200), SMPoint(x: 100, y: -400), SMPoint(x: 200, y: -200)])
+            .translated(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
+        let testLine2 = CurvilinearEdgesView()
+            .setCurvilinearEdges(testGeometry2.roundedCorners(pointDistance: 250, controlPointDistance: 200))
+            .addBorder()
         familyMemberLayer.add(testLine2)
-        testLine2
-            .constrainLeft(padding: testLine2.boundingBox.minX + self.canvasController.canvasRect.width/2)
-            .constrainTop(padding: testLine2.boundingBox.minY + self.canvasController.canvasRect.height/2)
+        testLine2.constrainToPosition()
         
         let testLine3 = LineSegmentView()
             .setLineSegment(SMLineSegment(origin: SMPoint(x: 100, y: 100), end: SMPoint(x: 500, y: 750)))
@@ -245,131 +252,10 @@ class ViewController: UIViewController {
         familyMemberLayer.add(testLine4)
         testLine4
             .constrainToPosition()
-        
-//        let test = FamView()
-//            .setWidthConstraint(to: 5)
-//            .setHeightConstraint(to: 5)
-//            .setBackgroundColor(to: .red)
-//        familyMemberLayer.addSubview(test)
-//        test
-//            .constrainCenterLeft(padding: 100)
-//            .constrainCenterTop(padding: 100)
     }
     
     func createFamily() -> Family {
         return MockFamilies.standard
     }
 
-}
-
-class LineView2: FamView {
-    
-    private var startPoint = SMPoint()
-    private var endPoint = SMPoint()
-    private(set) var boundingBox = SMRect(minX: 0, maxX: 0, minY: 0, maxY: 0)
-    
-    override func setup() {
-        super.setup()
-        self.setBackgroundColor(to: .clear)
-    }
-    
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-
-        guard let context = UIGraphicsGetCurrentContext() else { return }
-        
-        context.beginPath()
-        context.move(to: self.startPoint.cgPoint)
-        context.addLine(to: self.endPoint.cgPoint)
-        context.setStrokeColor(UIColor.green.cgColor)
-        context.setLineWidth(4)
-        context.strokePath()
-    }
-    
-    @discardableResult
-    func setPoints(_ start: SMPoint, _ end: SMPoint) -> Self {
-        let boundingBox = SMPointCollection(points: [start, end]).boundingBox!
-        boundingBox.expandAllSides(by: 4)
-        self.startPoint = start - boundingBox.origin
-        self.endPoint = end - boundingBox.origin
-        self.boundingBox = boundingBox
-        return self
-            .removeWidthConstraint()
-            .removeHeightConstraint()
-            .setWidthConstraint(to: boundingBox.width)
-            .setHeightConstraint(to: boundingBox.height)
-    }
-    
-}
-
-class TestLineView: FamView {
-    
-    private var points = [SMPoint]()
-    private(set) var boundingBox = SMRect(minX: 0, maxX: 0, minY: 0, maxY: 0)
-    
-    override func setup() {
-        super.setup()
-        self.setBackgroundColor(to: .clear)
-    }
-    
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-        
-        let line = SMPolyline(vertices: self.points)
-//        let roundedLine = line.roundedCorners(radius: 30, controlPointDistance: 60)
-        let roundedLine = line.roundedCorners(pointDistance: 250, controlPointDistance: 200)
-
-        guard let context = UIGraphicsGetCurrentContext() else { return }
-        context.addPath(line.cgPath)
-        context.setStrokeColor(UIColor.black.cgColor)
-        context.setLineWidth(6)
-        context.strokePath()
-        
-        context.addPath(roundedLine.cgPath)
-        context.setStrokeColor(UIColor.green.cgColor)
-        context.setLineWidth(8)
-        context.strokePath()
-        
-        for bez in roundedLine.sortedBezierEdges {
-            context.addEllipse(in: SMRect(center: bez.origin, width: 20, height: 20).cgRect)
-            context.setFillColor(UIColor.purple.cgColor)
-            context.fillPath()
-            context.addEllipse(in: SMRect(center: bez.originControlPoint, width: 20, height: 20).cgRect)
-            context.setFillColor(UIColor.blue.cgColor)
-            context.fillPath()
-            context.addEllipse(in: SMRect(center: bez.end, width: 20, height: 20).cgRect)
-            context.setFillColor(UIColor.red.cgColor)
-            context.fillPath()
-            context.addEllipse(in: SMRect(center: bez.endControlPoint, width: 20, height: 20).cgRect)
-            context.setFillColor(UIColor.orange.cgColor)
-            context.fillPath()
-        }
-        
-        let boundingBox = roundedLine.boundingBox
-        context.addRect(boundingBox.cgRect)
-        context.setStrokeColor(UIColor.red.cgColor)
-        context.setLineWidth(8)
-        context.strokePath()
-    }
-    
-    @discardableResult
-    func setPoints(_ points: [SMPoint] = [SMPoint(x: 0, y: 0), SMPoint(x: 0, y: 500), SMPoint(x: 500, y: 700), SMPoint(x: 500, y: 1200)]) -> Self {
-        let line = SMPolyline(vertices: points)
-        let roundedLine = line.roundedCorners(pointDistance: 250, controlPointDistance: 200)
-        dump(roundedLine)
-        
-        let boundingBox = SMPointCollection(points: points).boundingBox!
-        // TODO: This is temp
-        boundingBox.expandAllSides(by: 50)
-        for point in points {
-            self.points.append(point - boundingBox.origin)
-        }
-        self.boundingBox = boundingBox
-        return self
-            .removeWidthConstraint()
-            .removeHeightConstraint()
-            .setWidthConstraint(to: boundingBox.width)
-            .setHeightConstraint(to: boundingBox.height)
-    }
-    
 }
