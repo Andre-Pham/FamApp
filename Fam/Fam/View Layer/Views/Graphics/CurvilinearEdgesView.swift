@@ -52,15 +52,11 @@ class CurvilinearEdgesView: FamView {
         return self
     }
     
-    // TODO: Optimise setLineWidth for all geometry views, which currently performs two transform operations when only one is needed
-    // let previousBoundingBoxOrigin = self.boundingBox.origin
-    // self.boundingBox.expandAllSides(by: width - self.lineWidth)
-    
     @discardableResult
     func setLineWidth(to width: Double) -> Self {
-        self.curvilinearEdges += self.boundingBox.origin
+        let previousOrigin = self.boundingBox.origin
         self.boundingBox.expandAllSides(by: width - self.lineWidth)
-        self.curvilinearEdges -= self.boundingBox.origin
+        self.curvilinearEdges += (previousOrigin - self.boundingBox.origin)
         self.lineWidth = width
         self.refreshSizeConstraints()
         return self

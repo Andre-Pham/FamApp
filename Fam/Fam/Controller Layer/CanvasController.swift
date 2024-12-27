@@ -208,9 +208,27 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         )
     }
     
+    /// Mounts this view controller as a child of another view controller.
+    /// Example:
+    /// ```
+    /// // Inside a view controller's viewDidLoad
+    /// let canvasView = self.canvasController.mount(to: self) // 1. Mount canvas to view controller
+    /// self.view.add(canvasView)                              // 2. Add canvas view as subview
+    /// canvasView.constrainAllSides(padding: 50)              // 3. Constrain canvas view
+    /// ```
+    /// - Parameters:
+    ///   - viewController: The view controller to be the parent of the canvas view controller
+    /// - Returns: The canvas controller's view to be added as a subview
+    public func mount(to viewController: UIViewController) -> UIView {
+        viewController.addChild(self)
+        self.view.useAutoLayout()
+        self.didMove(toParent: viewController)
+        return self.view
+    }
+    
     // MARK: - Layer Functions
     
-    func addLayer() -> UIView {
+    public func addLayer() -> UIView {
         let newLayer = UIView().useAutoLayout()
         self.layers.append(newLayer)
         self.canvasContainer.add(newLayer)
@@ -218,7 +236,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         return newLayer
     }
     
-    func insertLayer(at position: Int) -> UIView {
+    public func insertLayer(at position: Int) -> UIView {
         guard position <= self.layers.count else {
             return self.addLayer()
         }

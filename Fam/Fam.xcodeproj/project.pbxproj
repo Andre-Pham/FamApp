@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B6285ED32CC362ED00218C94 /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6285ED22CC362ED00218C94 /* TestUtils.swift */; };
+		B632131D2D1EE6620010A5E3 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B632131C2D1EE6620010A5E3 /* Strings.swift */; };
 		B649B7462C0971AB004364C2 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = B649B7452C0971AB004364C2 /* Int.swift */; };
 		B649B7482C0971CC004364C2 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = B649B7472C0971CC004364C2 /* Double.swift */; };
 		B65BB9C52CFA1020002BEC0D /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65BB9C42CFA1020002BEC0D /* AppContext.swift */; };
@@ -112,6 +113,7 @@
 
 /* Begin PBXFileReference section */
 		B6285ED22CC362ED00218C94 /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
+		B632131C2D1EE6620010A5E3 /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
 		B649B7452C0971AB004364C2 /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
 		B649B7472C0971CC004364C2 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
 		B65BB9C42CFA1020002BEC0D /* AppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContext.swift; sourceTree = "<group>"; };
@@ -231,6 +233,14 @@
 				B6285ED22CC362ED00218C94 /* TestUtils.swift */,
 			);
 			path = Testing;
+			sourceTree = "<group>";
+		};
+		B632131B2D1EE6560010A5E3 /* Strings */ = {
+			isa = PBXGroup;
+			children = (
+				B632131C2D1EE6620010A5E3 /* Strings.swift */,
+			);
+			path = Strings;
 			sourceTree = "<group>";
 		};
 		B65BB9C32CFA0FAD002BEC0D /* Context */ = {
@@ -366,7 +376,7 @@
 				B65BB9C32CFA0FAD002BEC0D /* Context */,
 				B6E308AB2BD003C10032B923 /* App */,
 				B6E308B42BD0048D0032B923 /* Swift */,
-				B6E308B52BD0049A0032B923 /* Strings */,
+				B632131B2D1EE6560010A5E3 /* Strings */,
 				B6E308B02BD004550032B923 /* Model Layer */,
 				B6E308B12BD004620032B923 /* Controller Layer */,
 				B6E308B32BD004780032B923 /* View Layer */,
@@ -458,13 +468,6 @@
 				B649B7472C0971CC004364C2 /* Double.swift */,
 			);
 			path = Swift;
-			sourceTree = "<group>";
-		};
-		B6E308B52BD0049A0032B923 /* Strings */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Strings;
 			sourceTree = "<group>";
 		};
 		B6E308F32BD0115A0032B923 /* Assets */ = {
@@ -673,6 +676,7 @@
 				B65BB9F82CFA1264002BEC0D /* FamSegmentedSlider.swift in Sources */,
 				B65BB9C52CFA1020002BEC0D /* AppContext.swift in Sources */,
 				B6E308C52BD00F470032B923 /* CanvasController.swift in Sources */,
+				B632131D2D1EE6620010A5E3 /* Strings.swift in Sources */,
 				B6E308FB2BD011A30032B923 /* FamColors.swift in Sources */,
 				B67985B22CBB6E7E005E38CB /* TraceStack.swift in Sources */,
 				B6CD91B22D11AB3C006919B7 /* PolylineView.swift in Sources */,

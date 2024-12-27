@@ -32,24 +32,9 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Step 1: Add the Child View Controller to the Parent
-        addChild(self.canvasController)
-        
-        // Step 2: Set Up the Child View Controller’s View
-        view.addSubview(self.canvasController.view)
-        self.canvasController.view.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Step 3: Apply Auto Layout Constraints
-        NSLayoutConstraint.activate([
-            self.canvasController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            self.canvasController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            self.canvasController.view.topAnchor.constraint(equalTo: view.topAnchor, constant: 64),
-            self.canvasController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -48)
-        ])
-        
-        // Step 4: Notify the Child View Controller
-        self.canvasController.didMove(toParent: self)
+        let canvasView = self.canvasController.mount(to: self)
+        self.view.add(canvasView)
+        canvasView.constrainAllSides(padding: 50)
         
         self.canvasController.setCanvasBackgroundColor(to: .lightGray)
         
@@ -172,8 +157,8 @@ class ViewController: UIViewController {
         let familyMemberLayer = self.canvasController.addLayer()
         
         for coupleConnection in render.coupleConnections {
-            guard var position1 = coupleConnection.leftPartner.position,
-                  var position2 = coupleConnection.rightPartner.position else {
+            guard let position1 = coupleConnection.leftPartner.position,
+                  let position2 = coupleConnection.rightPartner.position else {
                 //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
@@ -185,9 +170,9 @@ class ViewController: UIViewController {
         }
         
         for childConnection in render.childConnections {
-            guard var parentPosition1 = childConnection.parentsConnection.leftPartner.position,
-                  var parentPosition2 = childConnection.parentsConnection.rightPartner.position,
-                  var childPosition = childConnection.child.position else {
+            guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position,
+                  let parentPosition2 = childConnection.parentsConnection.rightPartner.position,
+                  let childPosition = childConnection.child.position else {
                 //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
