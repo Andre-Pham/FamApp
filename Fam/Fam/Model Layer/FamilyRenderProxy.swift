@@ -74,6 +74,14 @@ class FamilyRenderProxy {
         self.traceStack.trace(Trace(type: .outcome, message: "Connection conflicts: \(self.countConnectionConflicts())"))
     }
     
+    func transformPositions(_ transformation: (SMPoint) -> SMPoint) {
+        for proxy in self.orderedFamilyMemberProxies {
+            if let position = proxy.position {
+                proxy.setPosition(to: transformation(position))
+            }
+        }
+    }
+    
     func generateTraceStack(includedTypes: [Trace.TraceType] = Trace.TraceType.allCases, expanded: Bool = false) -> String {
         return self.traceStack.generate(includeTypes: includedTypes, expanded: expanded)
     }

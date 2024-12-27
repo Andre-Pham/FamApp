@@ -120,8 +120,8 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     // MARK: - Config Functions
     
     @discardableResult
-    public func setCanvasSize(to size: CGSize) -> Self {
-        self.canvasSize = size
+    public func setCanvasSize(to size: SMSize) -> Self {
+        self.canvasSize = size.cgSize
         self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
         self.scrollContainer.contentOffset = CGPoint(
             x: size.width/2.0 - self.viewSize.width/2.0,
