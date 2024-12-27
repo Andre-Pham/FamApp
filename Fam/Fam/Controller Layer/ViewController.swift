@@ -157,8 +157,8 @@ class ViewController: UIViewController {
         let familyMemberLayer = self.canvasController.addLayer()
         
         for coupleConnection in render.coupleConnections {
-            guard var position1 = coupleConnection.leftPartner.position,
-                  var position2 = coupleConnection.rightPartner.position else {
+            guard let position1 = coupleConnection.leftPartner.position,
+                  let position2 = coupleConnection.rightPartner.position else {
                 //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
@@ -170,9 +170,9 @@ class ViewController: UIViewController {
         }
         
         for childConnection in render.childConnections {
-            guard var parentPosition1 = childConnection.parentsConnection.leftPartner.position,
-                  var parentPosition2 = childConnection.parentsConnection.rightPartner.position,
-                  var childPosition = childConnection.child.position else {
+            guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position,
+                  let parentPosition2 = childConnection.parentsConnection.rightPartner.position,
+                  let childPosition = childConnection.child.position else {
                 //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
