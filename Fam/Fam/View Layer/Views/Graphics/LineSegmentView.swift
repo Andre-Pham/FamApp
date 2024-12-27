@@ -54,9 +54,9 @@ class LineSegmentView: FamView {
     
     @discardableResult
     func setLineWidth(to width: Double) -> Self {
-        self.lineSegment += self.boundingBox.origin
+        let previousOrigin = self.boundingBox.origin
         self.boundingBox.expandAllSides(by: width - self.lineWidth)
-        self.lineSegment -= self.boundingBox.origin
+        self.lineSegment += (previousOrigin - self.boundingBox.origin)
         self.lineWidth = width
         self.refreshSizeConstraints()
         return self
