@@ -152,6 +152,21 @@ class ViewController: UIViewController {
         let render = FamilyRenderProxy(self.family, stopAtStep: self.step == 0 ? nil : self.step)
         print(render.generateTraceStack())
         
+        let proxyPoints = SMPointCollection(points: render.orderedFamilyMemberProxies.compactMap({ $0.position }))
+        guard let proxyBoundingBox = proxyPoints.boundingBox, let xOffset = proxyPoints.minX else {
+            return
+        }
+        self.canvasController.setCanvasSize(to: proxyBoundingBox.size + SMSize(width: 500, height: 500))
+        let canvasBoundingBox = self.canvasController.canvasRect
+        // Translate center of proxy bounding box to center of canvas bounding box
+        let translation = canvasBoundingBox.center - proxyBoundingBox.center
+        render.transformPositions { position in
+            return position.translated(by: translation)
+        }
+        
+        // TODO: Next: make it so when the family re-renders, it creates the new layer, then removes the old layer
+        // TODO: Also make it so the canvas matches the aspect ratio of the device
+        
         let connectionLayer = self.canvasController.addLayer()
             .setBackgroundColor(to: .blue.withAlphaComponent(0.2))
         let familyMemberLayer = self.canvasController.addLayer()
@@ -162,7 +177,7 @@ class ViewController: UIViewController {
                 //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
                 continue
             }
-            let lineSegment = SMLineSegment(origin: position1, end: position2) + SMPoint(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
+            let lineSegment = SMLineSegment(origin: position1, end: position2)
             let connectionView = LineSegmentView()
                 .setLineSegment(lineSegment)
             connectionLayer.add(connectionView)
@@ -180,13 +195,11 @@ class ViewController: UIViewController {
             // TODO: These would be tracked as seperate connections - "parent connections" - and the parent connections would connect to the child connections
             let positionBetweenParents = SMLineSegment(origin: parentPosition1, end: parentPosition2).midPoint
             let connectionLineSegment = SMLineSegment(origin: positionBetweenParents, end: positionBetweenParents + SMPoint(x: 0, y: 100))
-                .translated(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             let connectionView1 = LineSegmentView()
                 .setLineSegment(connectionLineSegment)
             connectionLayer.add(connectionView1)
             connectionView1.constrainToPosition()
             let connectionLineSegment2 = SMLineSegment(origin: positionBetweenParents + SMPoint(x: 0, y: 100), end: childPosition - SMPoint(x: 0, y: 80))
-                .translated(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
             let connectionView2 = LineSegmentView()
                 .setLineSegment(connectionLineSegment2)
             connectionLayer.add(connectionView2)
@@ -201,42 +214,9 @@ class ViewController: UIViewController {
                 .setFamilyMemberName(firstName: proxy.familyMember.firstName, lastName: proxy.familyMember.lastName)
             familyMemberLayer.add(familyMemberView)
             familyMemberView
-                .constrainCenterLeft(padding: position.x + self.canvasController.canvasRect.width/2)
-                .constrainCenterTop(padding: position.y + self.canvasController.canvasRect.height/2)
+                .constrainCenterLeft(padding: position.x)
+                .constrainCenterTop(padding: position.y)
         }
-        
-        let testGeometry = SMPolyline(vertices: [SMPoint(x: 0, y: 0), SMPoint(x: 0, y: 500), SMPoint(x: 500, y: 700), SMPoint(x: 500, y: 1200)])
-            .translated(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
-        let testLine = CurvilinearEdgesView()
-            .setCurvilinearEdges(testGeometry.roundedCorners(pointDistance: 250, controlPointDistance: 200))
-            .setLineWidth(to: 10)
-            .addBorder()
-        familyMemberLayer.add(testLine)
-        testLine.constrainToPosition()
-        
-        let testGeometry2 = SMPolyline(vertices: [SMPoint(x: 0, y: -200), SMPoint(x: 100, y: -400), SMPoint(x: 200, y: -200)])
-            .translated(x: self.canvasController.canvasRect.width/2, y: self.canvasController.canvasRect.height/2)
-        let testLine2 = CurvilinearEdgesView()
-            .setCurvilinearEdges(testGeometry2.roundedCorners(pointDistance: 250, controlPointDistance: 200))
-            .addBorder()
-        familyMemberLayer.add(testLine2)
-        testLine2.constrainToPosition()
-        
-        let testLine3 = LineSegmentView()
-            .setLineSegment(SMLineSegment(origin: SMPoint(x: 100, y: 100), end: SMPoint(x: 500, y: 750)))
-            .setLineWidth(to: 50)
-            .setLineCap(to: .round)
-            .addBorder()
-        familyMemberLayer.add(testLine3)
-        testLine3
-            .constrainToPosition()
-        
-        let testLine4 = LineSegmentView()
-            .setLineSegment(SMLineSegment(origin: SMPoint(x: 600, y: 100), end: SMPoint(x: 1000, y: 100)))
-            .setLineCap(to: .square)
-        familyMemberLayer.add(testLine4)
-        testLine4
-            .constrainToPosition()
     }
     
     func createFamily() -> Family {
