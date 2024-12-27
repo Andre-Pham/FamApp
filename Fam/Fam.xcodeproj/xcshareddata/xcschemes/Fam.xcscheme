@@ -40,17 +40,6 @@
                ReferencedContainer = "container:Fam.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B6E308912BD002B80032B923"
-               BuildableName = "FamUITests.xctest"
-               BlueprintName = "FamUITests"
-               ReferencedContainer = "container:Fam.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

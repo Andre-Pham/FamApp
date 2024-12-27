@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "swiftmath",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Andre-Pham/SwiftMath",
+      "state" : {
+        "branch" : "main",
+        "revision" : "ad65f0e24d06ca9a9b8b703d189ff59cddb8ed6d"
+      }
+    },
+    {
       "identity" : "swiftserialization",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Andre-Pham/SwiftSerialization.git",
