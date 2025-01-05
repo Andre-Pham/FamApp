@@ -265,7 +265,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.layers.append(newLayer)
         self.canvasContainer.add(newLayer)
         newLayer.constrainAllSides()
-     
         return newLayer
     }
     
