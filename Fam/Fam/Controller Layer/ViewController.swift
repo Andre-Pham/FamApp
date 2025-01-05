@@ -109,7 +109,6 @@ class ViewController: UIViewController {
                 self.family = self.createFamily()
                 self.selected = nil
                 self.renderFamily()
-                
             })
         self.minusStepButton
             .setLabel(to: "-")
@@ -139,22 +138,17 @@ class ViewController: UIViewController {
         }
         self.canvasController.setCanvasSize(to: proxyBoundingBox.size + SMSize(width: 500, height: 500))
         let canvasBoundingBox = self.canvasController.canvasRect
-        print("canvas bounding box center: \(canvasBoundingBox.center.toString())")
-        print("proxy bounding box center: \(proxyBoundingBox.center.toString())")
         // Translate center of proxy bounding box to center of canvas bounding box
         let translation = canvasBoundingBox.center - proxyBoundingBox.center
         render.transformPositions { position in
             return position.translated(by: translation)
         }
         
-        print(render.orderedFamilyMemberProxies.compactMap({ $0.position?.toString() }))
-        
         // TODO: Next: make it so when the family re-renders, it creates the new layer, then removes the old layer
         // TODO: Also make it so the canvas matches the aspect ratio of the device
         
         let layer = self.canvasController.addLayer()
             .setBackgroundColor(to: .blue.withAlphaComponent(0.2))
-            .addBorder()
         
         for coupleConnection in render.coupleConnections {
             guard let position1 = coupleConnection.leftPartner.position,
@@ -202,19 +196,6 @@ class ViewController: UIViewController {
                 .constrainCenterLeft(padding: position.x)
                 .constrainCenterTop(padding: position.y)
         }
-        
-        let testCenterHorizontal = LineSegmentView()
-            .setLineSegment(SMLineSegment(origin: self.canvasController.canvasLeftBorder.midPoint, end: self.canvasController.canvasRightBorder.midPoint))
-            .setLineWidth(to: 10)
-            .setStrokeColor(to: .red)
-        layer.add(testCenterHorizontal)
-        testCenterHorizontal.constrainToPosition()
-        let testCenterVertical = LineSegmentView()
-            .setLineSegment(SMLineSegment(origin: self.canvasController.canvasTopBorder.midPoint, end: self.canvasController.canvasBottomBorder.midPoint))
-            .setLineWidth(to: 10)
-            .setStrokeColor(to: .red)
-        layer.add(testCenterVertical)
-        testCenterVertical.constrainToPosition()
         
         self.activeLayer?.remove()
         self.activeLayer = layer
