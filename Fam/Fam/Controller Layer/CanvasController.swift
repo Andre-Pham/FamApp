@@ -79,13 +79,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         print("canvas size: \(SMSize(self.canvasSize).toString())")
     }
     
-    public func refreshTest() {
-        self.canvasContainer.setNeedsLayout()
-        self.canvasContainer.layoutIfNeeded()
-        self.canvasContainer.setNeedsDisplay()
-        self.view.setNeedsUpdateConstraints()
-        self.view.updateConstraintsIfNeeded()
-    }
+   
     
     // MARK: - Alignment Guides
     
@@ -177,11 +171,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         return self
     }
     
-    // Problems:
-    // Zoom in max, and go to top left, then go from step 0 to 1 -> it gets stuck in the top right
-    // When the canvas first loads in (don't zoom in yet) you can scroll down way further than you should be able to
-    // Zoom in max, go to step 0 to 1, then go from step 1 to 0
-    // Go to step 17, move viewport furthest right (to right edge), then go to step 16, it shouldn't have viewport outside visible area
+    
     
     public func zoomToVisibleArea() {
 //        self.zoomToArea(SMRect(self.visibleArea), animated: true)
@@ -273,6 +263,12 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     // BUG 2
     // 1. Run the app
     // 2. Canvas doesn't render until you start zooming/scrolling (do I need to call layoutIfNeeded()?)
+    // TODO: Other problems popping up
+    // Problems:
+    // Zoom in max, and go to top left, then go from step 0 to 1 -> it gets stuck in the top right
+    // When the canvas first loads in (don't zoom in yet) you can scroll down way further than you should be able to
+    // Zoom in max, go to step 0 to 1, then go from step 1 to 0
+    // Go to step 17, move viewport furthest right (to right edge), then go to step 16, it shouldn't have viewport outside visible area
     
     @discardableResult
     public func setCanvasBounce(to state: Bool) -> Self {
@@ -344,7 +340,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         // Setup canvas container
         self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
         
-        self.refreshTest()
+     
     }
     
     public override func viewDidLayoutSubviews() {
@@ -353,7 +349,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
             x: self.canvasWidth/2.0 - self.viewSize.width/2.0,
             y: self.canvasHeight/2.0 - self.viewSize.height/2.0
         )
-        self.refreshTest()
+      
     }
     
     /// Mounts this view controller as a child of another view controller.
@@ -371,7 +367,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         viewController.addChild(self)
         self.view.useAutoLayout()
         self.didMove(toParent: viewController)
-        self.refreshTest()
+       
         return self.view
     }
     
@@ -382,7 +378,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.layers.append(newLayer)
         self.canvasContainer.add(newLayer)
         newLayer.constrainAllSides()
-        self.refreshTest()
+     
         return newLayer
     }
     
@@ -394,7 +390,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.layers.insert(newLayer, at: position)
         self.canvasContainer.add(newLayer, at: position)
         newLayer.constrainAllSides()
-        self.refreshTest()
+        
         return newLayer
     }
     
