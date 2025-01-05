@@ -150,7 +150,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
             self.zoomToCenter(scale: previousZoom, animated: false)
         }
         // Necessary - otherwise can cause canvas getting "stuck"
-        // Example: scroll to the bottom-right corner of a large canvas, and then shrink it, then scroll
+        // Example: scroll to the bottom-right corner of a large canvas, and then shrink the canvas, then scroll around
         self.scrollViewDidZoom(self.scrollContainer)
         return self
     }
@@ -280,8 +280,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         
         // Setup canvas container
         self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
-        
-     
     }
     
     public override func viewDidLayoutSubviews() {
@@ -290,7 +288,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
             x: self.canvasWidth/2.0 - self.viewSize.width/2.0,
             y: self.canvasHeight/2.0 - self.viewSize.height/2.0
         )
-      
     }
     
     /// Mounts this view controller as a child of another view controller.
@@ -359,23 +356,30 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.scrollContainer.setZoomScale(scale, animated: animated)
     }
     
-    public func zoom(to area: SMRect, animated: Bool) {
-        self.scrollContainer.zoom(to: area.cgRect, animated: animated)
-    }
-    
-    /// Performs better
+    /// Zooms so the viewport contains the passed in area (scale-to-fit).
+    /// - Parameters:
+    ///   - area: The area to zoom to and become visible
+    ///   - animated: True to animate the zoom
     public func zoomToArea(_ area: SMRect, animated: Bool) {
-        let widthFraction = self.viewSize.width/area.width
-        let heightFraction = self.viewSize.height/area.height
-        let targetScale = min(widthFraction, heightFraction)
-        self.zoomTo(scale: targetScale, animated: animated)
-        self.scrollContainer.setContentOffset(
-            CGPoint(
-                x: area.origin.x*targetScale,
-                y: area.origin.y*targetScale
-            ),
-            animated: animated
-        )
+        self.scrollContainer.zoom(to: area.cgRect, animated: animated)
+        
+        // Note:
+        // Test thoroughly when calling this internally
+        // It can have some side effects with the canvas getting "stuck" if called whilst, for example, modifying the canvas size
+        // In such a scenario, the following code can handle those cases correctly
+        // (Although it would have to be revisited - it currently doesn't center the canvas if zooming the entire canvas size)
+        // ``` let widthFraction = self.viewSize.width/area.width
+        //     let heightFraction = self.viewSize.height/area.height
+        //     let targetScale = min(widthFraction, heightFraction)
+        //     self.zoomTo(scale: targetScale, animated: animated)
+        //     self.scrollContainer.setContentOffset(
+        //         CGPoint(
+        //             x: area.origin.x*targetScale,
+        //             y: area.origin.y*targetScale
+        //         ),
+        //         animated: animated
+        //     )
+        // ```
     }
     
 }
