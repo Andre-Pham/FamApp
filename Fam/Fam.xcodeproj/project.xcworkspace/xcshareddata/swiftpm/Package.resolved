@@ -1,4 +1,5 @@
 {
+  "originHash" : "753286f743d0865aa7e2e010f4365955f198d34e7000161a4601ba89824869d5",
   "pins" : [
     {
       "identity" : "swiftmath",
@@ -6,7 +7,7 @@
       "location" : "https://github.com/Andre-Pham/SwiftMath",
       "state" : {
         "branch" : "main",
-        "revision" : "7d776cfacb7f3afd8b0c7af7fb035fff63059589"
+        "revision" : "1a4ec534ac5c6f0a9ab1ca604ee24b96e8d19790"
       }
     },
     {
@@ -28,5 +29,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

@@ -45,6 +45,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     private var zoomScale: CGFloat {
         return self.scrollContainer.zoomScale
     }
+    ///
     private var visibleArea: CGRect {
         let width = self.scrollContainer.bounds.size.width/self.zoomScale
         let height = self.scrollContainer.bounds.size.height/self.zoomScale
@@ -56,24 +57,40 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         if (x + width).isGreater(than: self.canvasSize.width) {
             x -= (x + width - self.canvasSize.width)
         }
-        if (x + height).isGreater(than: self.canvasSize.height) {
+        if (y + height).isGreater(than: self.canvasSize.height) {
             y -= (y + height - self.canvasSize.height)
         }
         return CGRect(
             x: max(x, 0.0),
             y: max(y, 0.0),
-            width: width,
-            height: height
+            width: min(width, self.canvasWidth),
+            height: min(height, self.canvasHeight)
         )
     }
     private var visibleAreaOutOfBounds: Bool {
         return self.zoomScale.isLess(than: self.minZoomScale)
     }
     
+    public func printTest() {
+        print("zoom scale: \(self.zoomScale)")
+        
+        print("visible area: \(SMRect(self.visibleArea).toString())")
+        
+        print("canvas size: \(SMSize(self.canvasSize).toString())")
+    }
+    
+    public func refreshTest() {
+        self.canvasContainer.setNeedsLayout()
+        self.canvasContainer.layoutIfNeeded()
+        self.canvasContainer.setNeedsDisplay()
+        self.view.setNeedsUpdateConstraints()
+        self.view.updateConstraintsIfNeeded()
+    }
+    
     // MARK: - Alignment Guides
     
     public var canvasRect: SMRect {
-        return SMRect(minX: 0.0, maxX: self.canvasSize.width, minY: 0.0, maxY: self.canvasSize.height)
+        return SMRect(minX: 0.0, minY: 0.0, maxX: self.canvasSize.width, maxY: self.canvasSize.height)
     }
     public var canvasWidth: Double {
         return self.canvasSize.width
@@ -121,14 +138,141 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     @discardableResult
     public func setCanvasSize(to size: SMSize) -> Self {
+        let previousZoom = self.zoomScale
+        let previousVisibleArea = SMRect(self.visibleArea)
+        print("previous visible area: \(previousVisibleArea.toString())")
+        print("previous canvas size: \(SMSize(self.canvasSize).toString())")
+        let visibleAreaOffset = SMPoint(x: size.width - self.canvasWidth, y: size.height - self.canvasHeight) / 2.0
+        var targetNewVisibleArea = previousVisibleArea + visibleAreaOffset
+        targetNewVisibleArea.translate(
+            x: min(size.width - targetNewVisibleArea.maxX, 0),
+            y: min(size.height - targetNewVisibleArea.maxY, 0)
+        )
+        let newVisibleArea = targetNewVisibleArea.overlap(SMRect(origin: SMPoint(), width: size.width, height: size.height))
+        print("visibleAreaOffset: \(visibleAreaOffset.toString())")
+        self.zoomTo(scale: 1.0, animated: false)
         self.canvasSize = size.cgSize
         self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
-        self.scrollContainer.contentOffset = CGPoint(
-            x: size.width/2.0 - self.viewSize.width/2.0,
-            y: size.height/2.0 - self.viewSize.height/2.0
-        )
+//        self.zoomTo(scale: previousZoomScale, animated: false)
+//        let sizeDifference = SMRect(origin: SMPoint(), width: size.width - self.canvasWidth, height: size.height - self.canvasHeight)
+        
+//        self.zoomToFit(animated: false)
+        if let newVisibleArea {
+            print("new visible area: \(newVisibleArea.toString())")
+//            self.zoom(to: newVisibleArea, animated: false)
+//            self.zoomToArea(newVisibleArea, animated: false)
+            self.zoomCenterTo(position: newVisibleArea.center, scale: previousZoom, animated: false)
+        } else {
+            print("zooming to center")
+            self.zoomToCenter(scale: previousZoom, animated: false)
+        }
+//        if SMRect(self.visibleArea).contains(rect: self.canvasRect) {
+//            self.zoomToCenter(scale: previousZoom, animated: false)
+//        }
+        
+        print("applied visible area: \(SMRect(self.visibleArea).toString())")
+        
+        print("new canvas size: \(size.toString())")
+        self.scrollViewDidZoom(self.scrollContainer)
         return self
     }
+    
+    // Problems:
+    // Zoom in max, and go to top left, then go from step 0 to 1 -> it gets stuck in the top right
+    // When the canvas first loads in (don't zoom in yet) you can scroll down way further than you should be able to
+    // Zoom in max, go to step 0 to 1, then go from step 1 to 0
+    // Go to step 17, move viewport furthest right (to right edge), then go to step 16, it shouldn't have viewport outside visible area
+    
+    public func zoomToVisibleArea() {
+//        self.zoomToArea(SMRect(self.visibleArea), animated: true)
+        self.zoom(to: SMRect(self.visibleArea), animated: true)
+    }
+    
+    public func printVisibleArea() {
+        print(SMRect(self.visibleArea))
+    }
+    
+    @discardableResult
+    public func setCanvasSize2(to size: SMSize) -> Self {
+        let previousZoomScale = self.scrollContainer.zoomScale
+//        guard let previousVisibleArea = SMRect(self.visibleArea).overlap(self.canvasRect) else {
+//            return self
+//        }
+//        let previousVisibleAreaCenter = previousVisibleArea.center
+//        let previousNormalizedCenterX = previousVisibleAreaCenter.x / self.canvasWidth
+//        let previousNormalizedCenterY = previousVisibleAreaCenter.y / self.canvasHeight
+//        print("previous visible area: \(previousVisibleArea.toString())")
+//        print("previous visible area center: \(previousVisibleAreaCenter.toString())")
+//        print("previous canvas size: \(SMSize(self.canvasSize).toString())")
+//        print("previous normalised center x: \(previousNormalizedCenterX)")
+//        print("previous normalised center y: \(previousNormalizedCenterY)")
+        self.zoomTo(scale: 1.0, animated: false)
+        self.canvasSize = size.cgSize
+        self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
+        self.zoomTo(scale: previousZoomScale, animated: false)
+//        self.zoomCenterTo(
+//            position: SMPoint(
+//                x: size.width*previousNormalizedCenterX,
+//                y: size.height*previousNormalizedCenterY
+//            ),
+//            scale: previousZoomScale,
+//            animated: false
+//        )
+//        print("post x: \(size.width*previousNormalizedCenterX)")
+//        print("post y: \(size.height*previousNormalizedCenterY)")
+        self.scrollViewDidZoom(self.scrollContainer)
+        return self
+    }
+    
+    // 17 -> 18
+    // zoom in on middle
+    // should end up in middle
+    // does not end up in middle
+    
+    public func zoomToFit(animated: Bool) {
+        let widthFraction = self.viewSize.width/self.canvasWidth
+        let heightFraction = self.viewSize.height/self.canvasHeight
+        let targetScale = min(widthFraction, heightFraction)
+        self.zoomToCenter(scale: targetScale, animated: animated)
+    }
+    
+    public func zoomToCenter(scale: Double? = nil, animated: Bool) {
+        let targetScale = scale ?? self.zoomScale
+        if let scale {
+            self.zoomTo(scale: scale, animated: animated)
+        }
+        self.scrollContainer.setContentOffset(
+            CGPoint(
+                x: self.canvasWidth/2.0*targetScale - self.viewSize.width/2.0,
+                y: self.canvasHeight/2.0*targetScale - self.viewSize.height/2.0
+            ),
+            animated: animated
+        )
+    }
+    
+    public func zoomCenterTo(position: SMPoint, scale: Double? = nil, animated: Bool) {
+        let targetScale = scale ?? self.zoomScale
+        if let scale {
+            self.zoomTo(scale: scale, animated: animated)
+        }
+        self.scrollContainer.setContentOffset(
+            CGPoint(
+                x: position.x*targetScale - self.viewSize.width/2.0,
+                y: position.y*targetScale - self.viewSize.height/2.0
+            ),
+            animated: animated
+        )
+    }
+    
+    // TODO: Current bugs to fix:
+    // BUG 1
+    // 1. Start with full family rendered
+    // 2. Zoom to bottom right
+    // 3. Set step to 1 (only render 1 family member)
+    // Now it's stuck in the top left until you zoom again
+    // BUG 2
+    // 1. Run the app
+    // 2. Canvas doesn't render until you start zooming/scrolling (do I need to call layoutIfNeeded()?)
     
     @discardableResult
     public func setCanvasBounce(to state: Bool) -> Self {
@@ -199,13 +343,17 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         
         // Setup canvas container
         self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
+        
+        self.refreshTest()
     }
     
     public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         self.scrollContainer.contentOffset = CGPoint(
-            x: Self.DEFAULT_CANVAS_WIDTH/2.0 - self.viewSize.width/2.0,
-            y: Self.DEFAULT_CANVAS_HEIGHT/2.0 - self.viewSize.height/2.0
+            x: self.canvasWidth/2.0 - self.viewSize.width/2.0,
+            y: self.canvasHeight/2.0 - self.viewSize.height/2.0
         )
+        self.refreshTest()
     }
     
     /// Mounts this view controller as a child of another view controller.
@@ -223,6 +371,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         viewController.addChild(self)
         self.view.useAutoLayout()
         self.didMove(toParent: viewController)
+        self.refreshTest()
         return self.view
     }
     
@@ -233,6 +382,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.layers.append(newLayer)
         self.canvasContainer.add(newLayer)
         newLayer.constrainAllSides()
+        self.refreshTest()
         return newLayer
     }
     
@@ -244,6 +394,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.layers.insert(newLayer, at: position)
         self.canvasContainer.add(newLayer, at: position)
         newLayer.constrainAllSides()
+        self.refreshTest()
         return newLayer
     }
     
@@ -275,4 +426,59 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.scrollContainer.zoom(to: area.cgRect, animated: animated)
     }
     
+    /// Performs better
+    public func zoomToArea(_ area: SMRect, animated: Bool) {
+        // TODO: Where i'm at
+        print("VISIBLE AREA: \(SMRect(self.visibleArea).toString())")
+        print("TARGET AREA: \(area.toString())")
+        let widthFraction = self.viewSize.width/area.width
+        let heightFraction = self.viewSize.height/area.height
+        let targetScale = min(widthFraction, heightFraction)
+        self.zoomTo(scale: targetScale, animated: animated)
+        self.scrollContainer.setContentOffset(
+            CGPoint(
+                x: area.origin.x*targetScale,
+                y: area.origin.y*targetScale
+            ),
+            animated: animated
+        )
+    }
+    
 }
+
+/*
+ public func zoomToFit(animated: Bool) {
+     let widthFraction = self.viewSize.width/self.canvasWidth
+     let heightFraction = self.viewSize.height/self.canvasHeight
+     let targetScale = min(widthFraction, heightFraction)
+     self.zoomToCenter(scale: targetScale, animated: animated)
+ }
+ 
+ public func zoomToCenter(scale: Double? = nil, animated: Bool) {
+     let targetScale = scale ?? self.zoomScale
+     if let scale {
+         self.zoomTo(scale: scale, animated: animated)
+     }
+     self.scrollContainer.setContentOffset(
+         CGPoint(
+             x: self.canvasWidth/2.0*targetScale - self.viewSize.width/2.0,
+             y: self.canvasHeight/2.0*targetScale - self.viewSize.height/2.0
+         ),
+         animated: animated
+     )
+ }
+ 
+ public func zoomCenterTo(position: SMPoint, scale: Double? = nil, animated: Bool) {
+     let targetScale = scale ?? self.zoomScale
+     if let scale {
+         self.zoomTo(scale: scale, animated: animated)
+     }
+     self.scrollContainer.setContentOffset(
+         CGPoint(
+             x: position.x*targetScale - self.viewSize.width/2.0,
+             y: position.y*targetScale - self.viewSize.height/2.0
+         ),
+         animated: animated
+     )
+ }
+ */

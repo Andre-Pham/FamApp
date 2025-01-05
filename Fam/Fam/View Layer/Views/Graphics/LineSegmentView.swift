@@ -12,7 +12,7 @@ import SwiftMath
 class LineSegmentView: FamView {
     
     private var lineSegment = SMLineSegment(origin: SMPoint(), end: SMPoint())
-    private var boundingBox = SMRect(origin: SMPoint(), end: SMPoint())
+    private var boundingBox = SMRect(minX: 0, minY: 0, maxX: 0, maxY: 0)
     private var strokeColor = UIColor.black
     private var lineWidth = 1.0
     private var lineCap: CGLineCap = .butt

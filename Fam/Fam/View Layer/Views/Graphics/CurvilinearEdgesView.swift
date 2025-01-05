@@ -12,7 +12,7 @@ import SwiftMath
 class CurvilinearEdgesView: FamView {
     
     private var curvilinearEdges = SMCurvilinearEdges()
-    private var boundingBox = SMRect(origin: SMPoint(), end: SMPoint())
+    private var boundingBox = SMRect(minX: 0, minY: 0, maxX: 0, maxY: 0)
     private var strokeColor = UIColor.black
     private var lineWidth = 1.0
     private var lineCap: CGLineCap = .butt
@@ -45,7 +45,7 @@ class CurvilinearEdgesView: FamView {
     @discardableResult
     func setCurvilinearEdges(_ curvilinearEdges: SMCurvilinearEdges) -> Self {
         self.curvilinearEdges = curvilinearEdges
-        self.boundingBox = curvilinearEdges.boundingBox ?? SMRect(minX: 0, maxX: 0, minY: 0, maxY: 0)
+        self.boundingBox = curvilinearEdges.boundingBox ?? SMRect(minX: 0, minY: 0, maxX: 0, maxY: 0)
         self.boundingBox.expandAllSides(by: self.lineWidth)
         self.curvilinearEdges -= self.boundingBox.origin
         self.refreshSizeConstraints()
