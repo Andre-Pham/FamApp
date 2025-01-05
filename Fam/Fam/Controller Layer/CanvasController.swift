@@ -134,13 +134,19 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     public func setCanvasSize(to size: SMSize) -> Self {
         let previousZoom = self.zoomScale
         let previousVisibleArea = SMRect(self.visibleArea)
+        // Calculate where the visible area would be if the canvas expanded/contracted in all directions equally
+        // (In reality, the canvas expands in the positive x and y direction)
         let visibleAreaOffset = SMPoint(x: size.width - self.canvasWidth, y: size.height - self.canvasHeight) / 2.0
         var targetNewVisibleArea = previousVisibleArea + visibleAreaOffset
+        // If the target visible area is outside the new canvas size (because the canvas shrank), translate it to be inside
         targetNewVisibleArea.translate(
             x: min(size.width - targetNewVisibleArea.maxX, 0),
             y: min(size.height - targetNewVisibleArea.maxY, 0)
         )
+        // We only want to zoom to inside the new canvas area
+        // If our target visible area is partially outside, the center can be offset from where it should be
         let newVisibleArea = targetNewVisibleArea.overlap(SMRect(origin: SMPoint(), width: size.width, height: size.height))
+        // Zoom to a scale of 1.0 first, otherwise canvas content can become clipped
         self.zoomTo(scale: 1.0, animated: false)
         self.canvasSize = size.cgSize
         self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
