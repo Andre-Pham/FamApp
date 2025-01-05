@@ -222,41 +222,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         return self
     }
     
-    public func zoomToFit(animated: Bool) {
-        let widthFraction = self.viewSize.width/self.canvasWidth
-        let heightFraction = self.viewSize.height/self.canvasHeight
-        let targetScale = min(widthFraction, heightFraction)
-        self.zoomToCenter(scale: targetScale, animated: animated)
-    }
-    
-    public func zoomToCenter(scale: Double? = nil, animated: Bool) {
-        let targetScale = scale ?? self.zoomScale
-        if let scale {
-            self.zoomTo(scale: scale, animated: animated)
-        }
-        self.scrollContainer.setContentOffset(
-            CGPoint(
-                x: self.canvasWidth/2.0*targetScale - self.viewSize.width/2.0,
-                y: self.canvasHeight/2.0*targetScale - self.viewSize.height/2.0
-            ),
-            animated: animated
-        )
-    }
-    
-    public func zoomCenterTo(position: SMPoint, scale: Double? = nil, animated: Bool) {
-        let targetScale = scale ?? self.zoomScale
-        if let scale {
-            self.zoomTo(scale: scale, animated: animated)
-        }
-        self.scrollContainer.setContentOffset(
-            CGPoint(
-                x: position.x*targetScale - self.viewSize.width/2.0,
-                y: position.y*targetScale - self.viewSize.height/2.0
-            ),
-            animated: animated
-        )
-    }
-    
     @discardableResult
     public func setCanvasBounce(to state: Bool) -> Self {
         self.scrollContainer.alwaysBounceVertical = state
@@ -339,6 +304,41 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     public func zoomTo(scale: Double, animated: Bool) {
         self.scrollContainer.setZoomScale(scale, animated: animated)
+    }
+    
+    public func zoomToFit(animated: Bool) {
+        let widthFraction = self.viewSize.width/self.canvasWidth
+        let heightFraction = self.viewSize.height/self.canvasHeight
+        let targetScale = min(widthFraction, heightFraction)
+        self.zoomToCenter(scale: targetScale, animated: animated)
+    }
+    
+    public func zoomToCenter(scale: Double? = nil, animated: Bool) {
+        let targetScale = scale ?? self.zoomScale
+        if let scale {
+            self.zoomTo(scale: scale, animated: animated)
+        }
+        self.scrollContainer.setContentOffset(
+            CGPoint(
+                x: self.canvasWidth/2.0*targetScale - self.viewSize.width/2.0,
+                y: self.canvasHeight/2.0*targetScale - self.viewSize.height/2.0
+            ),
+            animated: animated
+        )
+    }
+    
+    public func zoomCenterTo(position: SMPoint, scale: Double? = nil, animated: Bool) {
+        let targetScale = scale ?? self.zoomScale
+        if let scale {
+            self.zoomTo(scale: scale, animated: animated)
+        }
+        self.scrollContainer.setContentOffset(
+            CGPoint(
+                x: position.x*targetScale - self.viewSize.width/2.0,
+                y: position.y*targetScale - self.viewSize.height/2.0
+            ),
+            animated: animated
+        )
     }
     
     /// Zooms so the viewport contains the passed in area (scale-to-fit).
