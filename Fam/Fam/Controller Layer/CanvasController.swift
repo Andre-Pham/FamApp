@@ -208,13 +208,13 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         // If our target visible area is partially outside, the center can be offset from where it should be
         let newVisibleArea = targetNewVisibleArea.overlap(SMRect(origin: SMPoint(), width: size.width, height: size.height))
         // Zoom to a scale of 1.0 first, otherwise canvas content can become clipped
-        self.zoomTo(scale: 1.0, animated: false)
+        self.zoom(scale: 1.0, animated: false)
         self.canvasSize = size.cgSize
         self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
         if let newVisibleArea {
-            self.zoomCenterTo(position: newVisibleArea.center, scale: previousZoom, animated: false)
+            self.zoomCenterTo(newVisibleArea.center, scale: previousZoom, animated: false)
         } else {
-            self.zoomToCenter(scale: previousZoom, animated: false)
+            self.zoomToCanvasCenter(scale: previousZoom, animated: false)
         }
         // Necessary - otherwise can cause canvas getting "stuck"
         // Example: scroll to the bottom-right corner of a large canvas, and then shrink the canvas, then scroll around
@@ -298,39 +298,21 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         scrollView.contentInset = UIEdgeInsets(top: verticalInset, left: horizontalInset, bottom: verticalInset, right: horizontalInset)
     }
     
-    public func scrollTo(_ position: SMPoint, animated: Bool) {
-        self.scrollContainer.setContentOffset(position.cgPoint, animated: animated)
-    }
-    
-    public func zoomTo(scale: Double, animated: Bool) {
+    public func zoom(scale: Double, animated: Bool) {
         self.scrollContainer.setZoomScale(scale, animated: animated)
     }
     
-    public func zoomToFit(animated: Bool) {
-        let widthFraction = self.viewSize.width/self.canvasWidth
-        let heightFraction = self.viewSize.height/self.canvasHeight
-        let targetScale = min(widthFraction, heightFraction)
-        self.zoomToCenter(scale: targetScale, animated: animated)
-    }
-    
-    public func zoomToCenter(scale: Double? = nil, animated: Bool) {
-        let targetScale = scale ?? self.zoomScale
+    public func zoomOriginTo(_ position: SMPoint, scale: Double? = nil, animated: Bool) {
         if let scale {
-            self.zoomTo(scale: scale, animated: animated)
+            self.zoom(scale: scale, animated: animated)
         }
-        self.scrollContainer.setContentOffset(
-            CGPoint(
-                x: self.canvasWidth/2.0*targetScale - self.viewSize.width/2.0,
-                y: self.canvasHeight/2.0*targetScale - self.viewSize.height/2.0
-            ),
-            animated: animated
-        )
+        self.scrollContainer.setContentOffset(position.cgPoint, animated: animated)
     }
     
-    public func zoomCenterTo(position: SMPoint, scale: Double? = nil, animated: Bool) {
+    public func zoomCenterTo(_ position: SMPoint, scale: Double? = nil, animated: Bool) {
         let targetScale = scale ?? self.zoomScale
         if let scale {
-            self.zoomTo(scale: scale, animated: animated)
+            self.zoom(scale: scale, animated: animated)
         }
         self.scrollContainer.setContentOffset(
             CGPoint(
@@ -341,26 +323,47 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         )
     }
     
-    /// Zooms so the viewport contains the passed in area (scale-to-fit).
+    public func zoomToCanvasCenter(scale: Double? = nil, animated: Bool) {
+        let targetScale = scale ?? self.zoomScale
+        if let scale {
+            self.zoom(scale: scale, animated: animated)
+        }
+        self.scrollContainer.setContentOffset(
+            CGPoint(
+                x: self.canvasWidth/2.0*targetScale - self.viewSize.width/2.0,
+                y: self.canvasHeight/2.0*targetScale - self.viewSize.height/2.0
+            ),
+            animated: animated
+        )
+    }
+    
+    public func zoomToFitCanvas(animated: Bool) {
+        let widthFraction = self.viewSize.width/self.canvasWidth
+        let heightFraction = self.viewSize.height/self.canvasHeight
+        let targetScale = min(widthFraction, heightFraction)
+        self.zoomToCanvasCenter(scale: targetScale, animated: animated)
+    }
+    
+    /// Zooms so the viewport contains the passed in rect (scale-to-fit).
     /// - Parameters:
-    ///   - area: The area to zoom to and become visible
+    ///   - rect: The rect to zoom to and become visible
     ///   - animated: True to animate the zoom
-    public func zoomToArea(_ area: SMRect, animated: Bool) {
-        self.scrollContainer.zoom(to: area.cgRect, animated: animated)
+    public func zoomToFitRect(_ rect: SMRect, animated: Bool) {
+        self.scrollContainer.zoom(to: rect.cgRect, animated: animated)
         
         // Note:
         // Test thoroughly when calling this internally
         // It can have some side effects with the canvas getting "stuck" if called whilst, for example, modifying the canvas size
         // In such a scenario, the following code can handle those cases correctly
         // (Although it would have to be revisited - it currently doesn't center the canvas if zooming the entire canvas size)
-        // ``` let widthFraction = self.viewSize.width/area.width
-        //     let heightFraction = self.viewSize.height/area.height
+        // ``` let widthFraction = self.viewSize.width/rect.width
+        //     let heightFraction = self.viewSize.height/rect.height
         //     let targetScale = min(widthFraction, heightFraction)
-        //     self.zoomTo(scale: targetScale, animated: animated)
+        //     self.zoom(scale: targetScale, animated: animated)
         //     self.scrollContainer.setContentOffset(
         //         CGPoint(
-        //             x: area.origin.x*targetScale,
-        //             y: area.origin.y*targetScale
+        //             x: rect.origin.x*targetScale,
+        //             y: rect.origin.y*targetScale
         //         ),
         //         animated: animated
         //     )

@@ -101,24 +101,14 @@ class ViewController: UIViewController {
         self.renderButton
             .setLabel(to: "Render")
             .setOnTap({
-//                self.canvasController.zoomToCenter(animated: true)
-//                self.canvasController.zoomToFit(animated: true)
-//                self.canvasController.zoomTo(scale: 1.0, animated: true)
-//                self.canvasController.zoomCenterTo(position: SMPoint(x: self.canvasController.canvasCenter.x, y: self.canvasController.canvasCenter.y + 100.0), animated: true)
-//                self.renderFamily()
-//                self.canvasController.zoom(to: SMRect(origin: self.canvasController.canvasCenter, end: self.canvasController.canvasBottomRight), animated: true)
-//                self.canvasController.zoomToVisibleArea()
-//                self.canvasController.zoom(to: SMRect(minX: 0, minY: 0, maxX: 500, maxY: 500), animated: true)
-                self.canvasController.zoomTo(scale: 1.0, animated: false)
-                self.canvasController.zoomToArea(self.canvasController.canvasRect, animated: false)
+                self.renderFamily()
             })
         self.resetButton
             .setLabel(to: "Reset")
             .setOnTap({
-                self.canvasController.zoomLegacy(to: self.canvasController.canvasRect, animated: false)
-//                self.family = self.createFamily()
-//                self.selected = nil
-//                self.renderFamily()
+                self.family = self.createFamily()
+                self.selected = nil
+                self.renderFamily()
                 
             })
         self.minusStepButton
