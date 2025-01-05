@@ -116,7 +116,7 @@ class ViewController: UIViewController {
 //                self.family = self.createFamily()
 //                self.selected = nil
 //                self.renderFamily()
-                self.canvasController.printVisibleArea()
+                
             })
         self.minusStepButton
             .setLabel(to: "-")

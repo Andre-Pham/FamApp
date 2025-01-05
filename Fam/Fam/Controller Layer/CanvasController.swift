@@ -32,26 +32,35 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Rendering Properties
     
+    /// The size of the canvas
     private(set) var canvasSize = CGSize()
+    /// The size of the controller's view
     private var viewSize: CGSize {
         return self.view.bounds.size
     }
+    /// The min allowed zoom scale
     private var minZoomScale: CGFloat {
         return self.scrollContainer.minimumZoomScale
     }
+    /// The max allowed zoom scale
     private var maxZoomScale: CGFloat {
         return self.scrollContainer.maximumZoomScale
     }
+    /// The zoom scale applied to the canvas
     private var zoomScale: CGFloat {
         return self.scrollContainer.zoomScale
     }
-    ///
+    /// True if the user is holding a position that's zoomed out further than the max zoom scale
+    private var pastMinZoomScale: Bool {
+        return self.zoomScale.isLess(than: self.minZoomScale)
+    }
+    /// The visible area (viewport) as a subset of the entire canvas
     private var visibleArea: CGRect {
         let width = self.scrollContainer.bounds.size.width/self.zoomScale
         let height = self.scrollContainer.bounds.size.height/self.zoomScale
         var x = self.scrollContainer.contentOffset.x/self.zoomScale
         var y = self.scrollContainer.contentOffset.y/self.zoomScale
-        guard !self.visibleAreaOutOfBounds else {
+        guard !self.pastMinZoomScale else {
             return CGRect(x: x, y: y, width: width, height: height)
         }
         if (x + width).isGreater(than: self.canvasSize.width) {
@@ -67,19 +76,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
             height: min(height, self.canvasHeight)
         )
     }
-    private var visibleAreaOutOfBounds: Bool {
-        return self.zoomScale.isLess(than: self.minZoomScale)
-    }
-    
-    public func printTest() {
-        print("zoom scale: \(self.zoomScale)")
-        
-        print("visible area: \(SMRect(self.visibleArea).toString())")
-        
-        print("canvas size: \(SMSize(self.canvasSize).toString())")
-    }
-    
-   
     
     // MARK: - Alignment Guides
     
@@ -170,51 +166,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.scrollViewDidZoom(self.scrollContainer)
         return self
     }
-    
-    
-    
-    public func zoomToVisibleArea() {
-//        self.zoomToArea(SMRect(self.visibleArea), animated: true)
-        self.zoom(to: SMRect(self.visibleArea), animated: true)
-    }
-    
-    public func printVisibleArea() {
-        print(SMRect(self.visibleArea))
-    }
-    
-    @discardableResult
-    public func setCanvasSize2(to size: SMSize) -> Self {
-        let previousZoomScale = self.scrollContainer.zoomScale
-//        guard let previousVisibleArea = SMRect(self.visibleArea).overlap(self.canvasRect) else {
-//            return self
-//        }
-//        let previousVisibleAreaCenter = previousVisibleArea.center
-//        let previousNormalizedCenterX = previousVisibleAreaCenter.x / self.canvasWidth
-//        let previousNormalizedCenterY = previousVisibleAreaCenter.y / self.canvasHeight
-//        print("previous visible area: \(previousVisibleArea.toString())")
-//        print("previous visible area center: \(previousVisibleAreaCenter.toString())")
-//        print("previous canvas size: \(SMSize(self.canvasSize).toString())")
-//        print("previous normalised center x: \(previousNormalizedCenterX)")
-//        print("previous normalised center y: \(previousNormalizedCenterY)")
-        self.zoomTo(scale: 1.0, animated: false)
-        self.canvasSize = size.cgSize
-        self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
-        self.zoomTo(scale: previousZoomScale, animated: false)
-//        self.zoomCenterTo(
-//            position: SMPoint(
-//                x: size.width*previousNormalizedCenterX,
-//                y: size.height*previousNormalizedCenterY
-//            ),
-//            scale: previousZoomScale,
-//            animated: false
-//        )
-//        print("post x: \(size.width*previousNormalizedCenterX)")
-//        print("post y: \(size.height*previousNormalizedCenterY)")
-        self.scrollViewDidZoom(self.scrollContainer)
-        return self
-    }
-    
-  
     
     public func zoomToFit(animated: Bool) {
         let widthFraction = self.viewSize.width/self.canvasWidth
@@ -410,6 +361,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         let horizontalInset = max(0, (width - contentWidth) / 2)
         let verticalInset = max(0, (height - contentHeight) / 2)
         scrollView.contentInset = UIEdgeInsets(top: verticalInset, left: horizontalInset, bottom: verticalInset, right: horizontalInset)
+        print(self.pastMinZoomScale)
     }
     
     public func scrollTo(_ position: SMPoint, animated: Bool) {
@@ -443,40 +395,3 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     }
     
 }
-
-/*
- public func zoomToFit(animated: Bool) {
-     let widthFraction = self.viewSize.width/self.canvasWidth
-     let heightFraction = self.viewSize.height/self.canvasHeight
-     let targetScale = min(widthFraction, heightFraction)
-     self.zoomToCenter(scale: targetScale, animated: animated)
- }
- 
- public func zoomToCenter(scale: Double? = nil, animated: Bool) {
-     let targetScale = scale ?? self.zoomScale
-     if let scale {
-         self.zoomTo(scale: scale, animated: animated)
-     }
-     self.scrollContainer.setContentOffset(
-         CGPoint(
-             x: self.canvasWidth/2.0*targetScale - self.viewSize.width/2.0,
-             y: self.canvasHeight/2.0*targetScale - self.viewSize.height/2.0
-         ),
-         animated: animated
-     )
- }
- 
- public func zoomCenterTo(position: SMPoint, scale: Double? = nil, animated: Bool) {
-     let targetScale = scale ?? self.zoomScale
-     if let scale {
-         self.zoomTo(scale: scale, animated: animated)
-     }
-     self.scrollContainer.setContentOffset(
-         CGPoint(
-             x: position.x*targetScale - self.viewSize.width/2.0,
-             y: position.y*targetScale - self.viewSize.height/2.0
-         ),
-         animated: animated
-     )
- }
- */
