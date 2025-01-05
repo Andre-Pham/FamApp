@@ -214,10 +214,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         return self
     }
     
-    // 17 -> 18
-    // zoom in on middle
-    // should end up in middle
-    // does not end up in middle
+  
     
     public func zoomToFit(animated: Bool) {
         let widthFraction = self.viewSize.width/self.canvasWidth
@@ -269,6 +266,11 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     // When the canvas first loads in (don't zoom in yet) you can scroll down way further than you should be able to
     // Zoom in max, go to step 0 to 1, then go from step 1 to 0
     // Go to step 17, move viewport furthest right (to right edge), then go to step 16, it shouldn't have viewport outside visible area
+    // TODO: Concept for resize
+    // 17 -> 18
+    // zoom in on middle
+    // should end up in middle
+    // does not end up in middle
     
     @discardableResult
     public func setCanvasBounce(to state: Bool) -> Self {
