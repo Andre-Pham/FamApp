@@ -124,6 +124,67 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         ])
     }
     
+    // MARK: - View Loading Functions
+    
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Setup properties
+        self.canvasSize = CGSize(width: Self.DEFAULT_CANVAS_WIDTH, height: Self.DEFAULT_CANVAS_HEIGHT)
+        self.view.backgroundColor = Self.DEFAULT_CANVAS_COLOR
+        
+        // View hierarchy
+        self.view.addSubview(self.scrollContainer)
+        self.scrollContainer.addSubview(self.canvasContainer)
+        
+        // Setup scroll container
+        self.scrollContainer.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            self.scrollContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            self.scrollContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            self.scrollContainer.topAnchor.constraint(equalTo: view.topAnchor),
+            self.scrollContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        self.scrollContainer.delegate = self
+        self.scrollContainer.alwaysBounceVertical = Self.DEFAULT_BOUNCE
+        self.scrollContainer.alwaysBounceHorizontal = Self.DEFAULT_BOUNCE
+        self.scrollContainer.contentSize = self.canvasSize
+        self.scrollContainer.minimumZoomScale = Self.DEFAULT_MIN_ZOOM_SCALE
+        self.scrollContainer.maximumZoomScale = Self.DEFAULT_MAX_ZOOM_SCALE
+        self.scrollContainer.showsVerticalScrollIndicator = Self.DEFAULT_SHOW_SCROLL_BARS
+        self.scrollContainer.showsHorizontalScrollIndicator = Self.DEFAULT_SHOW_SCROLL_BARS
+        
+        // Setup canvas container
+        self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
+    }
+    
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.scrollContainer.contentOffset = CGPoint(
+            x: self.canvasWidth/2.0 - self.viewSize.width/2.0,
+            y: self.canvasHeight/2.0 - self.viewSize.height/2.0
+        )
+    }
+    
+    /// Mounts this view controller as a child of another view controller.
+    /// Example:
+    /// ```
+    /// // Inside a view controller's viewDidLoad
+    /// let canvasView = self.canvasController.mount(to: self) // 1. Mount canvas to view controller
+    /// self.view.add(canvasView)                              // 2. Add canvas view as subview
+    /// canvasView.constrainAllSides(padding: 50)              // 3. Constrain canvas view
+    /// ```
+    /// - Parameters:
+    ///   - viewController: The view controller to be the parent of the canvas view controller
+    /// - Returns: The canvas controller's view to be added as a subview
+    public func mount(to viewController: UIViewController) -> UIView {
+        viewController.addChild(self)
+        self.view.useAutoLayout()
+        self.didMove(toParent: viewController)
+       
+        return self.view
+    }
+    
     // MARK: - Config Functions
     
     /// Sets the canvas size.
@@ -231,67 +292,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.scrollContainer.showsVerticalScrollIndicator = visible
         self.scrollContainer.showsHorizontalScrollIndicator = visible
         return self
-    }
-    
-    // MARK: - View Loading Functions
-    
-    public override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // Setup properties
-        self.canvasSize = CGSize(width: Self.DEFAULT_CANVAS_WIDTH, height: Self.DEFAULT_CANVAS_HEIGHT)
-        self.view.backgroundColor = Self.DEFAULT_CANVAS_COLOR
-        
-        // View hierarchy
-        self.view.addSubview(self.scrollContainer)
-        self.scrollContainer.addSubview(self.canvasContainer)
-        
-        // Setup scroll container
-        self.scrollContainer.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            self.scrollContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            self.scrollContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            self.scrollContainer.topAnchor.constraint(equalTo: view.topAnchor),
-            self.scrollContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        self.scrollContainer.delegate = self
-        self.scrollContainer.alwaysBounceVertical = Self.DEFAULT_BOUNCE
-        self.scrollContainer.alwaysBounceHorizontal = Self.DEFAULT_BOUNCE
-        self.scrollContainer.contentSize = self.canvasSize
-        self.scrollContainer.minimumZoomScale = Self.DEFAULT_MIN_ZOOM_SCALE
-        self.scrollContainer.maximumZoomScale = Self.DEFAULT_MAX_ZOOM_SCALE
-        self.scrollContainer.showsVerticalScrollIndicator = Self.DEFAULT_SHOW_SCROLL_BARS
-        self.scrollContainer.showsHorizontalScrollIndicator = Self.DEFAULT_SHOW_SCROLL_BARS
-        
-        // Setup canvas container
-        self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
-    }
-    
-    public override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        self.scrollContainer.contentOffset = CGPoint(
-            x: self.canvasWidth/2.0 - self.viewSize.width/2.0,
-            y: self.canvasHeight/2.0 - self.viewSize.height/2.0
-        )
-    }
-    
-    /// Mounts this view controller as a child of another view controller.
-    /// Example:
-    /// ```
-    /// // Inside a view controller's viewDidLoad
-    /// let canvasView = self.canvasController.mount(to: self) // 1. Mount canvas to view controller
-    /// self.view.add(canvasView)                              // 2. Add canvas view as subview
-    /// canvasView.constrainAllSides(padding: 50)              // 3. Constrain canvas view
-    /// ```
-    /// - Parameters:
-    ///   - viewController: The view controller to be the parent of the canvas view controller
-    /// - Returns: The canvas controller's view to be added as a subview
-    public func mount(to viewController: UIViewController) -> UIView {
-        viewController.addChild(self)
-        self.view.useAutoLayout()
-        self.didMove(toParent: viewController)
-       
-        return self.view
     }
     
     // MARK: - Layer Functions
