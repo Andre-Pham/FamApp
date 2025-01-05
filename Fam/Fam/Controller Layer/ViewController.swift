@@ -151,7 +151,6 @@ class ViewController: UIViewController {
         
         // TODO: Next: make it so when the family re-renders, it creates the new layer, then removes the old layer
         // TODO: Also make it so the canvas matches the aspect ratio of the device
-        // TODO: Also, like, fix the contains function for the SMPolygon class, hopefully is easy
         
         let layer = self.canvasController.addLayer()
             .setBackgroundColor(to: .blue.withAlphaComponent(0.2))
