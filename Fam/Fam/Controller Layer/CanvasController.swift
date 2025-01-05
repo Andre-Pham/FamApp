@@ -181,7 +181,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         viewController.addChild(self)
         self.view.useAutoLayout()
         self.didMove(toParent: viewController)
-       
         return self.view
     }
     
