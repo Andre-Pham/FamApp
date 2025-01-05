@@ -25,6 +25,7 @@ class ViewController: UIViewController {
     private var controls = [FamControl]()
     private var selected: FamilyMember? = nil
     private var step = 0
+    private var activeLayer: UIView? = nil
     
     let testView = FamChipToggle()
     let textTest = FamText()
@@ -41,27 +42,6 @@ class ViewController: UIViewController {
         self.family = self.createFamily()
         
         self.renderFamily()
-        
-//        let autoLayoutLayer = self.canvasController.addLayer()
-//        autoLayoutLayer
-//            .add(self.testView)
-//        self.testView
-//            .setIcon(to: FamIcon.Config(systemName: "scribble.variable"))
-//            .constrainTop(padding: 200)
-//            .constrainLeft(padding: 200)
-//        
-//        autoLayoutLayer
-//            .add(self.textTest)
-//        self.textTest
-//            .setFont(to: FamFont(font: FamFonts.Quicksand.SemiBold, size: 100))
-//            .setText(to: "Hello World")
-        
-//        autoLayoutLayer
-//            .add(self.familyMemberView)
-//        self.familyMemberView
-//            .constrainTop(padding: 500)
-//            .constrainLeft(padding: 500)
-//            .setFamilyMemberName(firstName: "Andre", lastName: "Pham")
         
         self.view
             .add(self.buttonStack)
@@ -153,7 +133,7 @@ class ViewController: UIViewController {
         print(render.generateTraceStack())
         
         let proxyPoints = SMPointCollection(points: render.orderedFamilyMemberProxies.compactMap({ $0.position }))
-        guard let proxyBoundingBox = proxyPoints.boundingBox, let xOffset = proxyPoints.minX else {
+        guard let proxyBoundingBox = proxyPoints.boundingBox else {
             return
         }
         self.canvasController.setCanvasSize(to: proxyBoundingBox.size + SMSize(width: 500, height: 500))
@@ -167,9 +147,8 @@ class ViewController: UIViewController {
         // TODO: Next: make it so when the family re-renders, it creates the new layer, then removes the old layer
         // TODO: Also make it so the canvas matches the aspect ratio of the device
         
-        let connectionLayer = self.canvasController.addLayer()
+        let layer = self.canvasController.addLayer()
             .setBackgroundColor(to: .blue.withAlphaComponent(0.2))
-        let familyMemberLayer = self.canvasController.addLayer()
         
         for coupleConnection in render.coupleConnections {
             guard let position1 = coupleConnection.leftPartner.position,
@@ -180,7 +159,7 @@ class ViewController: UIViewController {
             let lineSegment = SMLineSegment(origin: position1, end: position2)
             let connectionView = LineSegmentView()
                 .setLineSegment(lineSegment)
-            connectionLayer.add(connectionView)
+            layer.add(connectionView)
             connectionView.constrainToPosition()
         }
         
@@ -197,12 +176,12 @@ class ViewController: UIViewController {
             let connectionLineSegment = SMLineSegment(origin: positionBetweenParents, end: positionBetweenParents + SMPoint(x: 0, y: 100))
             let connectionView1 = LineSegmentView()
                 .setLineSegment(connectionLineSegment)
-            connectionLayer.add(connectionView1)
+            layer.add(connectionView1)
             connectionView1.constrainToPosition()
             let connectionLineSegment2 = SMLineSegment(origin: positionBetweenParents + SMPoint(x: 0, y: 100), end: childPosition - SMPoint(x: 0, y: 80))
             let connectionView2 = LineSegmentView()
                 .setLineSegment(connectionLineSegment2)
-            connectionLayer.add(connectionView2)
+            layer.add(connectionView2)
             connectionView2.constrainToPosition()
         }
     
@@ -212,11 +191,14 @@ class ViewController: UIViewController {
             }
             let familyMemberView = FamilyTreeMemberView()
                 .setFamilyMemberName(firstName: proxy.familyMember.firstName, lastName: proxy.familyMember.lastName)
-            familyMemberLayer.add(familyMemberView)
+            layer.add(familyMemberView)
             familyMemberView
                 .constrainCenterLeft(padding: position.x)
                 .constrainCenterTop(padding: position.y)
         }
+        
+        self.activeLayer?.remove()
+        self.activeLayer = layer
     }
     
     func createFamily() -> Family {

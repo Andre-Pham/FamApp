@@ -12,7 +12,7 @@ import SwiftMath
 class PolylineView: FamView {
     
     private var polyline = SMPolyline()
-    private var boundingBox = SMRect(origin: SMPoint(), end: SMPoint())
+    private var boundingBox = SMRect(minX: 0, minY: 0, maxX: 0, maxY: 0)
     private var strokeColor = UIColor.black
     private var lineWidth = 1.0
     private var lineCap: CGLineCap = .butt
@@ -45,7 +45,7 @@ class PolylineView: FamView {
     @discardableResult
     func setPolyline(_ polyline: SMPolyline) -> Self {
         self.polyline = polyline
-        self.boundingBox = polyline.boundingBox ?? SMRect(minX: 0, maxX: 0, minY: 0, maxY: 0)
+        self.boundingBox = polyline.boundingBox ?? SMRect(minX: 0, minY: 0, maxX: 0, maxY: 0)
         self.boundingBox.expandAllSides(by: self.lineWidth)
         self.polyline -= self.boundingBox.origin
         self.refreshSizeConstraints()
