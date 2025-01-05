@@ -278,7 +278,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.layers.insert(newLayer, at: position)
         self.canvasContainer.add(newLayer, at: position)
         newLayer.constrainAllSides()
-        
         return newLayer
     }
     
@@ -298,10 +297,18 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         scrollView.contentInset = UIEdgeInsets(top: verticalInset, left: horizontalInset, bottom: verticalInset, right: horizontalInset)
     }
     
+    /// Sets the zoom scale.
+    /// - Parameters:
+    ///   - animated: True to animate the zoom
     public func zoom(scale: Double, animated: Bool) {
         self.scrollContainer.setZoomScale(scale, animated: animated)
     }
     
+    /// Zooms so the viewport origin (top left corner) is at the provided position.
+    /// - Parameters:
+    ///   - position: The position to set the viewport window at
+    ///   - scale: The scale to zoom to (by default doesn't change scale)
+    ///   - animated: True to animate the zoom
     public func zoomOriginTo(_ position: SMPoint, scale: Double? = nil, animated: Bool) {
         if let scale {
             self.zoom(scale: scale, animated: animated)
@@ -309,6 +316,11 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.scrollContainer.setContentOffset(position.cgPoint, animated: animated)
     }
     
+    /// Zooms so the viewport is centered at the provided position.
+    /// - Parameters:
+    ///   - position: The position to zoom to and be centered
+    ///   - scale: The scale to zoom to (by default doesn't change scale)
+    ///   - animated: True to animate the zoom
     public func zoomCenterTo(_ position: SMPoint, scale: Double? = nil, animated: Bool) {
         let targetScale = scale ?? self.zoomScale
         if let scale {
@@ -323,6 +335,10 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         )
     }
     
+    /// Zooms to the center of the canvas.
+    /// - Parameters:
+    ///   - scale: The scale to zoom to (by default doesn't change scale)
+    ///   - animated: True to animate the zoom
     public func zoomToCanvasCenter(scale: Double? = nil, animated: Bool) {
         let targetScale = scale ?? self.zoomScale
         if let scale {
@@ -337,6 +353,9 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         )
     }
     
+    /// Zooms to fit the canvas exactly (zoom-to-fit).
+    /// - Parameters:
+    ///   - animated: True to animate the zoom
     public func zoomToFitCanvas(animated: Bool) {
         let widthFraction = self.viewSize.width/self.canvasWidth
         let heightFraction = self.viewSize.height/self.canvasHeight
@@ -344,7 +363,7 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         self.zoomToCanvasCenter(scale: targetScale, animated: animated)
     }
     
-    /// Zooms so the viewport contains the passed in rect (scale-to-fit).
+    /// Zooms so the viewport fits the passed in rect.
     /// - Parameters:
     ///   - rect: The rect to zoom to and become visible
     ///   - animated: True to animate the zoom
