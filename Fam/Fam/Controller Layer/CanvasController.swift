@@ -190,27 +190,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         )
     }
     
-    // TODO: Current bugs to fix:
-    // BUG 1
-    // 1. Start with full family rendered
-    // 2. Zoom to bottom right
-    // 3. Set step to 1 (only render 1 family member)
-    // Now it's stuck in the top left until you zoom again
-    // BUG 2
-    // 1. Run the app
-    // 2. Canvas doesn't render until you start zooming/scrolling (do I need to call layoutIfNeeded()?)
-    // TODO: Other problems popping up
-    // Problems:
-    // Zoom in max, and go to top left, then go from step 0 to 1 -> it gets stuck in the top right
-    // When the canvas first loads in (don't zoom in yet) you can scroll down way further than you should be able to
-    // Zoom in max, go to step 0 to 1, then go from step 1 to 0
-    // Go to step 17, move viewport furthest right (to right edge), then go to step 16, it shouldn't have viewport outside visible area
-    // TODO: Concept for resize
-    // 17 -> 18
-    // zoom in on middle
-    // should end up in middle
-    // does not end up in middle
-    
     @discardableResult
     public func setCanvasBounce(to state: Bool) -> Self {
         self.scrollContainer.alwaysBounceVertical = state
