@@ -126,12 +126,14 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     // MARK: - Config Functions
     
+    /// Sets the canvas size.
+    /// Maintains the viewport position relative to if the canvas was expanding/contracting in all directions equally.
+    /// - Parameters:
+    ///   - size: The new size for the canvas
     @discardableResult
     public func setCanvasSize(to size: SMSize) -> Self {
         let previousZoom = self.zoomScale
         let previousVisibleArea = SMRect(self.visibleArea)
-        print("previous visible area: \(previousVisibleArea.toString())")
-        print("previous canvas size: \(SMSize(self.canvasSize).toString())")
         let visibleAreaOffset = SMPoint(x: size.width - self.canvasWidth, y: size.height - self.canvasHeight) / 2.0
         var targetNewVisibleArea = previousVisibleArea + visibleAreaOffset
         targetNewVisibleArea.translate(
@@ -139,30 +141,16 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
             y: min(size.height - targetNewVisibleArea.maxY, 0)
         )
         let newVisibleArea = targetNewVisibleArea.overlap(SMRect(origin: SMPoint(), width: size.width, height: size.height))
-        print("visibleAreaOffset: \(visibleAreaOffset.toString())")
         self.zoomTo(scale: 1.0, animated: false)
         self.canvasSize = size.cgSize
         self.canvasContainer.frame = CGRect(origin: CGPoint(), size: self.canvasSize)
-//        self.zoomTo(scale: previousZoomScale, animated: false)
-//        let sizeDifference = SMRect(origin: SMPoint(), width: size.width - self.canvasWidth, height: size.height - self.canvasHeight)
-        
-//        self.zoomToFit(animated: false)
         if let newVisibleArea {
-            print("new visible area: \(newVisibleArea.toString())")
-//            self.zoom(to: newVisibleArea, animated: false)
-//            self.zoomToArea(newVisibleArea, animated: false)
             self.zoomCenterTo(position: newVisibleArea.center, scale: previousZoom, animated: false)
         } else {
-            print("zooming to center")
             self.zoomToCenter(scale: previousZoom, animated: false)
         }
-//        if SMRect(self.visibleArea).contains(rect: self.canvasRect) {
-//            self.zoomToCenter(scale: previousZoom, animated: false)
-//        }
-        
-        print("applied visible area: \(SMRect(self.visibleArea).toString())")
-        
-        print("new canvas size: \(size.toString())")
+        // Necessary - otherwise can cause canvas getting "stuck"
+        // Example: scroll to the bottom-right corner of a large canvas, and then shrink it, then scroll
         self.scrollViewDidZoom(self.scrollContainer)
         return self
     }
@@ -361,7 +349,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
         let horizontalInset = max(0, (width - contentWidth) / 2)
         let verticalInset = max(0, (height - contentHeight) / 2)
         scrollView.contentInset = UIEdgeInsets(top: verticalInset, left: horizontalInset, bottom: verticalInset, right: horizontalInset)
-        print(self.pastMinZoomScale)
     }
     
     public func scrollTo(_ position: SMPoint, animated: Bool) {
@@ -378,9 +365,6 @@ public class CanvasController: UIViewController, UIScrollViewDelegate {
     
     /// Performs better
     public func zoomToArea(_ area: SMRect, animated: Bool) {
-        // TODO: Where i'm at
-        print("VISIBLE AREA: \(SMRect(self.visibleArea).toString())")
-        print("TARGET AREA: \(area.toString())")
         let widthFraction = self.viewSize.width/area.width
         let heightFraction = self.viewSize.height/area.height
         let targetScale = min(widthFraction, heightFraction)
