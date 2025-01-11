@@ -92,7 +92,7 @@ class FamilyRenderProxy {
             guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position,
                   let parentPosition2 = childConnection.parentsConnection.rightPartner.position,
                   let childPosition = childConnection.child.position else {
-//                assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
+                assertionFailure("Missing positions for parents")
                 continue
             }
             let positionBetweenParents = SMLineSegment(origin: parentPosition1, end: parentPosition2).midPoint
@@ -1164,6 +1164,9 @@ class FamilyRenderProxy {
                 guard connectedCouples[proxy.id] == nil && connectedCouples[spouseID] == nil else {
                     continue
                 }
+                guard proxy.hasPosition && spouseProxy.hasPosition else {
+                    continue
+                }
                 connectedCouples[proxy.id] = spouseID
                 self.coupleConnections.append(CoupleConnectionRenderProxy(
                     partner1: proxy,
@@ -1182,6 +1185,9 @@ class FamilyRenderProxy {
             for childID in childrenIDs {
                 guard let childProxy = self.familyMemberProxiesStore[childID] else {
                     assertionFailure("Could not find child when it should exist")
+                    continue
+                }
+                guard childProxy.hasPosition else {
                     continue
                 }
                 self.childConnections.append(ChildConnectionRenderProxy(

@@ -152,7 +152,7 @@ class ViewController: UIViewController {
         for coupleConnection in render.coupleConnections {
             guard let position1 = coupleConnection.leftPartner.position,
                   let position2 = coupleConnection.rightPartner.position else {
-                //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
+                assertionFailure("Missing positions for parents")
                 continue
             }
             let lineSegment = SMLineSegment(origin: position1, end: position2)
@@ -166,7 +166,7 @@ class ViewController: UIViewController {
             guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position,
                   let parentPosition2 = childConnection.parentsConnection.rightPartner.position,
                   let childPosition = childConnection.child.position else {
-                //assertionFailure("Missing positions for parents") // NOTE: Commented out for steps
+                assertionFailure("Missing positions for parents")
                 continue
             }
             // TODO: In the future, the connections down from the two parents shouldn't be duplicated
