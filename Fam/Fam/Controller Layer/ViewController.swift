@@ -156,33 +156,122 @@ class ViewController: UIViewController {
                 continue
             }
             let lineSegment = SMLineSegment(origin: position1, end: position2)
-            let connectionView = LineSegmentView()
+            LineSegmentView()
                 .setLineSegment(lineSegment)
-            layer.add(connectionView)
-            connectionView.constrainToPosition()
+                .addAsSubview(of: layer)
+                .setLineWidth(to: 3.5)
+                .constrainToPosition()
         }
         
-        for childConnection in render.childConnections {
-            guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position,
-                  let parentPosition2 = childConnection.parentsConnection.rightPartner.position,
-                  let childPosition = childConnection.child.position else {
-                assertionFailure("Missing positions for parents")
+        for parentsToChildrenConnection in render.parentsToChildrenConnections {
+            let origin: SMPoint
+            guard let parentPosition = parentsToChildrenConnection.parent1.position else {
+                assertionFailure("Missing positions for parent")
                 continue
             }
-            // TODO: In the future, the connections down from the two parents shouldn't be duplicated
-            // TODO: These would be tracked as seperate connections - "parent connections" - and the parent connections would connect to the child connections
-            let positionBetweenParents = SMLineSegment(origin: parentPosition1, end: parentPosition2).midPoint
-            let connectionLineSegment = SMLineSegment(origin: positionBetweenParents, end: positionBetweenParents + SMPoint(x: 0, y: 100))
-            let connectionView1 = LineSegmentView()
-                .setLineSegment(connectionLineSegment)
-            layer.add(connectionView1)
-            connectionView1.constrainToPosition()
-            let connectionLineSegment2 = SMLineSegment(origin: positionBetweenParents + SMPoint(x: 0, y: 100), end: childPosition - SMPoint(x: 0, y: 80))
-            let connectionView2 = LineSegmentView()
-                .setLineSegment(connectionLineSegment2)
-            layer.add(connectionView2)
-            connectionView2.constrainToPosition()
+            if let otherParent = parentsToChildrenConnection.parent2 {
+                guard let otherParentPosition = otherParent.position else {
+                    assertionFailure("Missing positions for parent")
+                    continue
+                }
+                origin = SMLineSegment(origin: parentPosition, end: otherParentPosition).midPoint
+            } else {
+                origin = parentPosition
+            }
+            let childrenPoints = SMPointCollection(points: parentsToChildrenConnection.children.compactMap({ $0.position }))
+            assert(childrenPoints.points.count == parentsToChildrenConnection.children.count, "Not all children have a defined point")
+            guard !childrenPoints.points.isEmpty else {
+                assertionFailure("Parents to children connection has no children - that's illegal")
+                continue
+            }
+            let childrenLevel = childrenPoints.points.first!.y
+            let connectionLevel = childrenLevel - 130
+            let allChildrenAreOnOneSide = (
+                childrenPoints.points.allSatisfy({ $0.x.isLess(than: origin.x) })
+                || childrenPoints.points.allSatisfy({ $0.x.isGreater(than: origin.x) })
+            )
+            let singleChildDirectlyBelow = (
+                childrenPoints.points.count == 1
+                && origin.x.isEqual(to: childrenPoints.points.first!.x)
+            )
+            if singleChildDirectlyBelow {
+                let childPosition = childrenPoints.points.first!
+                LineSegmentView()
+                    .setLineSegment(SMLineSegment(origin: origin, end: childPosition))
+                    .addAsSubview(of: layer)
+                    .setLineWidth(to: 3.5)
+                    .constrainToPosition()
+            } else if allChildrenAreOnOneSide {
+                let furthestChildPosition = childrenPoints.furthestPoint(to: origin)!
+                let polyline = SMPolyline(vertices: [
+                    origin,
+                    SMPoint(x: origin.x, y: connectionLevel),
+                    SMPoint(x: furthestChildPosition.x, y: connectionLevel),
+                    furthestChildPosition
+                ])
+                CurvilinearEdgesView()
+                    .setCurvilinearEdges(polyline.roundedCorners(pointDistance: 40, controlPointDistance: 30))
+                    .addAsSubview(of: layer)
+                    .setLineWidth(to: 3.5)
+                    .constrainToPosition()
+                for childPosition in childrenPoints.points where childPosition != furthestChildPosition {
+                    LineSegmentView()
+                        .setLineSegment(SMLineSegment(origin: SMPoint(x: childPosition.x, y: connectionLevel), end: childPosition))
+                        .addAsSubview(of: layer)
+                        .setLineWidth(to: 3.5)
+                        .constrainToPosition()
+                }
+            } else {
+                LineSegmentView()
+                    .setLineSegment(SMLineSegment(origin: origin, end: SMPoint(x: origin.x, y: connectionLevel)))
+                    .addAsSubview(of: layer)
+                    .setLineWidth(to: 3.5)
+                    .constrainToPosition()
+                let furthestLeftChildPosition = childrenPoints.minXPoint!
+                let furthestRightChildPosition = childrenPoints.maxXPoint!
+                let polyline = SMPolyline(vertices: [
+                    furthestLeftChildPosition,
+                    SMPoint(x: furthestLeftChildPosition.x, y: connectionLevel),
+                    SMPoint(x: furthestRightChildPosition.x, y: connectionLevel),
+                    furthestRightChildPosition
+                ])
+                CurvilinearEdgesView()
+                    .setCurvilinearEdges(polyline.roundedCorners(pointDistance: 40, controlPointDistance: 30))
+                    .addAsSubview(of: layer)
+                    .setLineWidth(to: 3.5)
+                    .constrainToPosition()
+                for childPosition in childrenPoints.points where childPosition != furthestLeftChildPosition && childPosition != furthestRightChildPosition {
+                    LineSegmentView()
+                        .setLineSegment(SMLineSegment(origin: SMPoint(x: childPosition.x, y: connectionLevel), end: childPosition))
+                        .addAsSubview(of: layer)
+                        .setLineWidth(to: 3.5)
+                        .constrainToPosition()
+                }
+            }
         }
+        
+        
+//        for childConnection in render.childConnections {
+//            guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position,
+//                  let parentPosition2 = childConnection.parentsConnection.rightPartner.position,
+//                  let childPosition = childConnection.child.position else {
+//                assertionFailure("Missing positions for parents")
+//                continue
+//            }
+//            // TODO: In the future, the connections down from the two parents shouldn't be duplicated
+//            // TODO: These would be tracked as seperate connections - "parent connections" - and the parent connections would connect to the child connections
+//            let positionBetweenParents = SMLineSegment(origin: parentPosition1, end: parentPosition2).midPoint
+//            let connectionLineSegment = SMLineSegment(origin: positionBetweenParents, end: positionBetweenParents + SMPoint(x: 0, y: 100))
+//            let connectionView1 = LineSegmentView()
+//                .setLineSegment(connectionLineSegment)
+//            layer.add(connectionView1)
+//            connectionView1.constrainToPosition()
+//            let connectionLineSegment2 = SMLineSegment(origin: positionBetweenParents + SMPoint(x: 0, y: 100), end: childPosition - SMPoint(x: 0, y: 80))
+//            let connectionView2 = LineSegmentView()
+//                .setLineSegment(connectionLineSegment2)
+//            layer.add(connectionView2)
+//            connectionView2.constrainToPosition()
+//        }
     
         for proxy in render.orderedFamilyMemberProxies {
             guard let position = proxy.position else {

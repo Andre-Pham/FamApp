@@ -66,6 +66,30 @@ extension UIView {
     }
     
     @discardableResult
+    func addAsSubview(of view: UIView) -> Self {
+        view.add(self)
+        return self
+    }
+
+    @discardableResult
+    func addAsSubview(of view: UIView, at position: Int) -> Self {
+        view.add(self, at: position)
+        return self
+    }
+
+    @discardableResult
+    func addAsSubview(of view: UIView, above viewBelow: UIView) -> Self {
+        view.add(self, above: viewBelow)
+        return self
+    }
+
+    @discardableResult
+    func addAsSubview(of view: UIView, below viewAbove: UIView) -> Self {
+        view.add(self, below: viewAbove)
+        return self
+    }
+    
+    @discardableResult
     func add(_ layer: CALayer) -> Self {
         self.layer.addSublayer(layer)
         return self

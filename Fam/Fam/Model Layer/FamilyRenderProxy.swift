@@ -49,7 +49,7 @@ class FamilyRenderProxy {
     private(set) var familyMemberProxiesStore = [UUID: FamilyMemberRenderProxy]()
     private(set) var orderedFamilyMemberProxies = [FamilyMemberRenderProxy]()
     private(set) var coupleConnections = [CoupleConnectionRenderProxy]()
-    private(set) var childConnections = [ChildConnectionRenderProxy]()
+    private(set) var parentsToChildrenConnections = [ParentsToChildrenConnectionRenderProxy]()
     private var traceStack = TraceStack()
     
     init(_ family: Family, stopAtStep: Int? = nil) {
@@ -66,7 +66,7 @@ class FamilyRenderProxy {
         assert(family.cacheIsValid, "Expected to have valid cache before generating positions")
         self.generatePositions(stopAtStep: stopAtStep)
         self.generateCoupleConnections()
-        self.generateChildConnections()
+        self.generateParentsToChildrenConnections()
         self.bringCouplesCloser(by: Self.POSITION_PADDING - Self.COUPLES_PADDING)
         self.traceStack.trace(Trace(type: .end, message: "Completed render"))
         self.traceStack.trace(Trace(type: .end, message: "Ended at step: \(stopAtStep == nil ? "no limit" : String(stopAtStep!))"))
@@ -88,16 +88,29 @@ class FamilyRenderProxy {
     
     func countConnectionConflicts() -> Int {
         var connections = [SMLineSegment]()
-        for childConnection in self.childConnections {
-            guard let parentPosition1 = childConnection.parentsConnection.leftPartner.position,
-                  let parentPosition2 = childConnection.parentsConnection.rightPartner.position,
-                  let childPosition = childConnection.child.position else {
-                assertionFailure("Missing positions for parents")
+        for connection in self.parentsToChildrenConnections {
+            guard let parent1Position = connection.parent1.position else {
+                assertionFailure("Missing position for parent")
                 continue
             }
-            let positionBetweenParents = SMLineSegment(origin: parentPosition1, end: parentPosition2).midPoint
-            let connection = SMLineSegment(origin: positionBetweenParents, end: childPosition)
-            connections.append(connection)
+            let connectionStart: SMPoint
+            if let parent2 = connection.parent2 {
+                guard let parent2Position = parent2.position else {
+                    assertionFailure("Missing position for parent")
+                    continue
+                }
+                connectionStart = SMLineSegment(origin: parent1Position, end: parent2Position).midPoint
+            } else {
+                connectionStart = parent1Position
+            }
+            for child in connection.children {
+                guard let childPosition = child.position else {
+                    assertionFailure("Missing position for child")
+                    continue
+                }
+                let connection = SMLineSegment(origin: connectionStart, end: childPosition)
+                connections.append(connection)
+            }
         }
         var conflictsCount = 0
         // For every connection, check against every connection after it
@@ -1176,26 +1189,52 @@ class FamilyRenderProxy {
         }
     }
     
-    private func generateChildConnections() {
-        for coupleConnection in self.coupleConnections {
-            let childrenIDs = coupleConnection.leftPartner.familyMember.childrenIDs
-            guard childrenIDs.count > 0 else {
+    private func generateParentsToChildrenConnections() {
+        // Key: unique id identifying the two parents, value: The parent(s)' ParentsToChildrenConnectionRenderProxy
+        var parentToChildrenConnections = [String: ParentsToChildrenConnectionRenderProxy]()
+        var parentsAdded = Set<UUID>()
+        for proxy in self.orderedFamilyMemberProxies {
+            guard proxy.familyMember.isParent && proxy.hasPosition else {
                 continue
             }
-            for childID in childrenIDs {
-                guard let childProxy = self.familyMemberProxiesStore[childID] else {
-                    assertionFailure("Could not find child when it should exist")
+            let children = self.getDirectChildrenProxies(for: proxy)
+            // Key: other parent proxy, value: child proxy
+            var otherParents = [UUID: [FamilyMemberRenderProxy]]()
+            var singleParentChildren = [FamilyMemberRenderProxy]()
+            for child in children {
+                if self.getParentProxies(for: child).count == 1 {
+                    singleParentChildren.append(child)
+                } else {
+                    let otherParentID = child.familyMember.parentIDs.first(where: { $0 != proxy.id })
+                    guard let otherParentID else {
+                        assertionFailure("Logic error - child has more than one parent but only one unique parent")
+                        continue
+                    }
+                    if !parentsAdded.contains(otherParentID) {
+                        otherParents[otherParentID, default: []].append(child)
+                    }
+                }
+            }
+            if !singleParentChildren.isEmpty {
+                parentToChildrenConnections[proxy.id.uuidString] = ParentsToChildrenConnectionRenderProxy(parent: proxy, children: singleParentChildren)
+            }
+            for (otherParentId, childrenProxies) in otherParents {
+                guard let otherParentProxy = self.familyMemberProxiesStore[otherParentId] else {
+                    assertionFailure("Logic error - parent's id wasn't stored correctly or parent no longer exists")
                     continue
                 }
-                guard childProxy.hasPosition else {
+                guard otherParentProxy.hasPosition else {
                     continue
                 }
-                self.childConnections.append(ChildConnectionRenderProxy(
-                    parentsConnection: coupleConnection,
-                    child: childProxy
-                ))
+                let uniqueID = [proxy.consistentSortingID, otherParentProxy.consistentSortingID].sorted().joined()
+                parentToChildrenConnections[uniqueID] = ParentsToChildrenConnectionRenderProxy(parent: proxy, otherParent: otherParentProxy, children: childrenProxies)
+            }
+            parentsAdded.insert(proxy.id)
+            for otherParentID in otherParents.keys {
+                parentsAdded.insert(otherParentID)
             }
         }
+        self.parentsToChildrenConnections = Array(parentToChildrenConnections.values)
     }
     
     private func transformY(_ y: Double) -> Double {

@@ -99,6 +99,7 @@
 		B6E309032BD05D250032B923 /* ChildConnectionRenderProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E309022BD05D250032B923 /* ChildConnectionRenderProxy.swift */; };
 		B6E936D92C32D7A90044AAB9 /* FamilyRenderProxyUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E936D82C32D7A90044AAB9 /* FamilyRenderProxyUtil.swift */; };
 		B6E936DB2C3847440044AAB9 /* HorizontalDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E936DA2C3847440044AAB9 /* HorizontalDirection.swift */; };
+		B6FAB3C62D3223BB00957FB7 /* ParentsToChildrenConnectionRenderProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6FAB3C52D32239800957FB7 /* ParentsToChildrenConnectionRenderProxy.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -205,6 +206,7 @@
 		B6E309022BD05D250032B923 /* ChildConnectionRenderProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildConnectionRenderProxy.swift; sourceTree = "<group>"; };
 		B6E936D82C32D7A90044AAB9 /* FamilyRenderProxyUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyRenderProxyUtil.swift; sourceTree = "<group>"; };
 		B6E936DA2C3847440044AAB9 /* HorizontalDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalDirection.swift; sourceTree = "<group>"; };
+		B6FAB3C52D32239800957FB7 /* ParentsToChildrenConnectionRenderProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentsToChildrenConnectionRenderProxy.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -419,6 +421,7 @@
 				B67985AC2CBA7F00005E38CB /* Mocks */,
 				B6E309022BD05D250032B923 /* ChildConnectionRenderProxy.swift */,
 				B6E309002BD05CBD0032B923 /* CoupleConnectionRenderProxy.swift */,
+				B6FAB3C52D32239800957FB7 /* ParentsToChildrenConnectionRenderProxy.swift */,
 				B6E308BC2BD009C60032B923 /* Family.swift */,
 				B6E308BE2BD009D50032B923 /* FamilyMember.swift */,
 				B6E308C02BD00E1D0032B923 /* FamilyMemberRenderProxy.swift */,
@@ -720,6 +723,7 @@
 				B65BB9F32CFA1264002BEC0D /* FamText.swift in Sources */,
 				B65BB9C92CFA1034002BEC0D /* WindowContext.swift in Sources */,
 				B65BB9CB2CFA104B002BEC0D /* XcodeContext.swift in Sources */,
+				B6FAB3C62D3223BB00957FB7 /* ParentsToChildrenConnectionRenderProxy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
