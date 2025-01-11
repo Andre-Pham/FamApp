@@ -136,16 +136,15 @@ class ViewController: UIViewController {
         guard let proxyBoundingBox = proxyPoints.boundingBox else {
             return
         }
-        self.canvasController.setCanvasSize(to: proxyBoundingBox.size + SMSize(width: 500, height: 500))
+        var canvasSize = (proxyBoundingBox.size + SMSize(width: 500, height: 500))
+        canvasSize.expandToAspectRatio(WindowContext.windowAspectRatio)
+        self.canvasController.setCanvasSize(to: canvasSize)
         let canvasBoundingBox = self.canvasController.canvasRect
         // Translate center of proxy bounding box to center of canvas bounding box
         let translation = canvasBoundingBox.center - proxyBoundingBox.center
         render.transformPositions { position in
             return position.translated(by: translation)
         }
-        
-        // TODO: Next: make it so when the family re-renders, it creates the new layer, then removes the old layer
-        // TODO: Also make it so the canvas matches the aspect ratio of the device
         
         let layer = self.canvasController.addLayer()
             .setBackgroundColor(to: .blue.withAlphaComponent(0.2))
